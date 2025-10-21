@@ -74,7 +74,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
         </Card>
       </HoverCardTrigger>
 
-      <HoverCardContent className="w-80" side="right" align="start">
+      <HoverCardContent className="w-80" side="top" align="start">
         <div className="space-y-3">
           <div>
             <h4 className="font-semibold text-sm">{product.name}</h4>
