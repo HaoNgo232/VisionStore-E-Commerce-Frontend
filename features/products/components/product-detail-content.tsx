@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useProductDetail } from "@/features/products/hooks/use-product-detail"
-import { useCart } from "@/features/cart/context/cart-context"
+import { useCartStore } from "@/stores/cart.store"
 import { VirtualTryOnDialog } from "@/features/virtual-tryon/components/virtual-tryon-dialog"
 import { ProductDetailSkeleton } from "@/components/skeletons/product-detail-skeleton"
 import { Button } from "@/components/ui/button"
@@ -24,7 +24,7 @@ interface ProductDetailContentProps {
 
 export function ProductDetailContent({ productId }: ProductDetailContentProps) {
     const { product, loading, error } = useProductDetail(productId)
-    const { addItem, isLoading: isAddingToCart } = useCart()
+    const { addItem, isLoading: isAddingToCart } = useCartStore()
     const [selectedImage, setSelectedImage] = useState(0)
     const [quantity, setQuantity] = useState(1)
     const [tryOnDialogOpen, setTryOnDialogOpen] = useState(false)

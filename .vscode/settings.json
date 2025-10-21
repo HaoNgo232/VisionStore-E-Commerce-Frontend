@@ -20,5 +20,9 @@
         "copilot/o4-mini"
       ]
     }
-  }
+  },
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "javascript.preferences.importModuleSpecifier": "non-relative",
+  "typescript.suggest.paths": true,
+  "javascript.suggest.paths": true
 }

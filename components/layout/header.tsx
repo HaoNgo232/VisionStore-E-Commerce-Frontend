@@ -21,7 +21,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { useCart } from "@/features/cart/context/cart-context"
+import { useCartStore } from "@/stores/cart.store"
 
 const navigation = [
   { name: "Home", href: "/" },
@@ -37,7 +37,7 @@ const categories = [
 ]
 
 export function Header() {
-  const { cart } = useCart()
+  const { itemCount } = useCartStore()
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -142,9 +142,9 @@ export function Header() {
           <Button variant="ghost" size="icon" className="relative" asChild>
             <Link href="/cart">
               <ShoppingCart className="h-5 w-5" />
-              {cart.itemCount > 0 && (
+              {itemCount > 0 && (
                 <Badge variant="destructive" className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 text-xs">
-                  {cart.itemCount}
+                  {itemCount}
                 </Badge>
               )}
               <span className="sr-only">Shopping cart</span>

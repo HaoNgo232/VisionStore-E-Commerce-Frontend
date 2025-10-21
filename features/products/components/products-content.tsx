@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useProducts } from "@/features/products/hooks/use-products"
-import { useCart } from "@/features/cart/context/cart-context"
+import { useCartStore } from "@/stores/cart.store"
 import { ProductGrid } from "./product-grid"
 import { ProductFilters } from "./product-filters"
 import { ProductSort } from "./product-sort"
@@ -13,7 +13,7 @@ import { SlidersHorizontal } from "lucide-react"
 
 export function ProductsContent() {
     const { products, loading, filters, updateFilters, clearFilters } = useProducts()
-    const { addItem } = useCart()
+    const { addItem } = useCartStore()
     const [sortBy, setSortBy] = useState("featured")
 
     // Sort products

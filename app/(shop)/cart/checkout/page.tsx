@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useCart } from "@/features/cart/context/cart-context"
+import { useCartStore } from "@/stores/cart.store"
 import { CartSummary } from "@/features/cart/components/cart-summary"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -25,7 +25,7 @@ import { checkoutFormSchema, type CheckoutFormValues } from "@/lib/validations/f
 
 export default function CheckoutPage() {
   const router = useRouter()
-  const { cart, clearCart } = useCart()
+  const { items, total, clearCart } = useCartStore()
 
   const form = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutFormSchema),
@@ -45,10 +45,14 @@ export default function CheckoutPage() {
   const onSubmit = async (values: CheckoutFormValues) => {
     try {
       // TODO: Replace with actual API call when backend is ready
+      const shipping = total >= 50 ? 0 : 5.99
+      const tax = total * 0.1
+      const orderTotal = total + shipping + tax
+
       const order = await ordersApi.create({
         userId: "user-1",
-        items: cart.items,
-        total: cart.total + (cart.total >= 50 ? 0 : 5.99) + cart.total * 0.1,
+        items: items,
+        total: orderTotal,
         status: "pending",
         shippingAddress: {
           id: "temp",
@@ -81,14 +85,14 @@ export default function CheckoutPage() {
     }
   }
 
-  if (cart.items.length === 0) {
+  if (items.length === 0) {
     router.push("/cart")
     return null
   }
 
-  const shipping = cart.total >= 50 ? 0 : 5.99
-  const tax = cart.total * 0.1
-  const total = cart.total + shipping + tax
+  const shipping = total >= 50 ? 0 : 5.99
+  const tax = total * 0.1
+  const totalPrice = total + shipping + tax
 
   return (
     <div className="container py-8">
@@ -265,11 +269,11 @@ export default function CheckoutPage() {
               {/* Order Items */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Order Items ({cart.itemCount})</CardTitle>
+                  <CardTitle>Order Items ({items.length})</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {cart.items.map((item) => (
+                    {items.map((item: any) => (
                       <div key={item.productId} className="flex gap-4">
                         <img
                           src={item.product.images[0] || "/placeholder.svg"}
@@ -290,7 +294,7 @@ export default function CheckoutPage() {
 
             {/* Summary */}
             <div>
-              <CartSummary subtotal={cart.total} shipping={shipping} tax={tax} total={total} showCheckoutButton={false} />
+              <CartSummary subtotal={total} shipping={shipping} tax={tax} total={totalPrice} showCheckoutButton={false} />
 
               <Button type="submit" className="w-full mt-4" size="lg" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting ? "Processing..." : "Place Order"}

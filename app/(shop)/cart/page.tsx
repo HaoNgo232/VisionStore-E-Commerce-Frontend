@@ -1,7 +1,8 @@
 "use client"
 
-import { useCart } from "@/features/cart/context/cart-context"
+import { useCartStore } from "@/stores/cart.store"
 import { CartItem } from "@/features/cart/components/cart-item"
+import type { CartItem as CartItemType } from "@/types"
 import { CartSummary } from "@/features/cart/components/cart-summary"
 import { FreeShippingProgress } from "@/features/cart/components/free-shipping-progress"
 import { Button } from "@/components/ui/button"
@@ -18,9 +19,9 @@ import Link from "next/link"
 import { ShoppingBag } from "lucide-react"
 
 export default function CartPage() {
-  const { cart, updateQuantity, removeItem } = useCart()
+  const { items, total, itemCount, updateQuantity, removeItem } = useCartStore()
 
-  if (cart.items.length === 0) {
+  if (items.length === 0) {
     return (
       <div className="container py-16">
         <div className="mx-auto max-w-md text-center">
@@ -35,9 +36,9 @@ export default function CartPage() {
     )
   }
 
-  const shipping = cart.total >= 50 ? 0 : 5.99
-  const tax = cart.total * 0.1
-  const total = cart.total + shipping + tax
+  const shipping = total >= 50 ? 0 : 5.99
+  const tax = total * 0.1
+  const totalPrice = total + shipping + tax
 
   return (
     <div className="container py-8">
@@ -60,11 +61,11 @@ export default function CartPage() {
         <div className="lg:col-span-2">
           <div className="rounded-lg border bg-card">
             <div className="p-6">
-              <h2 className="text-lg font-semibold">Cart Items ({cart.itemCount})</h2>
+              <h2 className="text-lg font-semibold">Cart Items ({itemCount})</h2>
             </div>
             <Separator />
             <div className="divide-y">
-              {cart.items.map((item) => (
+              {items.map((item: CartItemType) => (
                 <div key={item.productId} className="px-6">
                   <CartItem item={item} onUpdateQuantity={updateQuantity} onRemove={removeItem} />
                 </div>
@@ -76,7 +77,7 @@ export default function CartPage() {
             <Button variant="outline" asChild>
               <Link href="/products">Continue Shopping</Link>
             </Button>
-            <Button variant="ghost" onClick={() => cart.items.forEach((item) => removeItem(item.productId))}>
+            <Button variant="ghost" onClick={() => items.forEach((item: CartItemType) => removeItem(item.productId))}>
               Clear Cart
             </Button>
           </div>
@@ -84,8 +85,8 @@ export default function CartPage() {
 
         {/* Summary */}
         <div className="space-y-4">
-          <FreeShippingProgress currentTotal={cart.total} freeShippingThreshold={50} />
-          <CartSummary subtotal={cart.total} shipping={shipping} tax={tax} total={total} />
+          <FreeShippingProgress currentTotal={total} freeShippingThreshold={50} />
+          <CartSummary subtotal={total} shipping={shipping} tax={tax} total={totalPrice} />
         </div>
       </div>
     </div>
