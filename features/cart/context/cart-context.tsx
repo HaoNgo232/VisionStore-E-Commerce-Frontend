@@ -2,6 +2,7 @@
 
 import type React from "react"
 import { createContext, useContext, useState, useEffect } from "react"
+import { toast } from "sonner"
 import type { Cart } from "@/types"
 import { productsApi } from "@/lib/api-client"
 
@@ -49,6 +50,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         const existingItem = prev.items.find((item) => item.productId === productId)
 
         if (existingItem) {
+          toast.success("Đã cập nhật số lượng trong giỏ hàng", {
+            description: `${product.name} - Số lượng: ${existingItem.quantity + quantity}`,
+          })
           return {
             ...prev,
             items: prev.items.map((item) =>
@@ -57,6 +61,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           }
         }
 
+        toast.success("Đã thêm vào giỏ hàng", {
+          description: `${product.name} - Số lượng: ${quantity}`,
+        })
         return {
           ...prev,
           items: [...prev.items, { productId, product, quantity }],
@@ -64,6 +71,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       })
     } catch (error) {
       console.error("[v0] Failed to add item to cart:", error)
+      toast.error("Không thể thêm vào giỏ hàng", {
+        description: "Vui lòng thử lại sau.",
+      })
     } finally {
       setIsLoading(false)
     }
@@ -72,6 +82,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const removeItem = (productId: string) => {
     // TODO: Replace with actual API call when backend is ready
     // await cartApi.removeItem('user-id', productId);
+
+    const item = cart.items.find((item) => item.productId === productId)
+    if (item) {
+      toast.info("Đã xóa khỏi giỏ hàng", {
+        description: item.product.name,
+      })
+    }
 
     setCart((prev) => ({
       ...prev,

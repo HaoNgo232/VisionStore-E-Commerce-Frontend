@@ -1,7 +1,8 @@
 "use client"
 
-import type React from "react"
-import { useState, useEffect } from "react"
+import { useEffect } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 import {
   Dialog,
   DialogContent,
@@ -11,10 +12,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
+import { toast } from "sonner"
 import type { Address } from "@/types"
+import { addressFormSchema, type AddressFormValues } from "@/lib/validations/forms"
 
 interface AddressFormDialogProps {
   open: boolean
@@ -24,24 +27,36 @@ interface AddressFormDialogProps {
 }
 
 export function AddressFormDialog({ open, onOpenChange, address, onSave }: AddressFormDialogProps) {
-  const [formData, setFormData] = useState<Omit<Address, "id">>({
-    fullName: "",
-    phone: "",
-    addressLine1: "",
-    addressLine2: "",
-    city: "",
-    state: "",
-    postalCode: "",
-    country: "Vietnam",
-    isDefault: false,
+  const form = useForm<AddressFormValues>({
+    resolver: zodResolver(addressFormSchema),
+    defaultValues: {
+      fullName: "",
+      phone: "",
+      addressLine1: "",
+      addressLine2: "",
+      city: "",
+      state: "",
+      postalCode: "",
+      country: "Vietnam",
+      isDefault: false,
+    },
   })
-  const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
     if (address) {
-      setFormData(address)
+      form.reset({
+        fullName: address.fullName,
+        phone: address.phone,
+        addressLine1: address.addressLine1,
+        addressLine2: address.addressLine2 || "",
+        city: address.city,
+        state: address.state,
+        postalCode: address.postalCode,
+        country: address.country,
+        isDefault: address.isDefault,
+      })
     } else {
-      setFormData({
+      form.reset({
         fullName: "",
         phone: "",
         addressLine1: "",
@@ -53,29 +68,27 @@ export function AddressFormDialog({ open, onOpenChange, address, onSave }: Addre
         isDefault: false,
       })
     }
-  }, [address, open])
+  }, [address, open, form])
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSaving(true)
-
+  const onSubmit = async (values: AddressFormValues) => {
     try {
       if (address) {
-        await onSave({ ...formData, id: address.id } as Address)
+        await onSave({ ...values, id: address.id } as Address)
+        toast.success("Đã cập nhật địa chỉ", {
+          description: "Địa chỉ giao hàng đã được cập nhật thành công.",
+        })
       } else {
-        await onSave(formData)
+        await onSave(values)
+        toast.success("Đã thêm địa chỉ mới", {
+          description: "Địa chỉ giao hàng đã được thêm thành công.",
+        })
       }
       onOpenChange(false)
     } catch (error) {
       console.error("[v0] Failed to save address:", error)
-      alert("Failed to save address. Please try again.")
-    } finally {
-      setIsSaving(false)
+      toast.error("Không thể lưu địa chỉ", {
+        description: "Vui lòng thử lại sau.",
+      })
     }
   }
 
@@ -89,84 +102,135 @@ export function AddressFormDialog({ open, onOpenChange, address, onSave }: Addre
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit}>
-          <div className="space-y-4 py-4">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="fullName">Full Name *</Label>
-                <Input id="fullName" name="fullName" value={formData.fullName} onChange={handleInputChange} required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number *</Label>
-                <Input
-                  id="phone"
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <div className="space-y-4 py-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="fullName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Full Name *</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Nguyễn Văn A" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
                   name="phone"
-                  type="tel"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  required
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone Number *</FormLabel>
+                      <FormControl>
+                        <Input type="tel" placeholder="0123456789" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="addressLine1">Address Line 1 *</Label>
-              <Input
-                id="addressLine1"
+              <FormField
+                control={form.control}
                 name="addressLine1"
-                value={formData.addressLine1}
-                onChange={handleInputChange}
-                required
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Address Line 1 *</FormLabel>
+                    <FormControl>
+                      <Input placeholder="123 Đường ABC" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="addressLine2">Address Line 2</Label>
-              <Input id="addressLine2" name="addressLine2" value={formData.addressLine2} onChange={handleInputChange} />
-            </div>
+              <FormField
+                control={form.control}
+                name="addressLine2"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Address Line 2</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Apartment, suite, etc. (optional)" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <div className="grid gap-4 sm:grid-cols-3">
-              <div className="space-y-2">
-                <Label htmlFor="city">City *</Label>
-                <Input id="city" name="city" value={formData.city} onChange={handleInputChange} required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="state">State/Province *</Label>
-                <Input id="state" name="state" value={formData.state} onChange={handleInputChange} required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="postalCode">Postal Code *</Label>
-                <Input
-                  id="postalCode"
+              <div className="grid gap-4 sm:grid-cols-3">
+                <FormField
+                  control={form.control}
+                  name="city"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>City *</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Hà Nội" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="state"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>State/Province *</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Hà Nội" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
                   name="postalCode"
-                  value={formData.postalCode}
-                  onChange={handleInputChange}
-                  required
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Postal Code *</FormLabel>
+                      <FormControl>
+                        <Input placeholder="100000" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
-            </div>
 
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="isDefault"
-                checked={formData.isDefault}
-                onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, isDefault: checked as boolean }))}
+              <FormField
+                control={form.control}
+                name="isDefault"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                    <FormControl>
+                      <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="cursor-pointer">Set as default address</FormLabel>
+                      <FormDescription>Use this address as your primary shipping address</FormDescription>
+                    </div>
+                  </FormItem>
+                )}
               />
-              <Label htmlFor="isDefault" className="cursor-pointer">
-                Set as default address
-              </Label>
             </div>
-          </div>
 
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSaving}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isSaving}>
-              {isSaving ? "Saving..." : "Save Address"}
-            </Button>
-          </DialogFooter>
-        </form>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting ? "Saving..." : address ? "Update Address" : "Add Address"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   )

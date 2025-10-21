@@ -1,47 +1,55 @@
 "use client"
 
-import type React from "react"
 import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Separator } from "@/components/ui/separator"
 import { Mail, Phone, MapPin, Clock, Send } from "lucide-react"
 import { siteConfig } from "@/config/site"
+import { toast } from "sonner"
+import { contactFormSchema, type ContactFormValues } from "@/lib/validations/forms"
 
 export default function ContactPage() {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    subject: "",
-    message: "",
-  })
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+  const form = useForm<ContactFormValues>({
+    resolver: zodResolver(contactFormSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      subject: "",
+      message: "",
+    },
+  })
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
+  const onSubmit = async (values: ContactFormValues) => {
+    try {
+      // TODO: Replace with actual API call when backend is ready
+      console.log("[v0] Contact form submission:", values)
 
-    // TODO: Replace with actual API call when backend is ready
-    console.log("[v0] Contact form submission:", formData)
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000))
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+      toast.success("Tin nhắn đã được gửi!", {
+        description: "Chúng tôi sẽ phản hồi bạn sớm nhất có thể.",
+      })
 
-    setSubmitted(true)
-    setIsSubmitting(false)
-    setFormData({ name: "", email: "", subject: "", message: "" })
+      setSubmitted(true)
+      form.reset()
 
-    // Reset submitted state after 5 seconds
-    setTimeout(() => setSubmitted(false), 5000)
+      // Reset submitted state after 5 seconds
+      setTimeout(() => setSubmitted(false), 5000)
+    } catch (error) {
+      console.error("[v0] Failed to submit contact form:", error)
+      toast.error("Không thể gửi tin nhắn", {
+        description: "Vui lòng thử lại sau.",
+      })
+    }
   }
 
   return (
@@ -150,62 +158,70 @@ export default function ContactPage() {
                   </p>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid gap-6 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Name *</Label>
-                      <Input
-                        id="name"
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                    <div className="grid gap-6 sm:grid-cols-2">
+                      <FormField
+                        control={form.control}
                         name="name"
-                        value={formData.name}
-                        onChange={handleInputChange}
-                        placeholder="Your name"
-                        required
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Name *</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Your name" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
                       />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email *</Label>
-                      <Input
-                        id="email"
+                      <FormField
+                        control={form.control}
                         name="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        placeholder="your@email.com"
-                        required
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Email *</FormLabel>
+                            <FormControl>
+                              <Input type="email" placeholder="your@email.com" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
                       />
                     </div>
-                  </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="subject">Subject *</Label>
-                    <Input
-                      id="subject"
+                    <FormField
+                      control={form.control}
                       name="subject"
-                      value={formData.subject}
-                      onChange={handleInputChange}
-                      placeholder="How can we help?"
-                      required
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Subject *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="How can we help?" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
-                  </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="message">Message *</Label>
-                    <Textarea
-                      id="message"
+                    <FormField
+                      control={form.control}
                       name="message"
-                      value={formData.message}
-                      onChange={handleInputChange}
-                      placeholder="Tell us more about your inquiry..."
-                      rows={6}
-                      required
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Message *</FormLabel>
+                          <FormControl>
+                            <Textarea placeholder="Tell us more about your inquiry..." rows={6} {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
-                  </div>
 
-                  <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
-                    {isSubmitting ? "Sending..." : "Send Message"}
-                  </Button>
-                </form>
+                    <Button type="submit" size="lg" className="w-full" disabled={form.formState.isSubmitting}>
+                      {form.formState.isSubmitting ? "Sending..." : "Send Message"}
+                    </Button>
+                  </form>
+                </Form>
               )}
             </CardContent>
           </Card>

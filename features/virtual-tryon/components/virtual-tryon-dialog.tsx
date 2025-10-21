@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Camera, SwitchCamera, Download, X, Loader2 } from "lucide-react"
 import type { Product } from "@/types"
+import { toast } from "sonner"
 
 interface VirtualTryOnDialogProps {
   open: boolean
@@ -61,7 +62,7 @@ export function VirtualTryOnDialog({ open, onOpenChange, product, onSwitchProduc
       }
     } catch (error) {
       console.error("[v0] Failed to access webcam:", error)
-      alert("Unable to access webcam. Please check your permissions.")
+      toast.error("Unable to access webcam. Please check your permissions.")
     } finally {
       setIsLoading(false)
     }
