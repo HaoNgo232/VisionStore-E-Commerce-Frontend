@@ -5,7 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Slider } from "@/components/ui/slider"
 import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import type { ProductFilters as ProductFiltersType } from "@/types"
 
 interface ProductFiltersProps {
@@ -37,7 +37,7 @@ export function ProductFilters({ filters, onFiltersChange, onClearFilters }: Pro
   const [minPrice, maxPrice] = filters.priceRange || [0, 200]
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">Filters</h3>
         <Button variant="ghost" size="sm" onClick={onClearFilters}>
@@ -45,107 +45,125 @@ export function ProductFilters({ filters, onFiltersChange, onClearFilters }: Pro
         </Button>
       </div>
 
-      <Separator />
+      <Accordion type="multiple" defaultValue={["category", "price", "brand"]} className="w-full">
+        {/* Category */}
+        <AccordionItem value="category">
+          <AccordionTrigger className="text-base font-semibold hover:no-underline">
+            Category
+          </AccordionTrigger>
+          <AccordionContent>
+            <RadioGroup
+              value={filters.category || ""}
+              onValueChange={(value) => onFiltersChange({ category: value as any })}
+              className="space-y-3"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="" id="all" />
+                <Label htmlFor="all" className="font-normal cursor-pointer">
+                  All Categories
+                </Label>
+              </div>
+              {categories.map((category) => (
+                <div key={category.value} className="flex items-center space-x-2">
+                  <RadioGroupItem value={category.value} id={category.value} />
+                  <Label htmlFor={category.value} className="font-normal cursor-pointer">
+                    {category.label}
+                  </Label>
+                </div>
+              ))}
+            </RadioGroup>
+          </AccordionContent>
+        </AccordionItem>
 
-      {/* Category */}
-      <div className="space-y-3">
-        <Label className="text-base font-semibold">Category</Label>
-        <RadioGroup
-          value={filters.category || ""}
-          onValueChange={(value) => onFiltersChange({ category: value as any })}
-        >
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="" id="all" />
-            <Label htmlFor="all" className="font-normal cursor-pointer">
-              All Categories
-            </Label>
-          </div>
-          {categories.map((category) => (
-            <div key={category.value} className="flex items-center space-x-2">
-              <RadioGroupItem value={category.value} id={category.value} />
-              <Label htmlFor={category.value} className="font-normal cursor-pointer">
-                {category.label}
-              </Label>
-            </div>
-          ))}
-        </RadioGroup>
-      </div>
-
-      <Separator />
-
-      {/* Price Range */}
-      <div className="space-y-3">
-        <Label className="text-base font-semibold">Price Range</Label>
-        <div className="pt-2">
-          <Slider
-            min={0}
-            max={200}
-            step={10}
-            value={[minPrice, maxPrice]}
-            onValueChange={(value) => onFiltersChange({ priceRange: value as [number, number] })}
-          />
-          <div className="flex items-center justify-between mt-2 text-sm text-muted-foreground">
-            <span>${minPrice}</span>
-            <span>${maxPrice}</span>
-          </div>
-        </div>
-      </div>
-
-      <Separator />
-
-      {/* Brand */}
-      <div className="space-y-3">
-        <Label className="text-base font-semibold">Brand</Label>
-        <div className="space-y-2">
-          {brands.map((brand) => (
-            <div key={brand} className="flex items-center space-x-2">
-              <Checkbox
-                id={brand}
-                checked={filters.brand === brand}
-                onCheckedChange={(checked) => onFiltersChange({ brand: checked ? brand : undefined })}
+        {/* Price Range */}
+        <AccordionItem value="price">
+          <AccordionTrigger className="text-base font-semibold hover:no-underline">
+            Price Range
+          </AccordionTrigger>
+          <AccordionContent>
+            <div className="pt-2 space-y-4">
+              <Slider
+                min={0}
+                max={200}
+                step={10}
+                value={[minPrice, maxPrice]}
+                onValueChange={(value) => onFiltersChange({ priceRange: value as [number, number] })}
               />
-              <Label htmlFor={brand} className="font-normal cursor-pointer">
-                {brand}
-              </Label>
+              <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <span>${minPrice}</span>
+                <span>${maxPrice}</span>
+              </div>
             </div>
-          ))}
-        </div>
-      </div>
+          </AccordionContent>
+        </AccordionItem>
 
-      <Separator />
+        {/* Brand */}
+        <AccordionItem value="brand">
+          <AccordionTrigger className="text-base font-semibold hover:no-underline">
+            Brand
+          </AccordionTrigger>
+          <AccordionContent>
+            <div className="space-y-3">
+              {brands.map((brand) => (
+                <div key={brand} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={brand}
+                    checked={filters.brand === brand}
+                    onCheckedChange={(checked) => onFiltersChange({ brand: checked ? brand : undefined })}
+                  />
+                  <Label htmlFor={brand} className="font-normal cursor-pointer">
+                    {brand}
+                  </Label>
+                </div>
+              ))}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
 
-      {/* Frame Type */}
-      <div className="space-y-3">
-        <Label className="text-base font-semibold">Frame Type</Label>
-        <div className="space-y-2">
-          {frameTypes.map((type) => (
-            <div key={type.value} className="flex items-center space-x-2">
+        {/* Frame Type */}
+        <AccordionItem value="frame">
+          <AccordionTrigger className="text-base font-semibold hover:no-underline">
+            Frame Type
+          </AccordionTrigger>
+          <AccordionContent>
+            <div className="space-y-3">
+              {frameTypes.map((type) => (
+                <div key={type.value} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={type.value}
+                    checked={filters.frameType === type.value}
+                    onCheckedChange={(checked) =>
+                      onFiltersChange({ frameType: checked ? (type.value as any) : undefined })
+                    }
+                  />
+                  <Label htmlFor={type.value} className="font-normal cursor-pointer">
+                    {type.label}
+                  </Label>
+                </div>
+              ))}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* In Stock */}
+        <AccordionItem value="stock">
+          <AccordionTrigger className="text-base font-semibold hover:no-underline">
+            Availability
+          </AccordionTrigger>
+          <AccordionContent>
+            <div className="flex items-center space-x-2">
               <Checkbox
-                id={type.value}
-                checked={filters.frameType === type.value}
-                onCheckedChange={(checked) => onFiltersChange({ frameType: checked ? (type.value as any) : undefined })}
+                id="inStock"
+                checked={filters.inStock || false}
+                onCheckedChange={(checked) => onFiltersChange({ inStock: checked as boolean })}
               />
-              <Label htmlFor={type.value} className="font-normal cursor-pointer">
-                {type.label}
+              <Label htmlFor="inStock" className="font-normal cursor-pointer">
+                In Stock Only
               </Label>
             </div>
-          ))}
-        </div>
-      </div>
-
-      <Separator />
-
-      {/* In Stock */}
-      <div className="flex items-center space-x-2">
-        <Checkbox
-          id="inStock"
-          checked={filters.inStock || false}
-          onCheckedChange={(checked) => onFiltersChange({ inStock: checked as boolean })}
-        />
-        <Label htmlFor="inStock" className="font-normal cursor-pointer">
-          In Stock Only
-        </Label>
-      </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
     </div>
   )
 }

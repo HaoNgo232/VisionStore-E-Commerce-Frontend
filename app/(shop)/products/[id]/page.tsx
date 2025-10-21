@@ -4,9 +4,18 @@ import { useState } from "react"
 import { useProductDetail } from "@/features/products/hooks/use-product-detail"
 import { useCart } from "@/features/cart/context/cart-context"
 import { VirtualTryOnDialog } from "@/features/virtual-tryon/components/virtual-tryon-dialog"
+import { ProductDetailSkeleton } from "@/components/skeletons/product-detail-skeleton"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 import { Star, ShoppingCart, Heart, Share2, Truck, Shield, RefreshCw, Scan } from "lucide-react"
 import { use } from "react"
 
@@ -19,25 +28,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const [tryOnDialogOpen, setTryOnDialogOpen] = useState(false)
 
   if (loading) {
-    return (
-      <div className="container py-8">
-        <div className="grid gap-8 lg:grid-cols-2">
-          <div className="space-y-4">
-            <div className="aspect-square bg-muted animate-pulse rounded-lg" />
-            <div className="grid grid-cols-4 gap-4">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="aspect-square bg-muted animate-pulse rounded-lg" />
-              ))}
-            </div>
-          </div>
-          <div className="space-y-4">
-            <div className="h-8 bg-muted animate-pulse rounded" />
-            <div className="h-4 bg-muted animate-pulse rounded w-2/3" />
-            <div className="h-6 bg-muted animate-pulse rounded w-1/3" />
-          </div>
-        </div>
-      </div>
-    )
+    return <ProductDetailSkeleton />
   }
 
   if (error || !product) {
@@ -56,6 +47,28 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   return (
     <>
       <div className="container py-8">
+        <Breadcrumb className="mb-6">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/">Home</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/products">Products</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href={`/products?category=${product.category}`}>
+                {product.category.charAt(0).toUpperCase() + product.category.slice(1)}
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{product.name}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+
         <div className="grid gap-8 lg:grid-cols-2">
           {/* Images */}
           <div className="space-y-4">
@@ -76,9 +89,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                 <button
                   key={index}
                   onClick={() => setSelectedImage(index)}
-                  className={`relative aspect-square overflow-hidden rounded-lg border-2 transition-colors ${
-                    selectedImage === index ? "border-primary" : "border-transparent"
-                  }`}
+                  className={`relative aspect-square overflow-hidden rounded-lg border-2 transition-colors ${selectedImage === index ? "border-primary" : "border-transparent"
+                    }`}
                 >
                   <img
                     src={image || "/placeholder.svg"}

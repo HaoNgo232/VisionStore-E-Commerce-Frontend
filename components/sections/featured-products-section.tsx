@@ -5,6 +5,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { ProductCardSkeleton } from "@/components/skeletons/product-card-skeleton"
 import { Star, ShoppingCart } from "lucide-react"
 import { productsApi } from "@/lib/api-client"
 import type { Product } from "@/types"
@@ -30,13 +31,7 @@ export function FeaturedProductsSection() {
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {[...Array(4)].map((_, i) => (
-              <Card key={i} className="overflow-hidden">
-                <div className="aspect-square bg-muted animate-pulse" />
-                <CardContent className="p-4">
-                  <div className="h-4 bg-muted rounded animate-pulse mb-2" />
-                  <div className="h-3 bg-muted rounded animate-pulse w-2/3" />
-                </CardContent>
-              </Card>
+              <ProductCardSkeleton key={i} />
             ))}
           </div>
         </div>

@@ -6,6 +6,7 @@ import { useCart } from "@/features/cart/context/cart-context"
 import { ProductGrid } from "@/features/products/components/product-grid"
 import { ProductFilters } from "@/features/products/components/product-filters"
 import { ProductSort } from "@/features/products/components/product-sort"
+import { ProductGridSkeleton } from "@/components/skeletons/product-card-skeleton"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { SlidersHorizontal } from "lucide-react"
@@ -78,15 +79,7 @@ export default function ProductsPage() {
 
           {/* Products Grid */}
           {loading ? (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="space-y-3">
-                  <div className="aspect-square bg-muted animate-pulse rounded-lg" />
-                  <div className="h-4 bg-muted animate-pulse rounded" />
-                  <div className="h-3 bg-muted animate-pulse rounded w-2/3" />
-                </div>
-              ))}
-            </div>
+            <ProductGridSkeleton count={12} />
           ) : (
             <ProductGrid products={sortedProducts} onAddToCart={handleAddToCart} />
           )}
