@@ -5,6 +5,7 @@ applyTo: "features/*/hooks/*.ts,hooks/*.ts"
 # Custom Hooks Instructions
 
 ## Purpose
+
 Hooks encapsulate API call logic and state management, making components cleaner and reusable.
 
 ## Pattern
@@ -46,11 +47,13 @@ export function use[Domain](filters?: [TypeFilters]) {
 ## Requirements
 
 1. **Always mark as client component**:
+
    ```typescript
    "use client"; // Required for useState, useEffect
    ```
 
 2. **Use async/await in useEffect**:
+
    ```typescript
    useEffect(() => {
      const fetch = async () => {
@@ -62,17 +65,20 @@ export function use[Domain](filters?: [TypeFilters]) {
    ```
 
 3. **Handle all three states**:
+
    - `loading` - Initial fetch or refetching
    - `error` - Error message from getErrorMessage()
    - `data` - Actual data from API
 
 4. **Include dependencies in useEffect**:
+
    ```typescript
    useEffect(() => { ... }, [filters]); // ✅ Include filters
    useEffect(() => { ... }, []); // ❌ Missing dependencies
    ```
 
 5. **Return consistent object**:
+
    ```typescript
    return { data, loading, error };
    // or with additional methods
@@ -80,9 +86,10 @@ export function use[Domain](filters?: [TypeFilters]) {
    ```
 
 6. **Use getErrorMessage() for errors**:
+
    ```typescript
    import { getErrorMessage } from "@/lib/api-client";
-   
+
    try { ... }
    catch (err) {
      setError(getErrorMessage(err)); // Transforms error to user-friendly message
@@ -92,6 +99,7 @@ export function use[Domain](filters?: [TypeFilters]) {
 ## Examples
 
 ### Simple List Hook
+
 ```typescript
 // hooks/use-products.ts
 export function useProducts(filters?: ProductFilters) {
@@ -121,6 +129,7 @@ export function useProducts(filters?: ProductFilters) {
 ```
 
 ### Single Item Hook
+
 ```typescript
 // hooks/use-product-detail.ts
 export function useProductDetail(productId: string) {
@@ -150,6 +159,7 @@ export function useProductDetail(productId: string) {
 ```
 
 ### Hook with Additional Methods
+
 ```typescript
 // hooks/use-addresses.ts
 export function useAddresses(userId: string) {
@@ -195,13 +205,13 @@ export function useAddresses(userId: string) {
     }
   };
 
-  return { 
-    addresses, 
-    loading, 
-    error, 
-    addAddress, 
-    deleteAddress, 
-    refetch: fetchAddresses 
+  return {
+    addresses,
+    loading,
+    error,
+    addAddress,
+    deleteAddress,
+    refetch: fetchAddresses,
   };
 }
 ```
@@ -209,6 +219,7 @@ export function useAddresses(userId: string) {
 ## Usage in Components
 
 ✅ **Correct:**
+
 ```typescript
 export function ProductsList() {
   const { products, loading, error } = useProducts();
@@ -220,6 +231,7 @@ export function ProductsList() {
 ```
 
 ❌ **Avoid:**
+
 ```typescript
 // Don't call API directly in component
 export function ProductsList() {
@@ -239,6 +251,7 @@ export function ProductsList() {
 ## Do's & Don'ts
 
 ✅ **Do:**
+
 - Use async/await (not .then())
 - Include useEffect dependencies
 - Handle all three states (loading, error, data)
@@ -247,6 +260,7 @@ export function ProductsList() {
 - Extract refetch as separate function if needed
 
 ❌ **Don't:**
+
 - Add UI logic (toast, redirects) - Keep pure
 - Call multiple APIs - One hook per domain
 - Forget "use client" directive

@@ -15,10 +15,13 @@ export function FeaturedProductsSection() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    productsApi.getFeatured().then((data: Product[]) => {
-      setProducts(data)
-      setLoading(false)
-    })
+    const fetchFeaturedProducts = async () => {
+      const data: Product[] = await productsApi.getFeatured();
+      setProducts(data);
+      setLoading(false);
+    };
+
+    fetchFeaturedProducts();
   }, [])
 
   if (loading) {

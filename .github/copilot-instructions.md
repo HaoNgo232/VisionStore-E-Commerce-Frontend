@@ -1,6 +1,7 @@
 # GitHub Copilot Repository Instructions
 
 ## Project Overview
+
 - **Project**: Frontend Eyewear Store (Next.js 15 + TypeScript)
 - **Feature**: API Integration - Connecting frontend to NestJS backend APIs
 - **Branch**: feature/api-integration
@@ -9,14 +10,17 @@
 ## Code Style & Language
 
 ### Vietnamese Language
+
 - Respond in Vietnamese
 - Use helpful colleague tone, minimize explanations but provide enough context
 - Provide TypeScript examples
 
 ### Async/Await Priority
+
 **Always use async/await over .then() EXCEPT for parallel Promises:**
 
 ✅ **Correct:**
+
 ```typescript
 // Async/await (default)
 const data = await productsApi.getAll();
@@ -38,14 +42,16 @@ const [products, categories] = await Promise.all([
 ```
 
 ❌ **Avoid:**
+
 ```typescript
 // .then() for simple cases
-productsApi.getAll().then(data => setData(data));
+productsApi.getAll().then((data) => setData(data));
 ```
 
 ## Architecture & Project Structure
 
 ### Domains (9 Services)
+
 1. **auth** - Login, register, token refresh
 2. **users** - User profile, CRUD
 3. **addresses** - Shipping addresses
@@ -57,6 +63,7 @@ productsApi.getAll().then(data => setData(data));
 9. **ar** - AR snapshots
 
 ### Folder Structure
+
 ```
 features/[domain]/
 ├── components/       # UI components
@@ -86,6 +93,7 @@ lib/                # Utilities
 ## API Integration
 
 ### API Client
+
 - **Location**: `lib/api-client.ts`
 - **Base URL**: `http://localhost:3000`
 - **HTTP Client**: Axios
@@ -93,6 +101,7 @@ lib/                # Utilities
 - **Token Refresh**: Automatic on 401 with retry
 
 ### Service Layer Pattern
+
 ```typescript
 // features/[domain]/services/[domain].service.ts
 export const [domain]Api = {
@@ -103,6 +112,7 @@ export const [domain]Api = {
 ```
 
 ### Import Pattern
+
 ```typescript
 // ✅ Correct
 import { productsApi } from "@/features/products/services/products.service";
@@ -113,6 +123,7 @@ import { productsApi } from "@/lib/api-client"; // Don't put services here
 ```
 
 ### Error Handling
+
 ```typescript
 import { getErrorMessage } from "@/lib/api-client";
 
@@ -129,11 +140,13 @@ try {
 ## Type Definitions
 
 ### Global Types (types/)
+
 - Import from `@/types` for global types
 - Each domain has dedicated type file
 - Export all from `types/index.ts`
 
 ### Common Types (types/common.types.ts)
+
 ```typescript
 export interface ApiError {
   statusCode: number;
@@ -153,27 +166,33 @@ export interface PaginatedResponse<T> {
 ## API Data Format
 
 ### Prices
+
 - **Format**: Integer cents (e.g., 199900 = 1,999.00 VND)
 - **Storage**: Always in cents
 - **Display**: Divide by 100, format with currency locale
+
 ```typescript
 const price = 199900; // cents
 const display = (price / 100).toLocaleString("vi-VN"); // "1,999"
 ```
 
 ### Payments
+
 - **Methods**: COD (Cash on Delivery), SEPAY (QR code) only
 - **No**: Credit cards, Momo, ZaloPay
 - **Status**: pending, completed, cancelled, failed
 
 ### Orders
+
 - **Status**: pending, confirmed, shipped, delivered, cancelled
 - **Address**: Required from user's saved addresses
 
 ## React Best Practices
 
 ### Component Patterns
+
 1. **Client Component** - For state/effects/interactions
+
    ```typescript
    "use client";
    ```
@@ -184,6 +203,7 @@ const display = (price / 100).toLocaleString("vi-VN"); // "1,999"
    ```
 
 ### Custom Hooks
+
 ```typescript
 // hooks/use-[domain].ts
 import { useState, useEffect } from "react";
@@ -217,6 +237,7 @@ export function use[Domain]() {
 ## Documentation & Reference
 
 ### Key Files
+
 - **Planning**: `docs/ai/planning/feature-api-integration.md`
 - **Design**: `docs/ai/design/feature-api-integration.md`
 - **Implementation**: `docs/ai/implementation/feature-api-integration.md`
@@ -224,22 +245,26 @@ export function use[Domain]() {
 - **Code Style**: `docs/ai/CODE_STYLE.md`
 
 ### Project Structure
+
 - **AI Docs**: `docs/ai/` - Requirements, design, planning, implementation, testing
 - **DevKit**: `AGENTS.md` - AI DevKit rules and workflow
 
 ## Common Commands & Workflows
 
 ### Task Execution
+
 - Review current phase doc before implementing
 - Update docs when requirements/design changes
 - Reference planning doc for task breakdown
 
 ### Testing
+
 - Use `/writing-test` for unit/integration tests
 - Target 100% coverage for critical paths
 - Test both success and error cases
 
 ### Git Workflow
+
 - Feature branch: `feature/api-integration`
 - Commit message format: `task([phase].[task]): Description`
 - Example: `task(1.2): Populate type definitions`
@@ -247,6 +272,7 @@ export function use[Domain]() {
 ## Important Notes
 
 ⚠️ **Do NOT:**
+
 - Put service functions in `lib/api-client.ts` - Use service files instead
 - Use hardcoded URLs - Use `apiGet()`, `apiPost()` helpers
 - Mix mock data with real API - All mocks removed
@@ -254,6 +280,7 @@ export function use[Domain]() {
 - Use .then() for sequential operations - Use async/await
 
 ✅ **Always:**
+
 - Use TypeScript types for all API responses
 - Handle errors with `getErrorMessage()`
 - Extract async logic to custom hooks

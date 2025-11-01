@@ -5,6 +5,7 @@ applyTo: "features/*/services/*.service.ts"
 # Service Layer Instructions
 
 ## Purpose
+
 Service files contain API integration logic - domain-specific API wrappers that handle HTTP communication.
 
 ## Structure Pattern
@@ -59,18 +60,21 @@ export const [domain]Api = {
 ## Requirements
 
 1. **Always use helper functions** from `lib/api-client.ts`:
+
    - `apiGet<T>()` - GET requests
-   - `apiPost<T>()` - POST requests  
+   - `apiPost<T>()` - POST requests
    - `apiPatch<T>()` - PATCH/PUT requests
    - `apiDelete<T>()` - DELETE requests
 
 2. **Always type responses**:
+
    ```typescript
    return apiGet<Product[]>("/products"); // ✅ Typed
    return apiGet("/products"); // ❌ Untyped
    ```
 
 3. **Organize by HTTP method**:
+
    - getAll() first (with filters if applicable)
    - getById() next
    - create()
@@ -78,6 +82,7 @@ export const [domain]Api = {
    - delete() / specific delete methods
 
 4. **Include JSDoc comments** for each method:
+
    ```typescript
    /**
     * Fetch all products with optional filters
@@ -98,6 +103,7 @@ export const [domain]Api = {
 ## Examples
 
 ### Products Service
+
 ```typescript
 export const productsApi = {
   async getAll(filters?: ProductFilters): Promise<Product[]> {
@@ -123,6 +129,7 @@ export const productsApi = {
 ```
 
 ### Orders Service
+
 ```typescript
 export const ordersApi = {
   async getAll(userId: string): Promise<Order[]> {
@@ -150,6 +157,7 @@ export const ordersApi = {
 ## Do's & Don'ts
 
 ✅ **Do:**
+
 - Use typed generic parameters: `apiGet<Product[]>()`
 - Keep methods simple and focused
 - Export single `const [domain]Api` object
@@ -157,6 +165,7 @@ export const ordersApi = {
 - Handle query params cleanly
 
 ❌ **Don't:**
+
 - Hardcode URLs: `fetch("http://localhost:3000/products")`
 - Mix multiple domains in one service
 - Add UI logic (toasts, state management) - Keep pure
@@ -166,12 +175,14 @@ export const ordersApi = {
 ## Import Paths
 
 ✅ **Correct:**
+
 ```typescript
 import { apiGet, apiPost } from "@/lib/api-client";
 import type { Product } from "@/types";
 ```
 
 ❌ **Avoid:**
+
 ```typescript
 import axios from "axios"; // Use apiGet instead
 import * from "@/lib/api-client"; // Be specific

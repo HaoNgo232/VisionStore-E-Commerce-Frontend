@@ -5,11 +5,13 @@ applyTo: "types/*.types.ts"
 # Type Definitions Instructions
 
 ## Purpose
+
 Type files contain TypeScript interfaces for each domain, ensuring type safety across the application.
 
 ## File Organization
 
 Each domain has a dedicated type file:
+
 - `auth.types.ts` - Authentication types
 - `user.types.ts` - User profile types
 - `address.types.ts` - Address types
@@ -114,6 +116,7 @@ export type FrameType =
 ## Requirements
 
 1. **Always include JSDoc comments**:
+
    ```typescript
    /**
     * Product entity with pricing in cents
@@ -122,17 +125,19 @@ export type FrameType =
    ```
 
 2. **Use `interface` for objects**, `type` for unions:
+
    ```typescript
    // ✅ Object types
-   export interface Product { }
-   export interface Order { }
-   
+   export interface Product {}
+   export interface Order {}
+
    // ✅ Union/enum types
    export type OrderStatus = "pending" | "confirmed" | "shipped";
    export type FrameType = "full-rim" | "semi-rimless";
    ```
 
 3. **Prices always in cents**:
+
    ```typescript
    export interface Product {
      price: number; // cents (199900 = 1,999.00 VND)
@@ -140,6 +145,7 @@ export type FrameType =
    ```
 
 4. **Optional fields with `?`**:
+
    ```typescript
    export interface Product {
      id: string;
@@ -150,10 +156,11 @@ export type FrameType =
    ```
 
 5. **Use `Omit<T, 'id'>` for create inputs**:
+
    ```typescript
    // Service method signature
    async create(data: Omit<Product, "id">): Promise<Product>
-   
+
    // This ensures id is never provided on creation
    ```
 
@@ -231,11 +238,11 @@ export interface OrderItem {
   price: number; // cents at time of purchase
 }
 
-export type OrderStatus = 
-  | "pending" 
-  | "confirmed" 
-  | "shipped" 
-  | "delivered" 
+export type OrderStatus =
+  | "pending"
+  | "confirmed"
+  | "shipped"
+  | "delivered"
   | "cancelled";
 ```
 
@@ -281,7 +288,12 @@ export interface TokenRefreshResponse {
 export type { LoginRequest, RegisterRequest, AuthResponse } from "./auth.types";
 
 // Products domain
-export type { Product, ProductFilters, ProductCategory, FrameType } from "./product.types";
+export type {
+  Product,
+  ProductFilters,
+  ProductCategory,
+  FrameType,
+} from "./product.types";
 
 // Orders domain
 export type { Order, OrderItem, OrderStatus } from "./order.types";
@@ -296,6 +308,7 @@ export type { ApiError, PaginatedResponse, ApiResponse } from "./common.types";
 ## Do's & Don'ts
 
 ✅ **Do:**
+
 - Document interfaces with JSDoc
 - Use specific types (not `any`)
 - Import/export all types through index.ts
@@ -304,6 +317,7 @@ export type { ApiError, PaginatedResponse, ApiResponse } from "./common.types";
 - Include default/optional fields appropriately
 
 ❌ **Don't:**
+
 - Use `any` type - Always type explicitly
 - Mix concerns in one type file
 - Create circular dependencies
