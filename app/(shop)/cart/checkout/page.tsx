@@ -19,7 +19,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { ordersApi } from "@/lib/api-client"
+import { ordersApi } from "@/features/orders/services/orders.service"
 import { toast } from "sonner"
 import { checkoutFormSchema, type CheckoutFormValues } from "@/lib/validations/forms"
 

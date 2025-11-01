@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useProductDetail } from "@/features/products/hooks/use-product-detail"
 import { useCartStore } from "@/stores/cart.store"
-import { VirtualTryOnDialog } from "@/features/virtual-tryon/components/virtual-tryon-dialog"
+import { VirtualTryOnDialog } from "@/features/ar/components/virtual-tryon-dialog"
 import { ProductDetailSkeleton } from "@/components/skeletons/product-detail-skeleton"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"

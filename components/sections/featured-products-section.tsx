@@ -7,7 +7,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ProductCardSkeleton } from "@/components/skeletons/product-card-skeleton"
 import { Star, ShoppingCart } from "lucide-react"
-import { productsApi } from "@/lib/api-client"
+import { productsApi } from "@/features/products/services/products.service"
 import type { Product } from "@/types"
 
 export function FeaturedProductsSection() {
@@ -15,7 +15,7 @@ export function FeaturedProductsSection() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    productsApi.getFeatured().then((data) => {
+    productsApi.getFeatured().then((data: Product[]) => {
       setProducts(data)
       setLoading(false)
     })

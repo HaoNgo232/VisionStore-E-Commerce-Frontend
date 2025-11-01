@@ -4,7 +4,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { toast } from "sonner";
 import type { Cart, CartItem } from "@/types";
-import { productsApi } from "@/lib/api-client";
+import { productsApi } from "@/features/products/services/products.service";
 
 interface CartStore extends Cart {
   isLoading: boolean;

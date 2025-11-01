@@ -36,12 +36,12 @@ description: Chi tiết tasks và timeline cho việc kết nối frontend với
 
 #### Task 1.1: Project Structure Reorganization
 
-**Priority**: High | **Effort**: 2h | **Status**: Not Started
+**Priority**: High | **Effort**: 2h | **Status**: ✅ COMPLETED
 
 **Subtasks:**
 
-- [ ] Xóa hoặc archive `lib/mock-data.ts`
-- [ ] Tạo cấu trúc folders mới:
+- [x] Xóa hoặc archive `lib/mock-data.ts`
+- [x] Tạo cấu trúc folders mới:
   ```
   types/
   ├── auth.types.ts

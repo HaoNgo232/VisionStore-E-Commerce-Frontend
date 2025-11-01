@@ -3,7 +3,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { OrdersTab } from "@/features/orders/components/orders-tab"
 import { AddressesTab } from "@/features/addresses/components/addresses-tab"
-import { ProfileTab } from "@/features/profile/components/profile-tab"
+import { ProfileTab } from "@/features/users/components/profile-tab"
 import { Package, MapPin, User } from "lucide-react"
 
 export default function ProfilePage() {

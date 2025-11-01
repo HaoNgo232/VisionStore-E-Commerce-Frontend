@@ -1,204 +1,201 @@
-// API client structure ready for backend integration
-// Currently returns mock data, easy to replace with real API calls
+/**
+ * API Client - Axios-based HTTP client for backend communication
+ *
+ * Features:
+ * - Request/response interceptors for auth token management
+ * - Automatic token refresh on 401
+ * - Error handling and transformation
+ * - Retry logic for failed requests
+ */
 
-import type { Product, ProductFilters, Order, Address, Cart } from "@/types"
-import { mockProducts, mockOrders, mockAddresses } from "./mock-data"
+import axios, {
+  AxiosError,
+  AxiosRequestConfig,
+  InternalAxiosRequestConfig,
+} from "axios";
+import { useAuthStore } from "@/stores/auth.store";
+import type { ApiError } from "@/types/common.types";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api"
+// API Configuration
+export const API_CONFIG = {
+  BASE_URL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000",
+  TIMEOUT: 10000,
+  RETRY_COUNT: 3,
+  RETRY_DELAY: 1000,
+};
 
-// Helper function for future API calls
-async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
-  // TODO: Replace with actual fetch call when backend is ready
-  // const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-  //   ...options,
-  //   headers: {
-  //     'Content-Type': 'application/json',
-  //     ...options?.headers,
-  //   },
-  // });
-  // if (!response.ok) throw new Error('API call failed');
-  // return response.json();
+// Create axios instance
+export const apiClient = axios.create({
+  baseURL: API_CONFIG.BASE_URL,
+  timeout: API_CONFIG.TIMEOUT,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
-  // For now, return mock data
-  throw new Error("Not implemented - using mock data")
+/**
+ * Request Interceptor - Add auth header
+ */
+apiClient.interceptors.request.use(
+  (config: InternalAxiosRequestConfig) => {
+    const token = useAuthStore.getState().accessToken;
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error),
+);
+
+/**
+ * Response Interceptor - Handle errors and token refresh
+ */
+apiClient.interceptors.response.use(
+  (response) => response,
+  async (error: AxiosError<ApiError>) => {
+    const originalRequest = error.config as AxiosRequestConfig & {
+      _retry?: boolean;
+    };
+
+    // Handle 401 - Token might be expired, try refresh
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      originalRequest
+    ) {
+      originalRequest._retry = true;
+
+      try {
+        const { refreshToken } = useAuthStore.getState();
+        if (!refreshToken) {
+          // No refresh token - logout user
+          useAuthStore.getState().clearAuth();
+          throw new Error("No refresh token available");
+        }
+
+        // Call refresh endpoint
+        const response = await axios.post<{
+          accessToken: string;
+          refreshToken: string;
+        }>(
+          `${API_CONFIG.BASE_URL}/auth/refresh`,
+          { refreshToken },
+          {
+            timeout: API_CONFIG.TIMEOUT,
+          },
+        );
+
+        const { accessToken, refreshToken: newRefreshToken } = response.data;
+
+        // Update tokens in store
+        useAuthStore.getState().setTokens(accessToken, newRefreshToken);
+
+        // Update auth header with new token
+        if (originalRequest.headers) {
+          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        }
+
+        // Retry original request
+        return apiClient(originalRequest);
+      } catch (refreshError) {
+        // Refresh failed - logout user
+        useAuthStore.getState().clearAuth();
+
+        // Redirect to login (client-side only)
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
+
+        return Promise.reject(refreshError);
+      }
+    }
+
+    return Promise.reject(error);
+  },
+);
+
+/**
+ * Transform axios error to user-friendly message
+ */
+export function getErrorMessage(error: unknown): string {
+  if (axios.isAxiosError(error)) {
+    const apiError = error.response?.data as ApiError;
+    return apiError?.message || error.message || "An error occurred";
+  }
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return "An unexpected error occurred";
 }
 
-// Products API
-export const productsApi = {
-  getAll: async (filters?: ProductFilters): Promise<Product[]> => {
-    // TODO: Replace with API call
-    // return apiCall<Product[]>('/products', { method: 'GET' });
+/**
+ * Handle API errors consistently
+ */
+export function handleApiError(error: unknown, showToast = false): string {
+  const message = getErrorMessage(error);
 
-    let filtered = [...mockProducts]
+  if (showToast && typeof window !== "undefined") {
+    // Will integrate with toast notification library later
+    console.error("[API Error]", message);
+  }
 
-    if (filters?.category) {
-      filtered = filtered.filter((p) => p.category === filters.category)
-    }
-    if (filters?.brand) {
-      filtered = filtered.filter((p) => p.brand === filters.brand)
-    }
-    if (filters?.frameType) {
-      filtered = filtered.filter((p) => p.frameType === filters.frameType)
-    }
-    if (filters?.inStock !== undefined) {
-      filtered = filtered.filter((p) => p.inStock === filters.inStock)
-    }
-    if (filters?.priceRange) {
-      const [min, max] = filters.priceRange
-      filtered = filtered.filter((p) => p.price >= min && p.price <= max)
-    }
-
-    return Promise.resolve(filtered)
-  },
-
-  getById: async (id: string): Promise<Product | null> => {
-    // TODO: Replace with API call
-    // return apiCall<Product>(`/products/${id}`, { method: 'GET' });
-
-    const product = mockProducts.find((p) => p.id === id)
-    return Promise.resolve(product || null)
-  },
-
-  getFeatured: async (): Promise<Product[]> => {
-    // TODO: Replace with API call
-    // return apiCall<Product[]>('/products/featured', { method: 'GET' });
-
-    return Promise.resolve(mockProducts.slice(0, 4))
-  },
+  return message;
 }
 
-// Orders API
-export const ordersApi = {
-  getAll: async (userId: string): Promise<Order[]> => {
-    // TODO: Replace with API call
-    // return apiCall<Order[]>(`/orders?userId=${userId}`, { method: 'GET' });
-
-    return Promise.resolve(mockOrders.filter((o) => o.userId === userId))
-  },
-
-  getById: async (id: string): Promise<Order | null> => {
-    // TODO: Replace with API call
-    // return apiCall<Order>(`/orders/${id}`, { method: 'GET' });
-
-    const order = mockOrders.find((o) => o.id === id)
-    return Promise.resolve(order || null)
-  },
-
-  create: async (orderData: Omit<Order, "id" | "createdAt" | "updatedAt">): Promise<Order> => {
-    // TODO: Replace with API call
-    // return apiCall<Order>('/orders', {
-    //   method: 'POST',
-    //   body: JSON.stringify(orderData),
-    // });
-
-    const newOrder: Order = {
-      ...orderData,
-      id: `ORD-${Date.now()}`,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    }
-    return Promise.resolve(newOrder)
-  },
+/**
+ * Helper for GET requests
+ */
+export async function apiGet<T>(
+  endpoint: string,
+  config?: AxiosRequestConfig,
+): Promise<T> {
+  const response = await apiClient.get<T>(endpoint, config);
+  return response.data;
 }
 
-// Addresses API
-export const addressesApi = {
-  getAll: async (userId: string): Promise<Address[]> => {
-    // TODO: Replace with API call
-    // return apiCall<Address[]>(`/addresses?userId=${userId}`, { method: 'GET' });
-
-    return Promise.resolve(mockAddresses)
-  },
-
-  create: async (address: Omit<Address, "id">): Promise<Address> => {
-    // TODO: Replace with API call
-    // return apiCall<Address>('/addresses', {
-    //   method: 'POST',
-    //   body: JSON.stringify(address),
-    // });
-
-    const newAddress: Address = {
-      ...address,
-      id: `addr-${Date.now()}`,
-    }
-    return Promise.resolve(newAddress)
-  },
-
-  update: async (id: string, address: Partial<Address>): Promise<Address> => {
-    // TODO: Replace with API call
-    // return apiCall<Address>(`/addresses/${id}`, {
-    //   method: 'PUT',
-    //   body: JSON.stringify(address),
-    // });
-
-    const existing = mockAddresses.find((a) => a.id === id)
-    if (!existing) throw new Error("Address not found")
-
-    const updated = { ...existing, ...address }
-    return Promise.resolve(updated)
-  },
-
-  delete: async (id: string): Promise<void> => {
-    // TODO: Replace with API call
-    // return apiCall<void>(`/addresses/${id}`, { method: 'DELETE' });
-
-    return Promise.resolve()
-  },
+/**
+ * Helper for POST requests
+ */
+export async function apiPost<T>(
+  endpoint: string,
+  data?: any,
+  config?: AxiosRequestConfig,
+): Promise<T> {
+  const response = await apiClient.post<T>(endpoint, data, config);
+  return response.data;
 }
 
-// Cart API
-export const cartApi = {
-  get: async (userId: string): Promise<Cart> => {
-    // TODO: Replace with API call
-    // return apiCall<Cart>(`/cart?userId=${userId}`, { method: 'GET' });
+/**
+ * Helper for PUT requests
+ */
+export async function apiPut<T>(
+  endpoint: string,
+  data?: any,
+  config?: AxiosRequestConfig,
+): Promise<T> {
+  const response = await apiClient.put<T>(endpoint, data, config);
+  return response.data;
+}
 
-    // Mock empty cart
-    return Promise.resolve({
-      items: [],
-      total: 0,
-      itemCount: 0,
-    })
-  },
+/**
+ * Helper for PATCH requests
+ */
+export async function apiPatch<T>(
+  endpoint: string,
+  data?: any,
+  config?: AxiosRequestConfig,
+): Promise<T> {
+  const response = await apiClient.patch<T>(endpoint, data, config);
+  return response.data;
+}
 
-  addItem: async (userId: string, productId: string, quantity: number): Promise<Cart> => {
-    // TODO: Replace with API call
-    // return apiCall<Cart>('/cart/items', {
-    //   method: 'POST',
-    //   body: JSON.stringify({ userId, productId, quantity }),
-    // });
-
-    return Promise.resolve({
-      items: [],
-      total: 0,
-      itemCount: 0,
-    })
-  },
-
-  updateItem: async (userId: string, productId: string, quantity: number): Promise<Cart> => {
-    // TODO: Replace with API call
-    // return apiCall<Cart>(`/cart/items/${productId}`, {
-    //   method: 'PUT',
-    //   body: JSON.stringify({ userId, quantity }),
-    // });
-
-    return Promise.resolve({
-      items: [],
-      total: 0,
-      itemCount: 0,
-    })
-  },
-
-  removeItem: async (userId: string, productId: string): Promise<Cart> => {
-    // TODO: Replace with API call
-    // return apiCall<Cart>(`/cart/items/${productId}`, {
-    //   method: 'DELETE',
-    //   body: JSON.stringify({ userId }),
-    // });
-
-    return Promise.resolve({
-      items: [],
-      total: 0,
-      itemCount: 0,
-    })
-  },
+/**
+ * Helper for DELETE requests
+ */
+export async function apiDelete<T>(
+  endpoint: string,
+  config?: AxiosRequestConfig,
+): Promise<T> {
+  const response = await apiClient.delete<T>(endpoint, config);
+  return response.data;
 }
