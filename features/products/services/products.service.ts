@@ -1,62 +1,59 @@
 /**
  * Products Service
- * Handles all product-related API calls
+ * API integration for product catalog
  */
 
-import { apiGet, apiPost } from "@/lib/api-client";
-import type { Product, ProductFilters } from "@/types";
+import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api-client";
+import type {
+  Product,
+  PaginatedResponse,
+  CreateProductRequest,
+  UpdateProductRequest,
+} from "@/types";
+
+interface GetProductsParams {
+  page?: number;
+  limit?: number;
+  categoryId?: string;
+  search?: string;
+  sortBy?: string;
+  order?: "asc" | "desc";
+}
 
 export const productsApi = {
-  /**
-   * Fetch all products with optional filters
-   */
-  async getAll(filters?: ProductFilters): Promise<Product[]> {
-    const params = new URLSearchParams();
+  async getAll(
+    params?: GetProductsParams,
+  ): Promise<PaginatedResponse<Product>> {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append("page", String(params.page));
+    if (params?.limit) queryParams.append("limit", String(params.limit));
+    if (params?.categoryId) queryParams.append("categoryId", params.categoryId);
+    if (params?.search) queryParams.append("search", params.search);
+    if (params?.sortBy) queryParams.append("sortBy", params.sortBy);
+    if (params?.order) queryParams.append("order", params.order);
 
-    if (filters?.category) {
-      params.append("category", filters.category);
-    }
-    if (filters?.brand) {
-      params.append("brand", filters.brand);
-    }
-    if (filters?.priceRange) {
-      params.append("minPrice", filters.priceRange[0].toString());
-      params.append("maxPrice", filters.priceRange[1].toString());
-    }
-    if (filters?.frameType) {
-      params.append("frameType", filters.frameType);
-    }
-    if (filters?.color) {
-      params.append("color", filters.color);
-    }
-    if (filters?.inStock !== undefined) {
-      params.append("inStock", filters.inStock.toString());
-    }
-
-    const queryString = params.toString();
-    const endpoint = `/products${queryString ? `?${queryString}` : ""}`;
-
-    return apiGet<Product[]>(endpoint);
+    const query = queryParams.toString();
+    return apiGet<PaginatedResponse<Product>>(
+      `/products${query ? `?${query}` : ""}`,
+    );
   },
 
-  /**
-   * Fetch single product by ID
-   */
-  async getById(id: string): Promise<Product> {
-    return apiGet<Product>(`/products/${id}`);
+  async getById(productId: string): Promise<Product> {
+    return apiGet<Product>(`/products/${productId}`);
   },
 
-  /**
-   * Create new product (admin only)
-   */
-  async create(data: Omit<Product, "id">): Promise<Product> {
+  async create(data: CreateProductRequest): Promise<Product> {
     return apiPost<Product>("/products", data);
   },
 
-  /**
-   * Fetch featured products
-   */
-  async getFeatured(): Promise<Product[]> {
-    return apiGet<Product[]>("/products/featured");
+  async update(
+    productId: string,
+    data: UpdateProductRequest,
+  ): Promise<Product> {
+    return apiPatch<Product>(`/products/${productId}`, data);
+  },
+
+  async delete(productId: string): Promise<void> {
+    return apiDelete(`/products/${productId}`);
   },
 };

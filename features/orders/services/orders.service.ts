@@ -1,44 +1,40 @@
 /**
  * Orders Service
- * Handles all order-related API calls
+ * API integration for order management
  */
 
-import { apiGet, apiPost, apiPatch } from "@/lib/api-client";
-import type { Order } from "@/types";
+import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api-client";
+import type {
+  Order,
+  CreateOrderRequest,
+  UpdateOrderStatusRequest,
+} from "@/types";
 
 export const ordersApi = {
-  /**
-   * Fetch all orders for a user
-   */
-  async getAll(userId: string): Promise<Order[]> {
-    return apiGet<Order[]>(`/orders?userId=${userId}`);
+  async getAll(): Promise<Order[]> {
+    return apiGet<Order[]>("/orders");
   },
 
-  /**
-   * Fetch single order by ID
-   */
-  async getById(id: string): Promise<Order> {
-    return apiGet<Order>(`/orders/${id}`);
+  async getById(orderId: string): Promise<Order> {
+    return apiGet<Order>(`/orders/${orderId}`);
   },
 
-  /**
-   * Create new order
-   */
-  async create(data: Omit<Order, "id">): Promise<Order> {
+  async create(data: CreateOrderRequest): Promise<Order> {
     return apiPost<Order>("/orders", data);
   },
 
-  /**
-   * Update order status
-   */
-  async updateStatus(id: string, status: string): Promise<Order> {
-    return apiPatch<Order>(`/orders/${id}`, { status });
+  async updateStatus(
+    orderId: string,
+    data: UpdateOrderStatusRequest,
+  ): Promise<Order> {
+    return apiPatch<Order>(`/orders/${orderId}/status`, data);
   },
 
-  /**
-   * Cancel order
-   */
-  async cancel(id: string): Promise<Order> {
-    return apiPatch<Order>(`/orders/${id}/cancel`, {});
+  async cancel(orderId: string): Promise<Order> {
+    return apiPatch<Order>(`/orders/${orderId}/cancel`, {});
+  },
+
+  async delete(orderId: string): Promise<void> {
+    return apiDelete(`/orders/${orderId}`);
   },
 };

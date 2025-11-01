@@ -8,6 +8,8 @@
  * - Retry logic for failed requests
  */
 
+"use client";
+
 import axios, {
   AxiosError,
   AxiosRequestConfig,

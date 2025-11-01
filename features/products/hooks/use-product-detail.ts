@@ -1,8 +1,14 @@
+/**
+ * useProductDetail Hook
+ * Fetches single product details
+ */
+
 "use client";
 
 import { useState, useEffect } from "react";
-import type { Product } from "@/types";
+import { getErrorMessage } from "@/lib/api-client";
 import { productsApi } from "@/features/products/services/products.service";
+import type { Product } from "@/types";
 
 export function useProductDetail(productId: string) {
   const [product, setProduct] = useState<Product | null>(null);
@@ -10,27 +16,21 @@ export function useProductDetail(productId: string) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchProduct = async () => {
+    const fetch = async () => {
       try {
         setLoading(true);
         setError(null);
         const data = await productsApi.getById(productId);
         setProduct(data);
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to fetch product",
-        );
+        setError(getErrorMessage(err));
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProduct();
+    fetch();
   }, [productId]);
 
-  return {
-    product,
-    loading,
-    error,
-  };
+  return { product, loading, error };
 }

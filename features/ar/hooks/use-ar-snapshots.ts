@@ -1,17 +1,17 @@
 /**
- * useAddresses Hook
- * Fetches and manages user addresses
+ * useARSnapshots Hook
+ * Fetches and manages AR snapshots
  */
 
 "use client";
 
 import { useState, useEffect } from "react";
 import { getErrorMessage } from "@/lib/api-client";
-import { addressesApi } from "@/features/addresses/services/addresses.service";
-import type { Address } from "@/types";
+import { arApi } from "@/features/ar/services/ar.service";
+import type { ARSnapshot } from "@/types";
 
-export function useAddresses() {
-  const [addresses, setAddresses] = useState<Address[]>([]);
+export function useARSnapshots() {
+  const [snapshots, setSnapshots] = useState<ARSnapshot[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -20,8 +20,8 @@ export function useAddresses() {
       try {
         setLoading(true);
         setError(null);
-        const data = await addressesApi.getAll();
-        setAddresses(data);
+        const data = await arApi.getAll();
+        setSnapshots(data);
       } catch (err) {
         setError(getErrorMessage(err));
       } finally {
@@ -32,5 +32,5 @@ export function useAddresses() {
     fetch();
   }, []);
 
-  return { addresses, loading, error };
+  return { snapshots, loading, error };
 }

@@ -1,17 +1,17 @@
 /**
- * useAddresses Hook
- * Fetches and manages user addresses
+ * useUserProfile Hook
+ * Fetches and manages user profile
  */
 
 "use client";
 
 import { useState, useEffect } from "react";
 import { getErrorMessage } from "@/lib/api-client";
-import { addressesApi } from "@/features/addresses/services/addresses.service";
-import type { Address } from "@/types";
+import { usersApi } from "@/features/users/services/users.service";
+import type { User } from "@/types";
 
-export function useAddresses() {
-  const [addresses, setAddresses] = useState<Address[]>([]);
+export function useUserProfile() {
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -20,8 +20,8 @@ export function useAddresses() {
       try {
         setLoading(true);
         setError(null);
-        const data = await addressesApi.getAll();
-        setAddresses(data);
+        const data = await usersApi.getProfile();
+        setUser(data);
       } catch (err) {
         setError(getErrorMessage(err));
       } finally {
@@ -32,5 +32,5 @@ export function useAddresses() {
     fetch();
   }, []);
 
-  return { addresses, loading, error };
+  return { user, loading, error };
 }

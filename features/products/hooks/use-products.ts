@@ -1,48 +1,54 @@
+/**
+ * useProducts Hook
+ * Fetches and manages product listing with pagination
+ */
+
 "use client";
 
 import { useState, useEffect } from "react";
-import type { Product, ProductFilters } from "@/types";
+import { getErrorMessage } from "@/lib/api-client";
 import { productsApi } from "@/features/products/services/products.service";
+import type { Product } from "@/types";
 
-export function useProducts(initialFilters?: ProductFilters) {
+interface UseProductsParams {
+  page?: number;
+  limit?: number;
+  categoryId?: string;
+  search?: string;
+  sortBy?: string;
+  order?: "asc" | "desc";
+}
+
+export function useProducts(params?: UseProductsParams) {
   const [products, setProducts] = useState<Product[]>([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filters, setFilters] = useState<ProductFilters>(initialFilters || {});
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetch = async () => {
       try {
         setLoading(true);
         setError(null);
-        const data = await productsApi.getAll(filters);
-        setProducts(data);
+        const data = await productsApi.getAll(params);
+        setProducts(data.items);
+        setTotal(data.total);
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to fetch products",
-        );
+        setError(getErrorMessage(err));
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProducts();
-  }, [filters]);
+    fetch();
+  }, [
+    params?.page,
+    params?.limit,
+    params?.categoryId,
+    params?.search,
+    params?.sortBy,
+    params?.order,
+  ]);
 
-  const updateFilters = (newFilters: Partial<ProductFilters>) => {
-    setFilters((prev) => ({ ...prev, ...newFilters }));
-  };
-
-  const clearFilters = () => {
-    setFilters({});
-  };
-
-  return {
-    products,
-    loading,
-    error,
-    filters,
-    updateFilters,
-    clearFilters,
-  };
+  return { products, total, loading, error };
 }

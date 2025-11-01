@@ -41,6 +41,7 @@ export interface RegisterRequest {
  * Authentication response with tokens
  */
 export interface AuthResponse {
+  user: User;
   accessToken: string;
   refreshToken: string;
 }
