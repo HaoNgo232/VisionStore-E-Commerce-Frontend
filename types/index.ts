@@ -1,98 +1,99 @@
-// Global type definitions for the eyewear store
+/**
+ * Global Type Definitions
+ * Central export point for all types used across the application
+ */
 
-import type { ProductId, UserId, OrderId, AddressId } from "./utils";
+// Common Types
+export type {
+  ApiError,
+  PaginatedResponse,
+  ApiResponse,
+  ApiResponseWithMeta,
+} from "./common.types";
 
-export interface Product {
-  id: ProductId;
-  name: string;
-  description: string;
-  price: number;
-  originalPrice?: number;
-  images: string[];
-  category: ProductCategory;
-  brand: string;
-  frameType: FrameType;
-  material: string;
-  color: string;
-  lensType?: string;
-  inStock: boolean;
-  rating: number;
-  reviewCount: number;
-  features: string[];
-}
+// Auth Types
+export type {
+  User,
+  LoginRequest,
+  RegisterRequest,
+  AuthResponse,
+  TokenRefreshRequest,
+  TokenRefreshResponse,
+  VerifyTokenResponse,
+} from "./auth.types";
 
-export type ProductCategory = "sunglasses" | "eyeglasses" | "sports" | "kids";
-export type FrameType =
-  | "full-rim"
-  | "semi-rimless"
-  | "rimless"
-  | "aviator"
-  | "wayfarer"
-  | "round"
-  | "cat-eye";
+export { UserRole } from "./auth.types";
 
-export interface ProductFilters {
-  category?: ProductCategory;
-  brand?: string;
-  priceRange?: [number, number];
-  frameType?: FrameType;
-  color?: string;
-  inStock?: boolean;
-}
+// User Types
+export type {
+  UserProfile,
+  UpdateProfileRequest,
+  ChangePasswordRequest,
+  UserPreferences,
+} from "./user.types";
 
-export interface CartItem {
-  productId: ProductId;
-  product: Product;
-  quantity: number;
-}
+// Product Types
+export type {
+  Product,
+  ProductFilters,
+  ProductSortBy,
+  CreateProductRequest,
+  UpdateProductRequest,
+  ProductReview,
+} from "./product.types";
 
-export interface Cart {
-  items: CartItem[];
-  total: number;
-  itemCount: number;
-}
+// Category Types
+export type {
+  Category,
+  CategoryTree,
+  CreateCategoryRequest,
+  UpdateCategoryRequest,
+} from "./category.types";
 
-export interface Address {
-  id: AddressId;
-  fullName: string;
-  phone: string;
-  addressLine1: string;
-  addressLine2?: string;
-  city: string;
-  state: string;
-  postalCode: string;
-  country: string;
-  isDefault: boolean;
-}
+// Address Types
+export type {
+  Address,
+  CreateAddressRequest,
+  UpdateAddressRequest,
+  AddressSuggestion,
+} from "./address.types";
 
-export type OrderStatus =
-  | "pending"
-  | "processing"
-  | "shipped"
-  | "delivered"
-  | "cancelled";
+// Cart Types
+export type {
+  CartItem,
+  Cart,
+  SyncCartRequest,
+  AddToCartRequest,
+  UpdateCartItemRequest,
+} from "./cart.types";
 
-export interface Order {
-  id: string;
-  userId: string;
-  items: CartItem[];
-  total: number;
-  status: OrderStatus;
-  shippingAddress: Address;
-  paymentMethod: string;
-  createdAt: string;
-  updatedAt: string;
-  trackingNumber?: string;
-}
+// Order Types
+export type {
+  Order,
+  OrderItem,
+  CreateOrderRequest,
+  UpdateOrderStatusRequest,
+  OrderFilters,
+} from "./order.types";
 
-export interface User {
-  id: UserId;
-  email: string;
-  name: string;
-  avatar?: string;
-}
+export { OrderStatus } from "./order.types";
 
-export interface AuthState {
-  user: User | null;
-  isAuthenticated: boolean;
-}
+// Payment Types
+export type {
+  Payment,
+  CODPaymentRequest,
+  CODPaymentResponse,
+  SepayPaymentRequest,
+  SepayQRResponse,
+  SepayVerifyRequest,
+  SepayVerifyResponse,
+} from "./payment.types";
+
+export { PaymentMethod, PaymentStatus } from "./payment.types";
+
+// AR Types
+export type {
+  ARSnapshot,
+  UploadARSnapshotRequest,
+  ARSnapshotResponse,
+} from "./ar.types";
