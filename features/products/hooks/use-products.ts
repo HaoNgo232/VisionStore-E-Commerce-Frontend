@@ -12,11 +12,11 @@ import type { Product } from "@/types";
 
 interface UseProductsParams {
   page?: number;
-  limit?: number;
-  categoryId?: string;
+  pageSize?: number;
+  categorySlug?: string;
   search?: string;
-  sortBy?: string;
-  order?: "asc" | "desc";
+  minPriceInt?: number;
+  maxPriceInt?: number;
 }
 
 export function useProducts(params?: UseProductsParams) {
@@ -31,10 +31,12 @@ export function useProducts(params?: UseProductsParams) {
         setLoading(true);
         setError(null);
         const data = await productsApi.getAll(params);
-        setProducts(data.items);
-        setTotal(data.total);
+        setProducts(data?.items || []);
+        setTotal(data?.total || 0);
       } catch (err) {
         setError(getErrorMessage(err));
+        setProducts([]);
+        setTotal(0);
       } finally {
         setLoading(false);
       }
@@ -43,11 +45,11 @@ export function useProducts(params?: UseProductsParams) {
     fetch();
   }, [
     params?.page,
-    params?.limit,
-    params?.categoryId,
+    params?.pageSize,
+    params?.categorySlug,
     params?.search,
-    params?.sortBy,
-    params?.order,
+    params?.minPriceInt,
+    params?.maxPriceInt,
   ]);
 
   return { products, total, loading, error };

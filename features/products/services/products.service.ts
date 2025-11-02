@@ -13,11 +13,11 @@ import type {
 
 interface GetProductsParams {
   page?: number;
-  limit?: number;
-  categoryId?: string;
+  pageSize?: number;
+  categorySlug?: string;
   search?: string;
-  sortBy?: string;
-  order?: "asc" | "desc";
+  minPriceInt?: number;
+  maxPriceInt?: number;
 }
 
 export const productsApi = {
@@ -26,11 +26,15 @@ export const productsApi = {
   ): Promise<PaginatedResponse<Product>> {
     const queryParams = new URLSearchParams();
     if (params?.page) queryParams.append("page", String(params.page));
-    if (params?.limit) queryParams.append("limit", String(params.limit));
-    if (params?.categoryId) queryParams.append("categoryId", params.categoryId);
+    if (params?.pageSize)
+      queryParams.append("pageSize", String(params.pageSize));
+    if (params?.categorySlug)
+      queryParams.append("categorySlug", params.categorySlug);
     if (params?.search) queryParams.append("search", params.search);
-    if (params?.sortBy) queryParams.append("sortBy", params.sortBy);
-    if (params?.order) queryParams.append("order", params.order);
+    if (params?.minPriceInt)
+      queryParams.append("minPriceInt", String(params.minPriceInt));
+    if (params?.maxPriceInt)
+      queryParams.append("maxPriceInt", String(params.maxPriceInt));
 
     const query = queryParams.toString();
     return apiGet<PaginatedResponse<Product>>(

@@ -13,18 +13,15 @@ import { toast } from "sonner"
 
 export function ProductsContent() {
     const [page, setPage] = useState(1)
-    const [categoryId, setCategoryId] = useState<string | undefined>()
+    const [categorySlug, setCategorySlug] = useState<string | undefined>()
     const [search, setSearch] = useState<string | undefined>()
     const [sortBy, setSortBy] = useState<string>("")
-    const [order, setOrder] = useState<"asc" | "desc" | undefined>()
 
     const { products, total, loading, error } = useProducts({
         page,
-        limit: 12,
-        categoryId,
+        pageSize: 12,
+        categorySlug,
         search,
-        sortBy: sortBy || undefined,
-        order,
     })
 
     const totalPages = Math.ceil(total / 12)
@@ -67,7 +64,7 @@ export function ProductsContent() {
                 {/* Products Grid */}
                 {loading ? (
                     <ProductGridSkeleton count={12} />
-                ) : products.length > 0 ? (
+                ) : (products && products.length > 0) ? (
                     <>
                         <ProductGrid products={products} />
 
