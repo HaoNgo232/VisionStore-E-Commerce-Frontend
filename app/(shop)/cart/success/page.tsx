@@ -14,9 +14,11 @@ import {
 } from "@/components/ui/breadcrumb"
 import { CheckCircle } from "lucide-react"
 import { ordersApi } from "@/features/orders/services/orders.service"
+import { paymentsApi } from "@/features/payments/services/payments.service"
 import { useCartStore } from "@/stores/cart.store"
 import { toast } from "sonner"
-import type { Order } from "@/types"
+import type { Order, PaymentMethod } from "@/types"
+import { SepayQRDisplay } from "@/features/payments/components/sepay-qr-display"
 
 export default function SuccessPage() {
   const router = useRouter()
@@ -24,10 +26,12 @@ export default function SuccessPage() {
   const { clearCart } = useCartStore()
 
   const orderId = searchParams.get("orderId")
-  const paymentMethod = searchParams.get("paymentMethod")
+  const paymentMethod = (searchParams.get("paymentMethod") as PaymentMethod) || "COD"
 
   const [order, setOrder] = useState<Order | null>(null)
+  const [paymentResponse, setPaymentResponse] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [processingPayment, setProcessingPayment] = useState(false)
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -52,6 +56,31 @@ export default function SuccessPage() {
 
     fetchOrder()
   }, [orderId, router, clearCart])
+
+  const handleProcessPayment = async () => {
+    if (!order || processingPayment) return
+
+    try {
+      setProcessingPayment(true)
+
+      const response = await paymentsApi.process(
+        orderId!,
+        paymentMethod,
+        order.totalInt
+      )
+
+      setPaymentResponse(response)
+
+      if (paymentMethod === "COD") {
+        toast.success("Đơn hàng đã được tạo. Bạn sẽ thanh toán khi nhận hàng.")
+      }
+    } catch (error: any) {
+      console.error("Payment processing error:", error)
+      toast.error(error.message || "Lỗi xử lý thanh toán")
+    } finally {
+      setProcessingPayment(false)
+    }
+  }
 
   if (loading) {
     return (
@@ -98,7 +127,7 @@ export default function SuccessPage() {
       </div>
 
       <div className="container py-12">
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-4xl mx-auto">
           {/* Success Message */}
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
@@ -110,121 +139,173 @@ export default function SuccessPage() {
             </p>
           </div>
 
-          {/* Order Details */}
-          <div className="grid gap-6 mb-8">
-            {/* Order Info */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Thông tin đơn hàng</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Mã đơn hàng</p>
-                    <p className="font-mono font-semibold">{order.id}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Ngày đặt</p>
-                    <p className="font-semibold">
-                      {new Date(order.createdAt).toLocaleDateString("vi-VN")}
+          <div className="grid gap-6 lg:grid-cols-3 mb-8">
+            <div className="lg:col-span-2 space-y-6">
+              {/* Payment Processing */}
+              {!paymentResponse && (
+                <Card className="border-yellow-200 bg-yellow-50">
+                  <CardHeader>
+                    <CardTitle className="text-yellow-800">Chưa thanh toán</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <p className="text-sm text-yellow-700">
+                      Vui lòng xác nhận phương thức thanh toán để hoàn tất đơn hàng.
                     </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Trạng thái</p>
-                    <p className="font-semibold capitalize">{order.status}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Phương thức thanh toán</p>
-                    <p className="font-semibold">
-                      {paymentMethod === "COD" ? "Thanh toán khi nhận" : "Chuyển khoản"}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                    <Button
+                      onClick={handleProcessPayment}
+                      disabled={processingPayment}
+                      className="w-full"
+                    >
+                      {processingPayment ? "Đang xử lý..." : "Xác nhận thanh toán"}
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
 
-            {/* Items */}
-            {order.items && order.items.length > 0 && (
+              {/* SePay QR Display */}
+              {paymentResponse && paymentMethod === "SEPAY" && (
+                <SepayQRDisplay
+                  orderId={orderId!}
+                  payment={paymentResponse}
+                  amountInt={order.totalInt}
+                  onPaymentSuccess={() => {
+                    setTimeout(() => {
+                      router.push(`/profile#orders`)
+                    }, 2000)
+                  }}
+                />
+              )}
+
+              {/* COD Confirmation */}
+              {paymentResponse && paymentMethod === "COD" && (
+                <Card className="border-green-200 bg-green-50">
+                  <CardHeader>
+                    <CardTitle className="text-green-700">Thanh toán khi nhận hàng</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <p className="text-sm text-green-700">
+                      Bạn sẽ thanh toán tiền khi nhận hàng từ shipper. Vui lòng chuẩn bị đủ tiền.
+                    </p>
+                    <div className="rounded bg-white p-3 text-sm">
+                      <p className="font-semibold">
+                        Tổng tiền: {(order.totalInt / 100).toLocaleString("vi-VN")}₫
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
               <Card>
                 <CardHeader>
-                  <CardTitle>Sản phẩm ({order.items.length})</CardTitle>
+                  <CardTitle>Thông tin đơn hàng</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {order.items.map((item: any) => (
-                      <div key={item.productId} className="flex gap-4 pb-4 border-b last:border-0">
-                        {item.product?.images?.[0] && (
-                          <img
-                            src={item.product.images[0]}
-                            alt={item.product?.name || "Product"}
-                            className="h-16 w-16 rounded object-cover"
-                          />
-                        )}
-                        <div className="flex-1">
-                          <p className="font-medium">{item.product?.name || "Sản phẩm"}</p>
-                          <p className="text-sm text-muted-foreground">
-                            Số lượng: {item.quantity}
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Mã đơn hàng</p>
+                      <p className="font-mono font-semibold">{order.id}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Ngày đặt</p>
+                      <p className="font-semibold">
+                        {new Date(order.createdAt).toLocaleDateString("vi-VN")}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Trạng thái</p>
+                      <p className="font-semibold capitalize">{order.status}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Phương thức thanh toán</p>
+                      <p className="font-semibold">
+                        {paymentMethod === "COD" ? "Thanh toán khi nhận" : "Chuyển khoản"}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              {/* Items */}
+              {order.items && order.items.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Sản phẩm ({order.items.length})</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {order.items.map((item: any) => (
+                        <div key={item.productId} className="flex gap-4 pb-4 border-b last:border-0">
+                          {item.product?.images?.[0] && (
+                            <img
+                              src={item.product.images[0]}
+                              alt={item.product?.name || "Product"}
+                              className="h-16 w-16 rounded object-cover"
+                            />
+                          )}
+                          <div className="flex-1">
+                            <p className="font-medium">{item.product?.name || "Sản phẩm"}</p>
+                            <p className="text-sm text-muted-foreground">
+                              Số lượng: {item.quantity}
+                            </p>
+                          </div>
+                          <p className="font-semibold">
+                            {((item.priceInt || 0) / 100).toLocaleString("vi-VN")}₫
                           </p>
                         </div>
-                        <p className="font-semibold">
-                          {((item.priceInt || 0) / 100).toLocaleString("vi-VN")}₫
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
-            {/* Shipping Address */}
-            {order.addressId && (
+              {/* Shipping Address */}
+              {order.addressId && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Địa chỉ giao hàng</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground">Mã địa chỉ: {order.addressId}</p>
+                      <p className="text-sm text-muted-foreground">
+                        Chi tiết địa chỉ sẽ được hiển thị trong email xác nhận
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Order Summary */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Địa chỉ giao hàng</CardTitle>
+                  <CardTitle>Tóm tắt đơn hàng</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">Mã địa chỉ: {order.addressId}</p>
-                    <p className="text-sm text-muted-foreground">
-                      Chi tiết địa chỉ sẽ được hiển thị trong email xác nhận
-                    </p>
+                <CardContent className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Tổng tiền hàng</span>
+                    <span>
+                      {((order.totalInt || 0) / 100).toLocaleString("vi-VN")}₫
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Phí vận chuyển</span>
+                    <span>Miễn phí</span>
+                  </div>
+                  <div className="border-t pt-3 flex justify-between font-semibold text-lg">
+                    <span>Tổng cộng</span>
+                    <span>
+                      {((order.totalInt || 0) / 100).toLocaleString("vi-VN")}₫
+                    </span>
                   </div>
                 </CardContent>
               </Card>
-            )}
+            </div>
 
-            {/* Order Summary */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Tóm tắt đơn hàng</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Tổng tiền hàng</span>
-                  <span>
-                    {((order.totalInt || 0) / 100).toLocaleString("vi-VN")}₫
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Phí vận chuyển</span>
-                  <span>Miễn phí</span>
-                </div>
-                <div className="border-t pt-3 flex justify-between font-semibold text-lg">
-                  <span>Tổng cộng</span>
-                  <span>
-                    {((order.totalInt || 0) / 100).toLocaleString("vi-VN")}₫
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex gap-4 justify-center">
-            <Button variant="outline" onClick={() => router.push("/products")}>
-              Tiếp tục mua sắm
-            </Button>
-            <Button onClick={() => router.push("/profile#orders")}>Xem đơn hàng của tôi</Button>
+            {/* Action Buttons */}
+            <div className="flex gap-4 justify-center">
+              <Button variant="outline" onClick={() => router.push("/products")}>
+                Tiếp tục mua sắm
+              </Button>
+              <Button onClick={() => router.push("/profile#orders")}>Xem đơn hàng của tôi</Button>
+            </div>
           </div>
         </div>
       </div>
