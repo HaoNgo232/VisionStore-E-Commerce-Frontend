@@ -30,10 +30,13 @@ export function useProducts(params?: UseProductsParams) {
       try {
         setLoading(true);
         setError(null);
+        console.log("[useProducts] Fetching with params:", params);
         const data = await productsApi.getAll(params);
-        setProducts(data?.items || []);
+        console.log("[useProducts] Response:", data);
+        setProducts(data?.products || []);
         setTotal(data?.total || 0);
       } catch (err) {
+        console.error("[useProducts] Error:", err);
         setError(getErrorMessage(err));
         setProducts([]);
         setTotal(0);

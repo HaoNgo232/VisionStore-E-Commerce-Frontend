@@ -127,26 +127,31 @@ export function CommandMenu() {
                             <span>Đang tải...</span>
                         </CommandItem>
                     )}
-                    {!loading && products?.slice(0, 8).map((product) => (
-                        <CommandItem
-                            key={product.id}
-                            value={`${product.name} ${product.brand}`}
-                            onSelect={() => runCommand(() => router.push(`/products/${product.id}`), product.name)}
-                        >
-                            <div className="flex items-center gap-2 w-full">
-                                <img
-                                    src={product.images[0] || "/placeholder.svg"}
-                                    alt={product.name}
-                                    className="h-8 w-8 rounded object-cover"
-                                />
-                                <div className="flex-1 overflow-hidden">
-                                    <p className="text-sm font-medium truncate">{product.name}</p>
-                                    <p className="text-xs text-muted-foreground">{product.brand}</p>
+                    {!loading && products?.slice(0, 8).map((product) => {
+                        const brand = product.attributes?.brand as string | undefined;
+                        const price = (product.priceInt / 100).toLocaleString('vi-VN');
+
+                        return (
+                            <CommandItem
+                                key={product.id}
+                                value={`${product.name} ${brand || ''}`}
+                                onSelect={() => runCommand(() => router.push(`/products/${product.slug}`), product.name)}
+                            >
+                                <div className="flex items-center gap-2 w-full">
+                                    <img
+                                        src={product.imageUrls?.[0] || "/placeholder.svg"}
+                                        alt={product.name}
+                                        className="h-8 w-8 rounded object-cover"
+                                    />
+                                    <div className="flex-1 overflow-hidden">
+                                        <p className="text-sm font-medium truncate">{product.name}</p>
+                                        {brand && <p className="text-xs text-muted-foreground">{brand}</p>}
+                                    </div>
+                                    <span className="text-sm font-semibold">{price} đ</span>
                                 </div>
-                                <span className="text-sm font-semibold">${product.price}</span>
-                            </div>
-                        </CommandItem>
-                    ))}
+                            </CommandItem>
+                        );
+                    })}
                 </CommandGroup>
 
                 <CommandSeparator />

@@ -17,7 +17,7 @@ export function FeaturedProductsSection() {
     const fetchFeaturedProducts = async () => {
       try {
         const response = await productsApi.getAll({ pageSize: 4 });
-        setProducts(response.items);
+        setProducts(response.products);
       } catch (error) {
         console.error('Failed to fetch featured products:', error);
         setProducts([]);
@@ -56,45 +56,51 @@ export function FeaturedProductsSection() {
         </div>
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {products.map((product) => {
-            const price = product.priceInt / 100;
-            const brand = product.attributes?.brand as string | undefined;
+          {products && products.length > 0 ? (
+            products.map((product) => {
+              const price = product.priceInt / 100;
+              const brand = product.attributes?.brand as string | undefined;
 
-            return (
-              <Card key={product.id} className="group overflow-hidden transition-shadow hover:shadow-lg">
-                <Link href={`/products/${product.slug}`}>
-                  <div className="relative aspect-square overflow-hidden bg-muted">
-                    <img
-                      src={product.imageUrls[0] || "/placeholder.svg"}
-                      alt={product.name}
-                      className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                    />
-                  </div>
-                </Link>
-                <CardContent className="p-4">
+              return (
+                <Card key={product.id} className="group overflow-hidden transition-shadow hover:shadow-lg">
                   <Link href={`/products/${product.slug}`}>
-                    <h3 className="font-semibold text-balance group-hover:text-primary transition-colors">
-                      {product.name}
-                    </h3>
+                    <div className="relative aspect-square overflow-hidden bg-muted">
+                      <img
+                        src={product.imageUrls[0] || "/placeholder.svg"}
+                        alt={product.name}
+                        className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                      />
+                    </div>
                   </Link>
-                  {brand && (
-                    <p className="text-sm text-muted-foreground mt-1">{brand}</p>
-                  )}
-                </CardContent>
-                <CardFooter className="p-4 pt-0 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg font-bold">
-                      {price.toLocaleString('vi-VN')} đ
-                    </span>
-                  </div>
-                  <Button size="icon" variant="outline">
-                    <ShoppingCart className="h-4 w-4" />
-                    <span className="sr-only">Add to cart</span>
-                  </Button>
-                </CardFooter>
-              </Card>
-            );
-          })}
+                  <CardContent className="p-4">
+                    <Link href={`/products/${product.slug}`}>
+                      <h3 className="font-semibold text-balance group-hover:text-primary transition-colors">
+                        {product.name}
+                      </h3>
+                    </Link>
+                    {brand && (
+                      <p className="text-sm text-muted-foreground mt-1">{brand}</p>
+                    )}
+                  </CardContent>
+                  <CardFooter className="p-4 pt-0 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg font-bold">
+                        {price.toLocaleString('vi-VN')} đ
+                      </span>
+                    </div>
+                    <Button size="icon" variant="outline">
+                      <ShoppingCart className="h-4 w-4" />
+                      <span className="sr-only">Add to cart</span>
+                    </Button>
+                  </CardFooter>
+                </Card>
+              );
+            })
+          ) : (
+            <div className="col-span-full text-center py-12">
+              <p className="text-muted-foreground">Không có sản phẩm nổi bật</p>
+            </div>
+          )}
         </div>
 
         <div className="mt-12 text-center">

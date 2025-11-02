@@ -16,10 +16,10 @@ export interface ApiError {
  * Paginated API response wrapper
  */
 export interface PaginatedResponse<T> {
-  items: T[];
+  products: T[];
   total: number;
   page: number;
-  limit: number;
+  pageSize: number;
   totalPages: number;
 }
 
