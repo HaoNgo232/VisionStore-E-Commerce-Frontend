@@ -229,13 +229,13 @@ description: Chi tiết tasks và timeline cho việc kết nối frontend với
 
   ```typescript
   export function useAuth() {
-    const { accessToken, user, isAuthenticated, clearAuth } = useAuthStore()
+    const { accessToken, user, isAuthenticated, clearAuth } = useAuthStore();
     return {
       accessToken,
       user,
       isAuthenticated: isAuthenticated(),
       logout: clearAuth,
-    }
+    };
   }
   ```
 
@@ -284,7 +284,8 @@ description: Chi tiết tasks và timeline cho việc kết nối frontend với
 
 **Priority**: High | **Effort**: 2h | **Status**: ⏳ IN PROGRESS
 
-**Notes**: 
+**Notes**:
+
 - Workaround hiện tại: CheckoutContent có auth check nội bộ
 - Cần: Protected Route HOC để bảo vệ tất cả pages
 - Security risk: Profile, Orders, Addresses pages chưa protected
@@ -457,8 +458,8 @@ description: Chi tiết tasks và timeline cho việc kết nối frontend với
 - [x] Tạo `services/addresses/addresses.service.ts`
   - [x] Full CRUD operations (create, read, update, delete)
   - [x] Async error handling
-  
 - [x] Tạo `features/addresses/hooks/use-addresses.ts`
+
   - [x] Fetch addresses
   - [x] Create, update, delete operations
   - [x] Error handling và loading states
@@ -490,6 +491,7 @@ description: Chi tiết tasks và timeline cho việc kết nối frontend với
   - [x] `cancelOrder(id: string)` - cancel order
 
 - [x] Tạo `features/orders/hooks/use-orders.ts`
+
   - [x] Fetch orders with pagination
   - [x] Total count
   - [x] Error handling
@@ -523,6 +525,7 @@ description: Chi tiết tasks và timeline cho việc kết nối frontend với
   - [x] Create order via API
 
 - [x] Create CheckoutContent component
+
   - [x] Auth check (redirect to /auth/login if not authenticated)
   - [x] Empty cart check
   - [x] Address requirement check
@@ -604,6 +607,7 @@ description: Chi tiết tasks và timeline cho việc kết nối frontend với
 **Subtasks:**
 
 - [x] Update `/cart/checkout/success/page.tsx`
+
   - [x] Display order summary
   - [x] Show payment info
   - [x] Payment processing button
@@ -674,6 +678,7 @@ description: Chi tiết tasks và timeline cho việc kết nối frontend với
 **Subtasks:**
 
 - [ ] Test services (mock axios)
+
   - [ ] Auth service
   - [ ] Products service
   - [ ] Cart service
@@ -682,6 +687,7 @@ description: Chi tiết tasks và timeline cho việc kết nối frontend với
   - [ ] Addresses service
 
 - [ ] Test hooks (React Testing Library)
+
   - [ ] useAuth, useCurrentUser
   - [ ] useProducts, useProduct
   - [ ] useCart
@@ -701,12 +707,14 @@ description: Chi tiết tasks và timeline cho việc kết nối frontend với
 **Subtasks:**
 
 - [ ] Test auth flow (login → protected route)
+
   - [ ] Successful login
   - [ ] Login errors
   - [ ] Token refresh
   - [ ] Logout
 
 - [ ] Test checkout flow (cart → order → payment)
+
   - [ ] Add to cart
   - [ ] Checkout flow
   - [ ] Address selection
@@ -730,13 +738,14 @@ description: Chi tiết tasks và timeline cho việc kết nối frontend với
   - [ ] Backend API requirements
   - [ ] Environment variables
   - [ ] How to run locally
-  
 - [ ] Document environment variables
+
   - [ ] NEXT_PUBLIC_API_URL
   - [ ] API_TIMEOUT
   - [ ] RETRY_COUNT
 
 - [ ] Document common errors và solutions
+
   - [ ] Network errors
   - [ ] Auth errors
   - [ ] Validation errors
@@ -963,7 +972,8 @@ graph TD
 6. ⏭️ **THEN**: Task 8.2 - Integration Tests (4h)
 7. ⏭️ **FINAL**: Task 8.3 - Documentation (3h)
 
-**Current Status**: 
+**Current Status**:
+
 - ✅ **19/23 Core tasks completed (83%)**
 - 🔴 **1 Critical missing**: Task 2.4 Protected Route HOC
 - 🟡 **3 Quality tasks**: Unit/Integration tests + Documentation
