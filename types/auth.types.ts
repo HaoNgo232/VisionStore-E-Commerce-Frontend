@@ -1,6 +1,7 @@
 /**
  * Authentication Types
  * Types for login, register, token refresh, etc.
+
  */
 
 export enum UserRole {
@@ -8,11 +9,14 @@ export enum UserRole {
   CUSTOMER = "CUSTOMER",
 }
 
+/**
+ * User response
+ */
 export interface User {
   id: string;
   email: string;
   fullName: string;
-  phone?: string;
+  phone: string | null;
   role: UserRole;
   isActive: boolean;
   createdAt: string;
@@ -41,7 +45,6 @@ export interface RegisterRequest {
  * Authentication response with tokens
  */
 export interface AuthResponse {
-  user: User;
   accessToken: string;
   refreshToken: string;
 }
@@ -66,6 +69,7 @@ export interface TokenRefreshResponse {
  */
 export interface VerifyTokenResponse {
   valid: boolean;
-  user?: User;
-  expiresIn?: number;
+  userId?: string;
+  email?: string;
+  role?: string;
 }

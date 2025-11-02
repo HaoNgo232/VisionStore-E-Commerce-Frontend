@@ -1,6 +1,7 @@
 /**
  * Cart Types
  * Shopping cart, items, and checkout related types
+ * Note: Cart and CartItem types match backend @shared/types/cart.types.ts
  */
 
 export interface CartItem {
@@ -8,8 +9,8 @@ export interface CartItem {
   cartId: string;
   productId: string;
   quantity: number;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: string; // Date serialized from API
+  updatedAt: string; // Date serialized from API
   product: {
     id: string;
     name: string;
@@ -24,8 +25,8 @@ export interface Cart {
   userId: string | null;
   items: CartItem[];
   totalInt: number; // cents
-  createdAt: string;
-  updatedAt: string;
+  createdAt: string; // Date serialized from API
+  updatedAt: string; // Date serialized from API
 }
 
 /**

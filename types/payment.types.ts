@@ -1,20 +1,25 @@
 /**
  * Payment Types
  * Payment methods, transactions, and payment processing
+ * Note: Matches backend @shared/types/payment.types.ts
  */
 
+/**
+ * Payment response (matches backend PaymentResponse)
+ */
 export interface Payment {
   id: string;
   orderId: string;
-  amount: number; // cents
+  method: PaymentMethod;
+  amountInt: number; // cents
   status: PaymentStatus;
-  transactionId?: string;
-  createdAt: string;
-  updatedAt: string;
+  payload?: Record<string, unknown> | null;
+  createdAt: string; // Date serialized from API
+  updatedAt: string; // Date serialized from API
 }
 
 /**
- * Payment method (COD or SEPAY)
+ * Payment method enum (matches backend)
  */
 export enum PaymentMethod {
   COD = "COD",
@@ -22,7 +27,7 @@ export enum PaymentMethod {
 }
 
 /**
- * Payment status
+ * Payment status enum (matches backend)
  */
 export enum PaymentStatus {
   UNPAID = "UNPAID",
@@ -30,99 +35,69 @@ export enum PaymentStatus {
 }
 
 /**
- * COD (Cash on Delivery) payment confirmation
+ * Payment process request (matches backend PaymentProcessDto)
  */
-export interface CODPaymentRequest {
+export interface PaymentProcessRequest {
   orderId: string;
-  amount: number; // cents
-}
-
-/**
- * COD payment confirmation response
- */
-export interface CODPaymentResponse {
-  success: boolean;
-  orderId: string;
-  transactionId: string;
-  amount: number; // cents
-  confirmedAt: string;
-}
-
-/**
- * SEPAY (VietQR) payment request
- */
-export interface SepayPaymentRequest {
-  orderId: string;
-  amount: number; // cents
-  accountNo: string; // Bank account number for transfer
-  accountName?: string;
-}
-
-/**
- * SEPAY QR Code response
- */
-export interface SepayQRResponse {
-  qrCode: string; // Base64 encoded QR code image
-  qrDataUrl?: string; // Data URL for QR code
-  bankName: string;
-  accountNo: string;
-  accountName: string;
-  amount: string; // Display format
-  description: string;
-  transferUrl?: string; // Deep link for banking app
-}
-
-/**
- * SEPAY payment verification request
- */
-export interface SepayVerifyRequest {
-  orderId: string;
-  transactionId?: string;
-}
-
-/**
- * SEPAY payment verification response
- */
-export interface SepayVerifyResponse {
-  success: boolean;
-  orderId: string;
-  transactionId: string;
-  amount: number; // cents
-  status: PaymentStatus;
-  verifiedAt: string;
-}
-
-/**
- * Payment confirmation webhook
- */
-export interface PaymentWebhook {
-  event: "payment.completed" | "payment.failed" | "payment.refunded";
-  orderId: string;
-  transactionId: string;
-  amount: number; // cents
   method: PaymentMethod;
+  amountInt: number; // cents
+}
+
+/**
+ * Payment process response (matches backend PaymentProcessResponse)
+ */
+export interface PaymentProcessResponse {
+  paymentId: string;
   status: PaymentStatus;
-  timestamp: string;
-  signature?: string; // For security verification
+  paymentUrl?: string; // URL thanh toán (SePay)
+  qrCode?: string; // QR code cho bank transfer
+  message?: string;
 }
 
 /**
- * Refund request
+ * Payment verification request (matches backend PaymentVerifyDto)
  */
-export interface RefundRequest {
+export interface PaymentVerifyRequest {
   orderId: string;
-  reason: string;
-  amount?: number; // cents (partial refund if not full)
+  payload: Record<string, unknown>;
 }
 
 /**
- * Refund response
+ * Payment verification response (matches backend PaymentVerifyResponse)
  */
-export interface RefundResponse {
+export interface PaymentVerifyResponse {
+  paymentId: string;
+  orderId: string;
+  status: PaymentStatus;
+  verified: boolean;
+  transactionId?: string;
+  message?: string;
+}
+
+/**
+ * SePay webhook payload
+ */
+export interface SePayWebhookPayload {
+  id: number;
+  gateway: string;
+  transactionDate: string;
+  accountNumber: string;
+  code?: string | null;
+  content: string;
+  transferType: "in" | "out";
+  transferAmount: number;
+  accumulated: number;
+  subAccount?: string | null;
+  referenceCode: string;
+  description: string;
+}
+
+/**
+ * SePay webhook response
+ */
+export interface SePayWebhookResponse {
   success: boolean;
-  refundId: string;
-  orderId: string;
-  amount: number; // cents
-  status: "pending" | "completed" | "failed";
-  createdAt: string;
+  message: string;
+  orderId?: string;
+  paymentId?: string;
 }

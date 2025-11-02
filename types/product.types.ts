@@ -1,6 +1,7 @@
 /**
  * Product Types
  * Product, category, and filter types
+ * Note: Product type matches backend @shared/types/product.types.ts (ProductResponse)
  */
 
 import type { Category } from "./category.types";

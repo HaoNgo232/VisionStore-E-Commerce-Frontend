@@ -29,7 +29,7 @@ export type {
   UserProfile,
   UpdateProfileRequest,
   ChangePasswordRequest,
-  UserPreferences,
+  ListUsersResponse,
 } from "./user.types";
 
 // Product Types
@@ -74,26 +74,31 @@ export type {
   CreateOrderRequest,
   UpdateOrderStatusRequest,
   OrderFilters,
+  PaginatedOrdersResponse,
 } from "./order.types";
 
-export { OrderStatus } from "./order.types";
+export { OrderStatus, PaymentStatus } from "./order.types";
 
 // Payment Types
 export type {
   Payment,
-  CODPaymentRequest,
-  CODPaymentResponse,
-  SepayPaymentRequest,
-  SepayQRResponse,
-  SepayVerifyRequest,
-  SepayVerifyResponse,
+  PaymentProcessRequest,
+  PaymentProcessResponse,
+  PaymentVerifyRequest,
+  PaymentVerifyResponse,
 } from "./payment.types";
 
-export { PaymentMethod, PaymentStatus } from "./payment.types";
+export { PaymentMethod } from "./payment.types";
+// Note: PaymentStatus is exported from order.types
 
 // AR Types
 export type {
   ARSnapshot,
+  PaginatedARSnapshotsResponse,
+  ARSnapshotCreateResponse,
   UploadARSnapshotRequest,
-  ARSnapshotResponse,
+  SalesSummaryResponse,
+  ProductPerformanceResponse,
+  UserCohortResponse,
+  DateRangeQuery,
 } from "./ar.types";

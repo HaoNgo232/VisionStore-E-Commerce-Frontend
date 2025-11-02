@@ -56,7 +56,7 @@ description: Chi tiết tasks và timeline cho việc kết nối frontend với
   ├── common.types.ts
   └── index.ts
   ```
-- [ ] Refactor `features/` structure:
+- [x] Refactor `features/` structure:
   - Rename `features/profile` → merge vào `features/users`
   - Rename `features/virtual-tryon` → `features/ar`
   - Tạo `features/categories/` (tách từ products)
@@ -72,11 +72,11 @@ description: Chi tiết tasks và timeline cho việc kết nối frontend với
 
 #### Task 1.2: Type Definitions
 
-**Priority**: High | **Effort**: 4h | **Status**: Not Started
+**Priority**: High | **Effort**: 4h | **Status**: ✅ COMPLETED
 
 **Subtasks:**
 
-- [ ] Copy và adapt types từ backend `@shared/types`:
+- [x] Copy và adapt types từ backend `@shared/types`:
 
   - `auth.types.ts` ← `auth.types.ts`
   - `user.types.ts` ← `user.types.ts`
@@ -88,7 +88,7 @@ description: Chi tiết tasks và timeline cho việc kết nối frontend với
   - `payment.types.ts` ← `payment.types.ts`
   - `ar.types.ts` ← `ar.types.ts`
 
-- [ ] Tạo `common.types.ts`:
+- [x] Tạo `common.types.ts`:
 
   ```typescript
   export interface PaginatedResponse<T> {
@@ -107,7 +107,7 @@ description: Chi tiết tasks và timeline cho việc kết nối frontend với
   }
   ```
 
-- [ ] Export tất cả từ `types/index.ts`
+- [x] Export tất cả từ `types/index.ts`
 
 **Acceptance Criteria:**
 
@@ -119,25 +119,25 @@ description: Chi tiết tasks và timeline cho việc kết nối frontend với
 
 #### Task 1.3: API Client Setup
 
-**Priority**: High | **Effort**: 3h | **Status**: Not Started
+**Priority**: High | **Effort**: 3h | **Status**: ✅ COMPLETED
 
 **Subtasks:**
 
-- [ ] Install dependencies:
+- [x] Install dependencies:
 
   ```bash
   pnpm add axios
   pnpm add -D @types/axios
   ```
 
-- [ ] Tạo `lib/api-client.ts` với:
+- [x] Tạo `lib/api-client.ts` với:
 
   - Base axios instance
   - Request interceptor (add auth header)
   - Response interceptor (handle 401, retry)
   - Error transformer
 
-- [ ] Tạo `lib/api-config.ts`:
+- [x] Tạo `lib/api-config.ts`:
 
   ```typescript
   export const API_CONFIG = {
@@ -148,7 +148,7 @@ description: Chi tiết tasks và timeline cho việc kết nối frontend với
   };
   ```
 
-- [ ] Setup `.env.local`:
+- [x] Setup `.env.local`:
   ```
   NEXT_PUBLIC_API_URL=http://localhost:3000
   ```
@@ -163,18 +163,18 @@ description: Chi tiết tasks và timeline cho việc kết nối frontend với
 
 #### Task 1.4: Auth Store Setup
 
-**Priority**: High | **Effort**: 2h | **Status**: Not Started
+**Priority**: High | **Effort**: 2h | **Status**: ✅ COMPLETED
 
 **Subtasks:**
 
-- [ ] Cập nhật `stores/auth.store.ts`:
+- [x] Cập nhật `stores/auth.store.ts`:
 
   - Add `accessToken` và `refreshToken` state
   - Add `setTokens()` và `clearAuth()` methods
   - Setup persistence với `zustand/middleware`
   - Add helper methods: `getAccessToken()`, `getRefreshToken()`
 
-- [ ] Tạo `lib/auth-utils.ts`:
+- [x] Tạo `lib/auth-utils.ts`:
   - `decodeToken(token: string): TokenPayload`
   - `isTokenExpired(token: string): boolean`
   - `getTokenExpiryTime(token: string): number`
@@ -191,7 +191,7 @@ description: Chi tiết tasks và timeline cho việc kết nối frontend với
 
 #### Task 2.1: Auth Service
 
-**Priority**: High | **Effort**: 3h | **Status**: Not Started
+**Priority**: High | **Effort**: 3h | **Status**: 🔄 IN PROGRESS
 
 **Subtasks:**
 

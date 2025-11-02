@@ -1,6 +1,7 @@
 /**
  * AR (Augmented Reality) Types
  * Virtual try-on snapshots and AR related types
+
  */
 
 export interface ARSnapshot {
@@ -12,18 +13,68 @@ export interface ARSnapshot {
   createdAt: string;
 }
 
+export interface PaginatedARSnapshotsResponse {
+  snapshots: ARSnapshot[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+export interface ARSnapshotCreateResponse {
+  id: string;
+  imageUrl: string;
+  createdAt: string;
+}
+
 /**
  * Upload AR snapshot request
  */
 export interface UploadARSnapshotRequest {
   productId: string;
-  image: File | string; // File or base64
+  imageUrl: string; // URL after upload
+  metadata?: Record<string, unknown>;
 }
 
 /**
- * AR snapshot response
+ * Sales summary report response
  */
-export interface ARSnapshotResponse {
-  success: boolean;
-  snapshot: ARSnapshot;
+export interface SalesSummaryResponse {
+  fromAt: string; // Date serialized to string
+  toAt: string;
+  totalOrders: number;
+  totalRevenueInt: number; // cents
+  averageOrderValueInt: number; // cents
+}
+
+/**
+ * Product performance report response
+ */
+export interface ProductPerformanceResponse {
+  fromAt: string;
+  toAt: string;
+  products: Array<{
+    productId: string;
+    productName: string;
+    totalQuantitySold: number;
+    totalRevenueInt: number; // cents
+  }>;
+}
+
+/**
+ * User cohort report response
+ */
+export interface UserCohortResponse {
+  fromAt: string;
+  toAt: string;
+  newUsers: number;
+  activeUsers: number;
+  returningCustomers: number;
+}
+
+/**
+ * Date range query parameters
+ */
+export interface DateRangeQuery {
+  fromAt: string;
+  toAt: string;
 }

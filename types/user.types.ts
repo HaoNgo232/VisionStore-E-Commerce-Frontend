@@ -3,33 +3,20 @@
  * User profile and related types
  */
 
-export interface UserProfile {
-  id: string;
-  email: string;
-  name: string;
-  phone?: string;
-  avatar?: string;
-  bio?: string;
-  dateOfBirth?: string;
-  gender?: "male" | "female" | "other";
-  role: UserRole;
-  isVerified: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
+import type { User } from "./auth.types";
 
-export type UserRole = "customer" | "admin" | "staff";
+/**
+ * Re-export User as UserProfile for backward compatibility
+ * But prefer using User directly
+ */
+export type UserProfile = User;
 
 /**
  * Update profile request
  */
 export interface UpdateProfileRequest {
-  name?: string;
+  fullName?: string;
   phone?: string;
-  avatar?: string;
-  bio?: string;
-  dateOfBirth?: string;
-  gender?: "male" | "female" | "other";
 }
 
 /**
@@ -42,14 +29,11 @@ export interface ChangePasswordRequest {
 }
 
 /**
- * User preferences/settings
+ * List users response (matches backend)
  */
-export interface UserPreferences {
-  userId: string;
-  emailNotifications: boolean;
-  smsNotifications: boolean;
-  pushNotifications: boolean;
-  newsletter: boolean;
-  language: string;
-  timezone: string;
+export interface ListUsersResponse {
+  users: User[];
+  total: number;
+  page: number;
+  pageSize: number;
 }
