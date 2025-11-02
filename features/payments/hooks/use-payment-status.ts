@@ -48,7 +48,7 @@ export function usePaymentStatus(
     orderId,
     autoStart = false,
     pollInterval = 3000, // 3 seconds
-    maxAttempts = 40, // 2 minutes max
+    maxAttempts = 300, // 15 minutes max
   } = options;
 
   const [payment, setPayment] = useState<Payment | null>(null);

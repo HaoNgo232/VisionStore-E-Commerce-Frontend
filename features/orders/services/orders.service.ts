@@ -28,7 +28,14 @@ export const ordersApi = {
   },
 
   async create(data: CreateOrderRequest): Promise<Order> {
-    return apiPost<Order>("/orders", data);
+    const userId = useAuthStore.getState().getUserId();
+    if (!userId) {
+      throw new Error("User not authenticated - userId is missing");
+    }
+    return apiPost<Order>("/orders", {
+      ...data,
+      userId,
+    });
   },
 
   async updateStatus(

@@ -16,15 +16,15 @@ import { PaymentMethod } from "@/types"
 
 export function CheckoutContent() {
     const router = useRouter()
-    const { user } = useAuth()
+    const { isAuthenticated } = useAuth()
     const { cart, loading: cartLoading } = useCart()
     const { addresses, loading: addressesLoading } = useAddresses()
     const [selectedAddressId, setSelectedAddressId] = useState<string>("")
     const [selectedPayment, setSelectedPayment] = useState<PaymentMethod>(PaymentMethod.COD)
     const [isSubmitting, setIsSubmitting] = useState(false)
 
-    // Check if user logged in
-    if (!user) {
+    // Check if user logged in - use isAuthenticated instead of checking !user
+    if (!isAuthenticated) {
         return (
             <div className="container py-16 text-center">
                 <h1 className="text-2xl font-bold">Vui lòng đăng nhập</h1>

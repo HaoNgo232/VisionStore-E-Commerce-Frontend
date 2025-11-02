@@ -32,7 +32,6 @@ export default function SuccessPage() {
   const [order, setOrder] = useState<Order | null>(null)
   const [paymentResponse, setPaymentResponse] = useState<any>(null)
   const [loading, setLoading] = useState(true)
-  const [processingPayment, setProcessingPayment] = useState(false)
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -46,6 +45,9 @@ export default function SuccessPage() {
         const fetchedOrder = await ordersApi.getById(orderId)
         setOrder(fetchedOrder)
         clearCart()
+
+        // Auto-process payment immediately after order is fetched
+        await processPaymentAuto(fetchedOrder)
       } catch (error) {
         console.error("Lỗi khi tải đơn hàng:", error)
         toast.error("Không thể tải chi tiết đơn hàng")
@@ -58,16 +60,16 @@ export default function SuccessPage() {
     fetchOrder()
   }, [orderId, router, clearCart])
 
-  const handleProcessPayment = async () => {
-    if (!order || processingPayment) return
-
+  /**
+   * Auto-process payment after order is fetched
+   * No user action needed - payment UI renders automatically
+   */
+  const processPaymentAuto = async (orderData: Order) => {
     try {
-      setProcessingPayment(true)
-
       const response = await paymentsApi.process(
         orderId!,
         paymentMethod,
-        order.totalInt
+        orderData.totalInt
       )
 
       setPaymentResponse(response)
@@ -78,8 +80,6 @@ export default function SuccessPage() {
     } catch (error: any) {
       console.error("Payment processing error:", error)
       toast.error(error.message || "Lỗi xử lý thanh toán")
-    } finally {
-      setProcessingPayment(false)
     }
   }
 
@@ -131,39 +131,26 @@ export default function SuccessPage() {
         <div className="container py-12">
           <div className="max-w-4xl mx-auto">
             {/* Success Message */}
-            <div className="text-center mb-8">
+            <div className="text-center mb-7">
               <div className="flex justify-center mb-4">
                 <CheckCircle className="h-16 w-16 text-green-600" />
               </div>
-              <h1 className="text-3xl font-bold tracking-tight mb-2">Đơn hàng thành công!</h1>
+              <h1 className="text-3xl font-bold tracking-tight mb-2">Đơn hàng đã đặt thành công!</h1>
               <p className="text-muted-foreground">
                 Cảm ơn bạn đã mua hàng. Đơn hàng của bạn đã được xác nhận.
               </p>
             </div>
 
-            <div className="grid gap-6 lg:grid-cols-3 mb-8">
-              <div className="lg:col-span-2 space-y-6">
-                {/* Payment Processing */}
-                {!paymentResponse && (
-                  <Card className="border-yellow-200 bg-yellow-50">
-                    <CardHeader>
-                      <CardTitle className="text-yellow-800">Chưa thanh toán</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <p className="text-sm text-yellow-700">
-                        Vui lòng xác nhận phương thức thanh toán để hoàn tất đơn hàng.
-                      </p>
-                      <Button
-                        onClick={handleProcessPayment}
-                        disabled={processingPayment}
-                        className="w-full"
-                      >
-                        {processingPayment ? "Đang xử lý..." : "Xác nhận thanh toán"}
-                      </Button>
-                    </CardContent>
-                  </Card>
-                )}
+            <div className="">
+              {/* Action Buttons */}
+              <div className="flex gap-4 justify-center mb-4">
+                <Button variant="outline" onClick={() => router.push("/products")}>
+                  Tiếp tục mua sắm
+                </Button>
+                <Button onClick={() => router.push("/profile#orders")}>Xem đơn hàng của tôi</Button>
+              </div>
 
+              <div className="lg:col-span-2 space-y-6">
                 {/* SePay QR Display */}
                 {paymentResponse && paymentMethod === "SEPAY" && (
                   <SepayQRDisplay
@@ -191,6 +178,30 @@ export default function SuccessPage() {
                       <div className="rounded bg-white p-3 text-sm">
                         <p className="font-semibold">
                           Tổng tiền: {(order.totalInt / 100).toLocaleString("vi-VN")}₫
+                        </p>
+                      </div>
+                      <Button
+                        variant="default"
+                        className="w-full"
+                        onClick={() => router.push(`/profile#orders`)}
+                      >
+                        Xem chi tiết đơn hàng
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Payment Loading State */}
+                {!paymentResponse && loading === false && (
+                  <Card className="border-yellow-200 bg-yellow-50">
+                    <CardHeader>
+                      <CardTitle className="text-yellow-800">Đang xử lý thanh toán...</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center gap-3">
+                        <div className="h-6 w-6 rounded-full border-2 border-yellow-300 border-t-yellow-600 animate-spin" />
+                        <p className="text-sm text-yellow-700">
+                          Hệ thống đang chuẩn bị thanh toán, vui lòng chờ...
                         </p>
                       </div>
                     </CardContent>
@@ -301,13 +312,7 @@ export default function SuccessPage() {
                 </Card>
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex gap-4 justify-center">
-                <Button variant="outline" onClick={() => router.push("/products")}>
-                  Tiếp tục mua sắm
-                </Button>
-                <Button onClick={() => router.push("/profile#orders")}>Xem đơn hàng của tôi</Button>
-              </div>
+
             </div>
           </div>
         </div>
