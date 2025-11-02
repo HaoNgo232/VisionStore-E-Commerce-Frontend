@@ -12,6 +12,7 @@ import type { Order } from "@/types";
 
 export function useOrders() {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -22,6 +23,7 @@ export function useOrders() {
         setError(null);
         const data = await ordersApi.getAll();
         setOrders(data);
+        setTotal(data.length);
       } catch (err) {
         setError(getErrorMessage(err));
       } finally {
@@ -32,5 +34,5 @@ export function useOrders() {
     fetch();
   }, []);
 
-  return { orders, loading, error };
+  return { orders, total, loading, error };
 }
