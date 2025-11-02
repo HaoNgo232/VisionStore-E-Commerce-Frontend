@@ -191,7 +191,7 @@ description: Chi tiết tasks và timeline cho việc kết nối frontend với
 
 #### Task 2.1: Auth Service
 
-**Priority**: High | **Effort**: 3h | **Status**: 🔄 IN PROGRESS
+**Priority**: High | **Effort**: 3h | **Status**: Complete! ✅
 
 **Subtasks:**
 
