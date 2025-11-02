@@ -40,12 +40,10 @@ export const addressFormSchema = z.object({
     .string()
     .min(10, "Số điện thoại không hợp lệ")
     .regex(/^[0-9+\s()-]+$/, "Số điện thoại không hợp lệ"),
-  addressLine1: z.string().min(5, "Địa chỉ phải có ít nhất 5 ký tự"),
-  addressLine2: z.string().optional(),
+  street: z.string().min(5, "Địa chỉ phải có ít nhất 5 ký tự"),
+  ward: z.string().min(2, "Tên phường/xã không hợp lệ"),
+  district: z.string().min(2, "Tên quận/huyện không hợp lệ"),
   city: z.string().min(2, "Tên thành phố không hợp lệ"),
-  state: z.string().min(2, "Tên tỉnh/bang không hợp lệ"),
-  postalCode: z.string().min(4, "Mã bưu điện không hợp lệ"),
-  country: z.string().min(2, "Quốc gia không hợp lệ"),
   isDefault: z.boolean().default(false),
 });
 

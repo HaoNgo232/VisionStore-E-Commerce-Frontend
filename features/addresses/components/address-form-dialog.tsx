@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
@@ -12,10 +12,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
-import { toast } from "sonner"
 import type { Address } from "@/types"
 import { addressFormSchema, type AddressFormValues } from "@/lib/validations/forms"
 
@@ -23,21 +22,21 @@ interface AddressFormDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   address?: Address | null
-  onSave: (address: Omit<Address, "id"> | Address) => Promise<void>
+  onSave: (values: AddressFormValues, isEdit: boolean) => Promise<void>
 }
 
 export function AddressFormDialog({ open, onOpenChange, address, onSave }: AddressFormDialogProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
   const form = useForm<AddressFormValues>({
     resolver: zodResolver(addressFormSchema),
     defaultValues: {
       fullName: "",
       phone: "",
-      addressLine1: "",
-      addressLine2: "",
+      street: "",
+      ward: "",
+      district: "",
       city: "",
-      state: "",
-      postalCode: "",
-      country: "Vietnam",
       isDefault: false,
     },
   })
@@ -47,48 +46,32 @@ export function AddressFormDialog({ open, onOpenChange, address, onSave }: Addre
       form.reset({
         fullName: address.fullName,
         phone: address.phone,
-        addressLine1: address.addressLine1,
-        addressLine2: address.addressLine2 || "",
+        street: address.street,
+        ward: address.ward,
+        district: address.district,
         city: address.city,
-        state: address.state,
-        postalCode: address.postalCode,
-        country: address.country,
         isDefault: address.isDefault,
       })
     } else {
       form.reset({
         fullName: "",
         phone: "",
-        addressLine1: "",
-        addressLine2: "",
+        street: "",
+        ward: "",
+        district: "",
         city: "",
-        state: "",
-        postalCode: "",
-        country: "Vietnam",
         isDefault: false,
       })
     }
   }, [address, open, form])
 
   const onSubmit = async (values: AddressFormValues) => {
+    setIsSubmitting(true)
     try {
-      if (address) {
-        await onSave({ ...values, id: address.id } as Address)
-        toast.success("Đã cập nhật địa chỉ", {
-          description: "Địa chỉ giao hàng đã được cập nhật thành công.",
-        })
-      } else {
-        await onSave(values)
-        toast.success("Đã thêm địa chỉ mới", {
-          description: "Địa chỉ giao hàng đã được thêm thành công.",
-        })
-      }
+      await onSave(values, !!address)
       onOpenChange(false)
-    } catch (error) {
-      console.error("[v0] Failed to save address:", error)
-      toast.error("Không thể lưu địa chỉ", {
-        description: "Vui lòng thử lại sau.",
-      })
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -96,9 +79,9 @@ export function AddressFormDialog({ open, onOpenChange, address, onSave }: Addre
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{address ? "Edit Address" : "Add New Address"}</DialogTitle>
+          <DialogTitle>{address ? "Chỉnh sửa địa chỉ" : "Thêm địa chỉ mới"}</DialogTitle>
           <DialogDescription>
-            {address ? "Update your shipping address details" : "Add a new shipping address"}
+            {address ? "Cập nhật thông tin địa chỉ giao hàng" : "Thêm một địa chỉ giao hàng mới"}
           </DialogDescription>
         </DialogHeader>
 
@@ -111,7 +94,7 @@ export function AddressFormDialog({ open, onOpenChange, address, onSave }: Addre
                   name="fullName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Full Name *</FormLabel>
+                      <FormLabel>Tên người nhận *</FormLabel>
                       <FormControl>
                         <Input placeholder="Nguyễn Văn A" {...field} />
                       </FormControl>
@@ -124,7 +107,7 @@ export function AddressFormDialog({ open, onOpenChange, address, onSave }: Addre
                   name="phone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Phone Number *</FormLabel>
+                      <FormLabel>Số điện thoại *</FormLabel>
                       <FormControl>
                         <Input type="tel" placeholder="0123456789" {...field} />
                       </FormControl>
@@ -136,10 +119,10 @@ export function AddressFormDialog({ open, onOpenChange, address, onSave }: Addre
 
               <FormField
                 control={form.control}
-                name="addressLine1"
+                name="street"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Address Line 1 *</FormLabel>
+                    <FormLabel>Địa chỉ (Đường/Số nhà) *</FormLabel>
                     <FormControl>
                       <Input placeholder="123 Đường ABC" {...field} />
                     </FormControl>
@@ -148,29 +131,15 @@ export function AddressFormDialog({ open, onOpenChange, address, onSave }: Addre
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="addressLine2"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Address Line 2</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Apartment, suite, etc. (optional)" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="grid gap-4 sm:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <FormField
                   control={form.control}
-                  name="city"
+                  name="ward"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>City *</FormLabel>
+                      <FormLabel>Phường/Xã *</FormLabel>
                       <FormControl>
-                        <Input placeholder="Hà Nội" {...field} />
+                        <Input placeholder="Phường 1" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -178,25 +147,12 @@ export function AddressFormDialog({ open, onOpenChange, address, onSave }: Addre
                 />
                 <FormField
                   control={form.control}
-                  name="state"
+                  name="district"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>State/Province *</FormLabel>
+                      <FormLabel>Quận/Huyện *</FormLabel>
                       <FormControl>
-                        <Input placeholder="Hà Nội" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="postalCode"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Postal Code *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="100000" {...field} />
+                        <Input placeholder="Quận 1" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -206,27 +162,43 @@ export function AddressFormDialog({ open, onOpenChange, address, onSave }: Addre
 
               <FormField
                 control={form.control}
+                name="city"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tỉnh/Thành phố *</FormLabel>
+                    <FormControl>
+                      <Input placeholder="TP Hồ Chí Minh" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
                 name="isDefault"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormItem className="flex flex-row items-center space-x-3 space-y-0">
                     <FormControl>
                       <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                     </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel className="cursor-pointer">Set as default address</FormLabel>
-                      <FormDescription>Use this address as your primary shipping address</FormDescription>
-                    </div>
+                    <FormLabel className="font-normal">Đặt làm địa chỉ mặc định</FormLabel>
                   </FormItem>
                 )}
               />
             </div>
 
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                Cancel
+            <DialogFooter className="pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                disabled={isSubmitting}
+              >
+                Hủy
               </Button>
-              <Button type="submit" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? "Saving..." : address ? "Update Address" : "Add Address"}
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Đang lưu..." : address ? "Cập nhật" : "Thêm"}
               </Button>
             </DialogFooter>
           </form>
