@@ -1,12 +1,8 @@
 /**
  * Payment Types
  * Payment methods, transactions, and payment processing
- * Note: Matches backend @shared/types/payment.types.ts
  */
 
-/**
- * Payment response (matches backend PaymentResponse)
- */
 export interface Payment {
   id: string;
   orderId: string;
@@ -18,34 +14,22 @@ export interface Payment {
   updatedAt: string; // Date serialized from API
 }
 
-/**
- * Payment method enum (matches backend)
- */
 export enum PaymentMethod {
   COD = "COD",
   SEPAY = "SEPAY",
 }
 
-/**
- * Payment status enum (matches backend)
- */
 export enum PaymentStatus {
   UNPAID = "UNPAID",
   PAID = "PAID",
 }
 
-/**
- * Payment process request (matches backend PaymentProcessDto)
- */
 export interface PaymentProcessRequest {
   orderId: string;
   method: PaymentMethod;
   amountInt: number; // cents
 }
 
-/**
- * Payment process response (matches backend PaymentProcessResponse)
- */
 export interface PaymentProcessResponse {
   paymentId: string;
   status: PaymentStatus;
@@ -54,17 +38,11 @@ export interface PaymentProcessResponse {
   message?: string;
 }
 
-/**
- * Payment verification request (matches backend PaymentVerifyDto)
- */
 export interface PaymentVerifyRequest {
   orderId: string;
   payload: Record<string, unknown>;
 }
 
-/**
- * Payment verification response (matches backend PaymentVerifyResponse)
- */
 export interface PaymentVerifyResponse {
   paymentId: string;
   orderId: string;

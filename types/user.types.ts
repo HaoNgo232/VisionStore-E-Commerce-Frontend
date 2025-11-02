@@ -28,9 +28,6 @@ export interface ChangePasswordRequest {
   confirmPassword: string;
 }
 
-/**
- * List users response (matches backend)
- */
 export interface ListUsersResponse {
   users: User[];
   total: number;

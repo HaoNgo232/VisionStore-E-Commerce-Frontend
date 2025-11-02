@@ -4,13 +4,10 @@
  * Note: Order and OrderItem types match backend @shared/types/order.types.ts
  */
 
-/**
- * Order response (matches backend OrderResponse)
- */
 export interface Order {
   id: string;
   userId: string;
-  addressId: string | null; // Match backend field name
+  addressId: string | null;
   status: OrderStatus;
   paymentStatus: PaymentStatus;
   totalInt: number; // cents
@@ -19,9 +16,6 @@ export interface Order {
   updatedAt: string; // Date serialized from API
 }
 
-/**
- * Order item (matches backend OrderItemResponse)
- */
 export interface OrderItem {
   id: string;
   orderId: string;
@@ -37,9 +31,6 @@ export interface OrderItem {
   } | null;
 }
 
-/**
- * Order status (matches backend OrderStatus enum)
- */
 export enum OrderStatus {
   PENDING = "PENDING",
   PROCESSING = "PROCESSING",
@@ -48,17 +39,11 @@ export enum OrderStatus {
   CANCELLED = "CANCELLED",
 }
 
-/**
- * Payment status (matches backend PaymentStatus enum)
- */
 export enum PaymentStatus {
   UNPAID = "UNPAID",
   PAID = "PAID",
 }
 
-/**
- * Create order request (matches backend OrderCreateDto)
- */
 export interface CreateOrderRequest {
   addressId?: string; // Optional in backend
   items: {
@@ -87,9 +72,6 @@ export interface OrderFilters {
   limit?: number;
 }
 
-/**
- * Paginated orders response (matches backend PaginatedOrdersResponse)
- */
 export interface PaginatedOrdersResponse {
   orders: Order[];
   total: number;
