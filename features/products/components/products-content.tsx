@@ -4,86 +4,107 @@ import { useState } from "react"
 import { useProducts } from "@/features/products/hooks/use-products"
 import { useCartStore } from "@/stores/cart.store"
 import { ProductGrid } from "./product-grid"
-import { ProductFilters } from "./product-filters"
 import { ProductSort } from "./product-sort"
 import { ProductGridSkeleton } from "@/components/skeletons/product-card-skeleton"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { SlidersHorizontal } from "lucide-react"
+import { toast } from "sonner"
 
 export function ProductsContent() {
-    const { products, loading, filters, updateFilters, clearFilters } = useProducts()
-    const { addItem } = useCartStore()
-    const [sortBy, setSortBy] = useState("featured")
+    const [page, setPage] = useState(1)
+    const [categoryId, setCategoryId] = useState<string | undefined>()
+    const [search, setSearch] = useState<string | undefined>()
+    const [sortBy, setSortBy] = useState<string>("")
+    const [order, setOrder] = useState<"asc" | "desc" | undefined>()
 
-    // Sort products
-    const sortedProducts = [...products].sort((a, b) => {
-        switch (sortBy) {
-            case "price-asc":
-                return a.price - b.price
-            case "price-desc":
-                return b.price - a.price
-            case "rating":
-                return b.rating - a.rating
-            case "newest":
-                return 0
-            default:
-                return 0
-        }
+    const { products, total, loading, error } = useProducts({
+        page,
+        limit: 12,
+        categoryId,
+        search,
+        sortBy: sortBy || undefined,
+        order,
     })
 
-    const handleAddToCart = async (productId: string) => {
-        await addItem(productId, 1)
+    const totalPages = Math.ceil(total / 12)
+
+    if (error) {
+        return (
+            <div className="container py-8">
+                <div className="text-center">
+                    <p className="text-destructive">{error}</p>
+                </div>
+            </div>
+        )
     }
 
     return (
         <div className="container py-8">
             <div className="mb-8">
-                <h1 className="text-3xl font-bold tracking-tight text-balance">All Products</h1>
-                <p className="text-muted-foreground mt-2">Discover our complete eyewear collection</p>
+                <h1 className="text-3xl font-bold tracking-tight text-balance">Tất cả sản phẩm</h1>
+                <p className="text-muted-foreground mt-2">Khám phá bộ sưu tập kinh mắt hoàn chỉnh của chúng tôi</p>
             </div>
 
-            <div className="flex flex-col gap-8 lg:flex-row">
-                {/* Desktop Filters */}
-                <aside className="hidden lg:block w-64 shrink-0">
-                    <div className="sticky top-20">
-                        <ProductFilters filters={filters} onFiltersChange={updateFilters} onClearFilters={clearFilters} />
+            <div className="flex flex-col gap-8">
+                {/* Toolbar */}
+                <div className="flex items-center justify-between">
+                    <p className="text-sm text-muted-foreground">
+                        {loading ? "Đang tải..." : `${total} sản phẩm`}
+                    </p>
+
+                    <div className="flex items-center gap-2">
+                        <ProductSort
+                            value={sortBy}
+                            onChange={(value) => {
+                                setSortBy(value)
+                                setPage(1)
+                            }}
+                        />
                     </div>
-                </aside>
-
-                {/* Main Content */}
-                <div className="flex-1">
-                    {/* Toolbar */}
-                    <div className="flex items-center justify-between mb-6">
-                        <p className="text-sm text-muted-foreground">
-                            {loading ? "Loading..." : `${sortedProducts.length} products`}
-                        </p>
-
-                        <div className="flex items-center gap-2">
-                            <ProductSort value={sortBy} onChange={setSortBy} />
-
-                            {/* Mobile Filters */}
-                            <Sheet>
-                                <SheetTrigger asChild className="lg:hidden">
-                                    <Button variant="outline" size="icon">
-                                        <SlidersHorizontal className="h-4 w-4" />
-                                        <span className="sr-only">Filters</span>
-                                    </Button>
-                                </SheetTrigger>
-                                <SheetContent side="left" className="w-80 overflow-y-auto">
-                                    <ProductFilters filters={filters} onFiltersChange={updateFilters} onClearFilters={clearFilters} />
-                                </SheetContent>
-                            </Sheet>
-                        </div>
-                    </div>
-
-                    {/* Products Grid */}
-                    {loading ? (
-                        <ProductGridSkeleton count={12} />
-                    ) : (
-                        <ProductGrid products={sortedProducts} onAddToCart={handleAddToCart} />
-                    )}
                 </div>
+
+                {/* Products Grid */}
+                {loading ? (
+                    <ProductGridSkeleton count={12} />
+                ) : products.length > 0 ? (
+                    <>
+                        <ProductGrid products={products} />
+
+                        {/* Pagination */}
+                        {totalPages > 1 && (
+                            <div className="flex justify-center gap-2 mt-8">
+                                <Button
+                                    variant="outline"
+                                    disabled={page === 1}
+                                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                                >
+                                    Trang trước
+                                </Button>
+                                {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+                                    <Button
+                                        key={p}
+                                        variant={page === p ? "default" : "outline"}
+                                        onClick={() => setPage(p)}
+                                    >
+                                        {p}
+                                    </Button>
+                                ))}
+                                <Button
+                                    variant="outline"
+                                    disabled={page === totalPages}
+                                    onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                                >
+                                    Trang sau
+                                </Button>
+                            </div>
+                        )}
+                    </>
+                ) : (
+                    <div className="text-center py-12">
+                        <p className="text-muted-foreground">Không tìm thấy sản phẩm</p>
+                    </div>
+                )}
             </div>
         </div>
     )

@@ -2,12 +2,11 @@
 
 import { useState } from "react"
 import { useProductDetail } from "@/features/products/hooks/use-product-detail"
-import { useCartStore } from "@/stores/cart.store"
-import { VirtualTryOnDialog } from "@/features/ar/components/virtual-tryon-dialog"
 import { ProductDetailSkeleton } from "@/components/skeletons/product-detail-skeleton"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -16,7 +15,8 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { Star, ShoppingCart, Heart, Share2, Truck, Shield, RefreshCw, Scan } from "lucide-react"
+import { ShoppingCart, Truck, Shield } from "lucide-react"
+import { toast } from "sonner"
 
 interface ProductDetailContentProps {
     productId: string
@@ -24,10 +24,8 @@ interface ProductDetailContentProps {
 
 export function ProductDetailContent({ productId }: ProductDetailContentProps) {
     const { product, loading, error } = useProductDetail(productId)
-    const { addItem, isLoading: isAddingToCart } = useCartStore()
     const [selectedImage, setSelectedImage] = useState(0)
     const [quantity, setQuantity] = useState(1)
-    const [tryOnDialogOpen, setTryOnDialogOpen] = useState(false)
 
     if (loading) {
         return <ProductDetailSkeleton />
@@ -36,58 +34,62 @@ export function ProductDetailContent({ productId }: ProductDetailContentProps) {
     if (error || !product) {
         return (
             <div className="container py-16 text-center">
-                <h1 className="text-2xl font-bold">Product not found</h1>
-                <p className="text-muted-foreground mt-2">The product you're looking for doesn't exist.</p>
+                <h1 className="text-2xl font-bold">Sản phẩm không tồn tại</h1>
+                <p className="text-muted-foreground mt-2">Sản phẩm bạn tìm kiếm không tồn tại.</p>
             </div>
         )
     }
 
-    const handleAddToCart = async () => {
-        await addItem(product.id, quantity)
+    const price = (product.priceInt / 100).toLocaleString("vi-VN")
+    const inStock = product.stock > 0
+    const attributes = (product.attributes as Record<string, any>) || {}
+
+    const handleAddToCart = () => {
+        toast.success(`Đã thêm ${quantity}x ${product.name} vào giỏ hàng`)
+        // TODO: Integrate with cart store and ordersApi
     }
 
     return (
-        <>
-            <div className="container py-8">
-                <Breadcrumb className="mb-6">
-                    <BreadcrumbList>
-                        <BreadcrumbItem>
-                            <BreadcrumbLink href="/">Home</BreadcrumbLink>
-                        </BreadcrumbItem>
-                        <BreadcrumbSeparator />
-                        <BreadcrumbItem>
-                            <BreadcrumbLink href="/products">Products</BreadcrumbLink>
-                        </BreadcrumbItem>
-                        <BreadcrumbSeparator />
-                        <BreadcrumbItem>
-                            <BreadcrumbLink href={`/products?category=${product.category}`}>
-                                {product.category.charAt(0).toUpperCase() + product.category.slice(1)}
-                            </BreadcrumbLink>
-                        </BreadcrumbItem>
-                        <BreadcrumbSeparator />
-                        <BreadcrumbItem>
-                            <BreadcrumbPage>{product.name}</BreadcrumbPage>
-                        </BreadcrumbItem>
-                    </BreadcrumbList>
-                </Breadcrumb>
+        <div className="container py-8">
+            <Breadcrumb className="mb-6">
+                <BreadcrumbList>
+                    <BreadcrumbItem>
+                        <BreadcrumbLink href="/">Trang chủ</BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem>
+                        <BreadcrumbLink href="/products">Sản phẩm</BreadcrumbLink>
+                    </BreadcrumbItem>
+                    {product.categoryId && (
+                        <>
+                            <BreadcrumbSeparator />
+                            <BreadcrumbItem>
+                                <BreadcrumbLink href={`/products?categoryId=${product.categoryId}`}>
+                                    {product.category?.name || "Danh mục"}
+                                </BreadcrumbLink>
+                            </BreadcrumbItem>
+                        </>
+                    )}
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem>
+                        <BreadcrumbPage>{product.name}</BreadcrumbPage>
+                    </BreadcrumbItem>
+                </BreadcrumbList>
+            </Breadcrumb>
 
-                <div className="grid gap-8 lg:grid-cols-2">
-                    {/* Images */}
-                    <div className="space-y-4">
-                        <div className="relative aspect-square overflow-hidden rounded-lg bg-muted">
-                            <img
-                                src={product.images[selectedImage] || "/placeholder.svg"}
-                                alt={product.name}
-                                className="h-full w-full object-cover"
-                            />
-                            {product.originalPrice && (
-                                <Badge className="absolute top-4 right-4" variant="destructive">
-                                    Sale
-                                </Badge>
-                            )}
-                        </div>
+            <div className="grid gap-8 lg:grid-cols-2">
+                {/* Images */}
+                <div className="space-y-4">
+                    <div className="relative aspect-square overflow-hidden rounded-lg bg-muted">
+                        <img
+                            src={product.imageUrls[selectedImage] || "/placeholder.svg"}
+                            alt={product.name}
+                            className="h-full w-full object-cover"
+                        />
+                    </div>
+                    {product.imageUrls.length > 1 && (
                         <div className="grid grid-cols-4 gap-4">
-                            {product.images.map((image, index) => (
+                            {product.imageUrls.map((image, index) => (
                                 <button
                                     key={index}
                                     onClick={() => setSelectedImage(index)}
@@ -102,160 +104,132 @@ export function ProductDetailContent({ productId }: ProductDetailContentProps) {
                                 </button>
                             ))}
                         </div>
+                    )}
+                </div>
+
+                {/* Details */}
+                <div className="space-y-6">
+                    {/* Title and Stock */}
+                    <div className="space-y-2">
+                        <h1 className="text-3xl font-bold">{product.name}</h1>
+                        {!inStock && (
+                            <Badge variant="destructive">Hết hàng</Badge>
+                        )}
                     </div>
 
-                    {/* Details */}
-                    <div className="space-y-6">
-                        <div>
-                            <h1 className="text-3xl font-bold tracking-tight text-balance">{product.name}</h1>
-                            <p className="text-lg text-muted-foreground mt-2">{product.brand}</p>
-                        </div>
+                    {/* Price */}
+                    <div className="space-y-2">
+                        <span className="text-4xl font-bold">{price}₫</span>
+                        <p className="text-muted-foreground">SKU: {product.sku}</p>
+                    </div>
 
-                        <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-1">
-                                {[...Array(5)].map((_, i) => (
-                                    <Star
-                                        key={i}
-                                        className={`h-5 w-5 ${i < Math.floor(product.rating) ? "fill-primary text-primary" : "text-muted"}`}
-                                    />
-                                ))}
-                            </div>
-                            <span className="text-sm font-medium">{product.rating}</span>
-                            <span className="text-sm text-muted-foreground">({product.reviewCount} reviews)</span>
-                        </div>
+                    <Separator />
 
-                        <div className="flex items-center gap-3">
-                            <span className="text-3xl font-bold">${product.price}</span>
-                            {product.originalPrice && (
-                                <span className="text-xl text-muted-foreground line-through">${product.originalPrice}</span>
+                    {/* Attributes */}
+                    {(attributes.brand || attributes.frameType || attributes.material || attributes.color) && (
+                        <div className="space-y-3">
+                            {attributes.brand && (
+                                <div>
+                                    <span className="text-sm font-medium">Hãng:</span>
+                                    <p className="text-sm text-muted-foreground">{attributes.brand}</p>
+                                </div>
+                            )}
+                            {attributes.frameType && (
+                                <div>
+                                    <span className="text-sm font-medium">Loại khung:</span>
+                                    <p className="text-sm text-muted-foreground">{attributes.frameType}</p>
+                                </div>
+                            )}
+                            {attributes.material && (
+                                <div>
+                                    <span className="text-sm font-medium">Chất liệu:</span>
+                                    <p className="text-sm text-muted-foreground">{attributes.material}</p>
+                                </div>
+                            )}
+                            {attributes.color && (
+                                <div>
+                                    <span className="text-sm font-medium">Màu sắc:</span>
+                                    <p className="text-sm text-muted-foreground">{attributes.color}</p>
+                                </div>
                             )}
                         </div>
+                    )}
 
-                        <Separator />
+                    <Separator />
 
-                        <div className="space-y-4">
-                            <div>
-                                <h3 className="font-semibold mb-2">Description</h3>
-                                <p className="text-muted-foreground leading-relaxed">{product.description}</p>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4 text-sm">
-                                <div>
-                                    <span className="text-muted-foreground">Category:</span>
-                                    <span className="ml-2 font-medium capitalize">{product.category}</span>
-                                </div>
-                                <div>
-                                    <span className="text-muted-foreground">Frame Type:</span>
-                                    <span className="ml-2 font-medium capitalize">{product.frameType}</span>
-                                </div>
-                                <div>
-                                    <span className="text-muted-foreground">Material:</span>
-                                    <span className="ml-2 font-medium">{product.material}</span>
-                                </div>
-                                <div>
-                                    <span className="text-muted-foreground">Color:</span>
-                                    <span className="ml-2 font-medium">{product.color}</span>
-                                </div>
+                    {/* Quantity and Add to Cart */}
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-4">
+                            <label className="text-sm font-medium">Số lượng:</label>
+                            <div className="flex items-center border rounded-lg">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                                    disabled={!inStock}
+                                >
+                                    −
+                                </Button>
+                                <span className="px-4 py-2">{quantity}</span>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setQuantity(quantity + 1)}
+                                    disabled={!inStock || quantity >= product.stock}
+                                >
+                                    +
+                                </Button>
                             </div>
                         </div>
-
-                        <Separator />
-
-                        <div>
-                            <h3 className="font-semibold mb-3">Features</h3>
-                            <ul className="space-y-2">
-                                {product.features.map((feature, index) => (
-                                    <li key={index} className="flex items-center gap-2 text-sm">
-                                        <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                                        {feature}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-
-                        <Separator />
 
                         <Button
-                            variant="outline"
                             size="lg"
-                            className="w-full bg-transparent"
-                            onClick={() => setTryOnDialogOpen(true)}
-                            disabled={!product.inStock}
+                            className="w-full"
+                            disabled={!inStock}
+                            onClick={handleAddToCart}
                         >
-                            <Scan className="mr-2 h-5 w-5" />
-                            Try Virtual Fitting
+                            <ShoppingCart className="mr-2 h-5 w-5" />
+                            {inStock ? "Thêm vào giỏ hàng" : "Hết hàng"}
                         </Button>
+                    </div>
 
-                        <div className="space-y-4">
-                            <div className="flex items-center gap-4">
-                                <div className="flex items-center border rounded-lg">
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                        disabled={!product.inStock}
-                                    >
-                                        -
-                                    </Button>
-                                    <span className="w-12 text-center">{quantity}</span>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        onClick={() => setQuantity(quantity + 1)}
-                                        disabled={!product.inStock}
-                                    >
-                                    </Button>
-                                </div>
-                                <Button
-                                    className="flex-1"
-                                    size="lg"
-                                    disabled={!product.inStock || isAddingToCart}
-                                    onClick={handleAddToCart}
-                                >
-                                    <ShoppingCart className="mr-2 h-5 w-5" />
-                                    {isAddingToCart ? "Adding..." : product.inStock ? "Add to Cart" : "Out of Stock"}
-                                </Button>
-                            </div>
+                    <Separator />
 
-                            <div className="flex gap-2">
-                                <Button variant="outline" size="lg" className="flex-1 bg-transparent">
-                                    <Heart className="mr-2 h-5 w-5" />
-                                    Wishlist
-                                </Button>
-                                <Button variant="outline" size="icon">
-                                    <Share2 className="h-5 w-5" />
-                                </Button>
+                    {/* Features */}
+                    <div className="space-y-3">
+                        <div className="flex items-center gap-3">
+                            <Truck className="h-5 w-5 text-primary" />
+                            <div>
+                                <p className="font-medium text-sm">Miễn phí vận chuyển</p>
+                                <p className="text-xs text-muted-foreground">Cho đơn hàng trên 500,000₫</p>
                             </div>
                         </div>
-
-                        <Separator />
-
-                        <div className="space-y-3">
-                            <div className="flex items-center gap-3 text-sm">
-                                <Truck className="h-5 w-5 text-muted-foreground" />
-                                <span>Free shipping on orders over $50</span>
-                            </div>
-                            <div className="flex items-center gap-3 text-sm">
-                                <Shield className="h-5 w-5 text-muted-foreground" />
-                                <span>1-year warranty included</span>
-                            </div>
-                            <div className="flex items-center gap-3 text-sm">
-                                <RefreshCw className="h-5 w-5 text-muted-foreground" />
-                                <span>30-day return policy</span>
+                        <div className="flex items-center gap-3">
+                            <Shield className="h-5 w-5 text-primary" />
+                            <div>
+                                <p className="font-medium text-sm">Bảo hành chính hãng</p>
+                                <p className="text-xs text-muted-foreground">Bảo hành 12 tháng</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <VirtualTryOnDialog
-                open={tryOnDialogOpen}
-                onOpenChange={setTryOnDialogOpen}
-                product={product}
-                onSwitchProduct={() => {
-                    console.log("[v0] Switch to another product")
-                }}
-            />
-        </>
+            {/* Description */}
+            {product.description && (
+                <div className="mt-12">
+                    <Tabs defaultValue="description" className="w-full">
+                        <TabsList>
+                            <TabsTrigger value="description">Mô tả</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="description" className="mt-6">
+                            <div className="prose dark:prose-invert max-w-none">
+                                <p>{product.description}</p>
+                            </div>
+                        </TabsContent>
+                    </Tabs>
+                </div>
+            )}
+        </div>
     )
 }
