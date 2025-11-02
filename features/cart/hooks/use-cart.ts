@@ -7,6 +7,7 @@
 
 import { useEffect, useState } from "react";
 import { useCartStore } from "@/stores/cart.store";
+import { useAuthStore } from "@/stores/auth.store";
 
 export function useCart() {
   const [mounted, setMounted] = useState(false);
@@ -20,25 +21,18 @@ export function useCart() {
   const clearCart = useCartStore((state) => state.clearCart);
   const getItemCount = useCartStore((state) => state.getItemCount);
   const getTotal = useCartStore((state) => state.getTotal);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated());
 
   useEffect(() => {
     setMounted(true);
-    fetchCart();
-  }, [fetchCart]);
+  }, []);
 
-  if (!mounted) {
-    return {
-      cart: null,
-      loading: true,
-      error: null,
-      addItem,
-      updateItem,
-      removeItem,
-      clearCart,
-      getItemCount,
-      getTotal,
-    };
-  }
+  useEffect(() => {
+    // Only fetch cart if user is authenticated and component is mounted
+    if (mounted && isAuthenticated) {
+      fetchCart();
+    }
+  }, [mounted, isAuthenticated, fetchCart]);
 
   return {
     cart,
@@ -50,5 +44,7 @@ export function useCart() {
     clearCart,
     getItemCount,
     getTotal,
+    mounted,
+    isAuthenticated,
   };
 }

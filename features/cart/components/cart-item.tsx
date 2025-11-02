@@ -47,7 +47,7 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
   }
 
   return (
-    <div className="flex gap-4 py-4">
+    <div className="flex gap-4 py-4 px-5">
       <Link href={`/products/${product.id}`} className="shrink-0">
         <img
           src={product.imageUrls[0] || "/placeholder.svg"}

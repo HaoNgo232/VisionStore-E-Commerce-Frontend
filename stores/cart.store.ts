@@ -63,7 +63,6 @@ export const useCartStore = create<CartStore>()(
       },
 
       updateItem: async (itemId: string, quantity: number) => {
-        set({ loading: true });
         try {
           // Get product ID from cart item
           const item = get().cart?.items.find((i) => i.id === itemId);
@@ -80,15 +79,16 @@ export const useCartStore = create<CartStore>()(
             err instanceof Error ? err.message : "Failed to update item";
           set({ error: message });
           toast.error(message);
-        } finally {
-          set({ loading: false });
         }
       },
 
       removeItem: async (itemId: string) => {
-        set({ loading: true });
         try {
-          const cart = await cartApi.removeItem(itemId);
+          // Get product ID from cart item
+          const item = get().cart?.items.find((i) => i.id === itemId);
+          if (!item) throw new Error("Item not found");
+
+          const cart = await cartApi.removeItem(itemId, item.productId);
           set({ cart, error: null });
           toast.success(`Đã xoá khỏi giỏ hàng`);
         } catch (err) {
@@ -96,8 +96,6 @@ export const useCartStore = create<CartStore>()(
             err instanceof Error ? err.message : "Failed to remove item";
           set({ error: message });
           toast.error(message);
-        } finally {
-          set({ loading: false });
         }
       },
 

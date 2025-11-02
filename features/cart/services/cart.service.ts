@@ -4,6 +4,7 @@
  */
 
 import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api-client";
+import { useAuthStore } from "@/stores/auth.store";
 import type { Cart, AddToCartRequest, UpdateCartItemRequest } from "@/types";
 
 export const cartApi = {
@@ -12,15 +13,35 @@ export const cartApi = {
   },
 
   async addItem(data: AddToCartRequest): Promise<Cart> {
-    return apiPost<Cart>("/cart/items", data);
+    const userId = useAuthStore.getState().getUserId();
+    if (!userId) {
+      throw new Error("User not authenticated");
+    }
+    return apiPost<Cart>("/cart/items", {
+      userId,
+      ...data,
+    });
   },
 
   async updateItem(itemId: string, data: UpdateCartItemRequest): Promise<Cart> {
-    return apiPatch<Cart>(`/cart/items/${itemId}`, data);
+    const userId = useAuthStore.getState().getUserId();
+    if (!userId) {
+      throw new Error("User not authenticated");
+    }
+    return apiPatch<Cart>("/cart/items", {
+      userId,
+      ...data,
+    });
   },
 
-  async removeItem(itemId: string): Promise<Cart> {
-    return apiDelete<Cart>(`/cart/items/${itemId}`);
+  async removeItem(itemId: string, productId: string): Promise<Cart> {
+    const userId = useAuthStore.getState().getUserId();
+    if (!userId) {
+      throw new Error("User not authenticated");
+    }
+    return apiDelete<Cart>("/cart/items", {
+      data: { userId, productId },
+    });
   },
 
   async clearCart(): Promise<void> {

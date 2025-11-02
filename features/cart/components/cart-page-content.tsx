@@ -16,14 +16,45 @@ export function CartPageContent() {
         updateItem,
         removeItem,
         getItemCount,
-        getTotal
+        getTotal,
+        mounted,
+        isAuthenticated,
     } = useCart()
 
+    // Debug
+    console.log("[CartPageContent] Render:", {
+        mounted,
+        isAuthenticated,
+        loading,
+        error,
+        cartItems: cart?.items?.length,
+    })
+
+    // Prevent hydration mismatch - render skeleton on server
+    if (!mounted) {
+        return <CartSkeleton />
+    }
+
+    // Show login prompt if not authenticated
+    if (!isAuthenticated) {
+        return (
+            <div className="container py-16 text-center">
+                <h1 className="text-2xl font-bold">Vui lòng đăng nhập</h1>
+                <p className="text-muted-foreground mt-2">Bạn cần đăng nhập để xem giỏ hàng</p>
+                <Link href="/login" className="text-primary hover:underline mt-4 inline-block">
+                    Đăng nhập ngay
+                </Link>
+            </div>
+        )
+    }
+
     if (loading) {
+        console.log("[CartPageContent] Loading skeleton")
         return <CartSkeleton />
     }
 
     if (error) {
+        console.log("[CartPageContent] Error:", error)
         return (
             <div className="container py-16 text-center">
                 <h1 className="text-2xl font-bold">Lỗi tải giỏ hàng</h1>
@@ -35,7 +66,8 @@ export function CartPageContent() {
         )
     }
 
-    if (!cart || cart.items.length === 0) {
+    if (!cart?.items || cart.items.length === 0) {
+        console.log("[CartPageContent] Empty cart")
         return (
             <div className="container py-16 text-center">
                 <h1 className="text-2xl font-bold">Giỏ hàng trống</h1>
