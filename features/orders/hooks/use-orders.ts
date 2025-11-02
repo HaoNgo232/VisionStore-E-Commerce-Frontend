@@ -21,9 +21,9 @@ export function useOrders() {
       try {
         setLoading(true);
         setError(null);
-        const data = await ordersApi.getAll();
-        setOrders(data);
-        setTotal(data.length);
+        const response = await ordersApi.getAll();
+        setOrders(response.orders);
+        setTotal(response.total);
       } catch (err) {
         setError(getErrorMessage(err));
       } finally {

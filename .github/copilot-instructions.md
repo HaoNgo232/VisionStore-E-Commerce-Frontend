@@ -137,6 +137,85 @@ try {
 }
 ```
 
+### User ID Handling - Decode JWT Token
+
+**IMPORTANT**: Các API request cần `userId` phải lấy từ decoded JWT token trong auth store.
+
+**Pattern:**
+
+```typescript
+// features/[domain]/services/[domain].service.ts
+import { useAuthStore } from "@/stores/auth.store";
+
+export const [domain]Api = {
+  async getByUserId(): Promise<T> {
+    // Lấy userId từ token decoded (stored in auth.store)
+    const userId = useAuthStore.getState().getUserId();
+
+    if (!userId) {
+      throw new Error("User not authenticated - userId is missing");
+    }
+
+    return apiGet<T>("/endpoint", { params: { userId } });
+  },
+
+  async create(data: CreateRequest): Promise<T> {
+    // Một số API cần include userId trong body
+    const userId = useAuthStore.getState().getUserId();
+
+    if (!userId) {
+      throw new Error("User not authenticated");
+    }
+
+    return apiPost<T>("/endpoint", {
+      ...data,
+      userId, // Include userId nếu backend yêu cầu
+    });
+  },
+};
+```
+
+**Quy trình JWT Decoding:**
+
+1. Khi login → accessToken được lưu vào auth store
+2. `auth.store.ts` tự động decode JWT payload
+3. Extract `sub` (subject) claim → lưu thành `userId` state
+4. Service layer gọi `getUserId()` để lấy userId
+5. Gửi userId trong query params hoặc request body
+
+**Ví dụ thực tế:**
+
+```typescript
+// orders.service.ts
+import { useAuthStore } from "@/stores/auth.store";
+
+export const ordersApi = {
+  async getAll(): Promise<Order[]> {
+    const userId = useAuthStore.getState().getUserId();
+    if (!userId) throw new Error("User not authenticated");
+    return apiGet<Order[]>("/orders", { params: { userId } });
+  },
+
+  async create(data: CreateOrderRequest): Promise<Order> {
+    const userId = useAuthStore.getState().getUserId();
+    if (!userId) throw new Error("User not authenticated");
+
+    return apiPost<Order>("/orders", {
+      userId,
+      ...data,
+    });
+  },
+};
+```
+
+**Khi nào cần userId:**
+
+- ✅ `/orders` - GET danh sách đơn hàng của user
+- ✅ `/addresses` - GET danh sách địa chỉ của user
+- ✅ `/user-profile` - GET thông tin profile của user
+- ❌ `/products` - GET danh sách sản phẩm (public)
+- ❌ `/categories` - GET danh sách category (public)
+
 ## Type Definitions
 
 ### Global Types (types/)
@@ -278,6 +357,8 @@ export function use[Domain]() {
 - Mix mock data with real API - All mocks removed
 - Manually manage auth tokens - Interceptor handles it
 - Use .then() for sequential operations - Use async/await
+- Hardcode userId - ALWAYS decode từ JWT token
+- Call API cần userId mà không validate userId exists
 
 ✅ **Always:**
 
@@ -287,6 +368,9 @@ export function use[Domain]() {
 - Import from correct domains
 - Keep services and hooks separate
 - Test error scenarios
+- Decode userId từ JWT token khi cần trong service layer
+- Check userId exists trước khi gửi API request
+- Validate userId not null/undefined
 
 ## Session Notes
 

@@ -9,10 +9,30 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { User, AuthResponse } from "@/types";
 
+/**
+ * Decode JWT token payload
+ * JWT format: header.payload.signature
+ */
+function decodeToken(
+  token: string,
+): { sub?: string; [key: string]: any } | null {
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) return null;
+
+    const payload = parts[1];
+    const decoded = JSON.parse(atob(payload));
+    return decoded;
+  } catch {
+    return null;
+  }
+}
+
 interface AuthStore {
   // State
   accessToken: string | null;
   refreshToken: string | null;
+  userId: string | null;
   user: User | null;
 
   // Methods
@@ -21,6 +41,7 @@ interface AuthStore {
   setAuth: (payload: AuthResponse) => void;
   clearAuth: () => void;
   isAuthenticated: () => boolean;
+  getUserId: () => string | null;
 }
 
 /**
@@ -33,13 +54,17 @@ export const useAuthStore = create<AuthStore>()(
       // Initial state
       accessToken: null,
       refreshToken: null,
+      userId: null,
       user: null,
 
       /**
        * Set tokens (called after login or token refresh)
+       * Automatically extracts userId from JWT
        */
       setTokens: (accessToken: string, refreshToken: string) => {
-        set({ accessToken, refreshToken });
+        const payload = decodeToken(accessToken);
+        const userId = payload?.sub || null;
+        set({ accessToken, refreshToken, userId });
       },
 
       /**
@@ -51,12 +76,15 @@ export const useAuthStore = create<AuthStore>()(
 
       /**
        * Set complete auth response (login/register)
+       * Extracts userId from accessToken JWT
        */
       setAuth: (payload: AuthResponse) => {
+        const decoded = decodeToken(payload.accessToken);
+        const userId = decoded?.sub || null;
         set({
           accessToken: payload.accessToken,
           refreshToken: payload.refreshToken,
-          user: payload.user,
+          userId,
         });
       },
 
@@ -67,6 +95,7 @@ export const useAuthStore = create<AuthStore>()(
         set({
           accessToken: null,
           refreshToken: null,
+          userId: null,
           user: null,
         });
       },
@@ -78,12 +107,26 @@ export const useAuthStore = create<AuthStore>()(
         const { accessToken } = get();
         return !!accessToken;
       },
+
+      /**
+       * Get userId from token (or return cached userId)
+       */
+      getUserId: () => {
+        const { userId, accessToken } = get();
+        if (userId) return userId;
+        if (accessToken) {
+          const payload = decodeToken(accessToken);
+          return payload?.sub || null;
+        }
+        return null;
+      },
     }),
     {
       name: "auth-store", // Key for localStorage
       partialize: (state) => ({
         accessToken: state.accessToken,
         refreshToken: state.refreshToken,
+        userId: state.userId,
         user: state.user,
       }),
     },

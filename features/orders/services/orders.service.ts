@@ -8,11 +8,19 @@ import type {
   Order,
   CreateOrderRequest,
   UpdateOrderStatusRequest,
+  PaginatedOrdersResponse,
 } from "@/types";
+import { useAuthStore } from "@/stores/auth.store";
 
 export const ordersApi = {
-  async getAll(): Promise<Order[]> {
-    return apiGet<Order[]>("/orders");
+  async getAll(): Promise<PaginatedOrdersResponse> {
+    const userId = useAuthStore.getState().getUserId();
+    if (!userId) {
+      throw new Error("User not authenticated - userId is missing");
+    }
+    return apiGet<PaginatedOrdersResponse>("/orders", {
+      params: { userId },
+    });
   },
 
   async getById(orderId: string): Promise<Order> {

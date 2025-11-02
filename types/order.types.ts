@@ -22,13 +22,7 @@ export interface OrderItem {
   productId: string;
   quantity: number;
   priceInt: number; // Price at time of purchase (cents)
-  createdAt: string; // Added to match backend
-  product?: {
-    id: string;
-    name: string;
-    priceInt: number;
-    imageUrls: string[];
-  } | null;
+  createdAt: string; // JSON serialized from Date
 }
 
 export enum OrderStatus {
