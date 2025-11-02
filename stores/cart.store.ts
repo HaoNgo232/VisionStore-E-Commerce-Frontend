@@ -2,137 +2,138 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { cartApi } from "@/features/cart/services/cart.service";
 import { toast } from "sonner";
-import type { Cart, CartItem } from "@/types";
-import { productsApi } from "@/features/products/services/products.service";
+import type { Cart } from "@/types";
 
-interface CartStore extends Cart {
-  isLoading: boolean;
-  addItem: (productId: string, quantity?: number) => Promise<void>;
-  removeItem: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
-  clearCart: () => void;
-  updateTotals: () => void;
+interface CartStore {
+  cart: Cart | null;
+  loading: boolean;
+  error: string | null;
+
+  // Actions
+  fetchCart: () => Promise<void>;
+  addItem: (productId: string, quantity: number) => Promise<void>;
+  updateItem: (itemId: string, quantity: number) => Promise<void>;
+  removeItem: (itemId: string) => Promise<void>;
+  clearCart: () => Promise<void>;
+
+  // Utils
+  getItemCount: () => number;
+  getTotal: () => number;
+  reset: () => void;
 }
 
 export const useCartStore = create<CartStore>()(
   persist(
-    (set, get: any) => ({
-      items: [],
-      total: 0,
-      itemCount: 0,
-      isLoading: false,
+    (set, get) => ({
+      cart: null,
+      loading: false,
+      error: null,
 
-      addItem: async (productId: string, quantity = 1) => {
-        set({ isLoading: true });
+      fetchCart: async () => {
+        set({ loading: true, error: null });
         try {
-          const product = await productsApi.getById(productId);
-          if (!product) throw new Error("Product not found");
-
-          set((state: CartStore) => {
-            const existingItem = state.items.find(
-              (item: CartItem) => item.productId === productId,
-            );
-
-            if (existingItem) {
-              toast.success("Đã cập nhật số lượng trong giỏ hàng", {
-                description: `${product.name} - Số lượng: ${
-                  existingItem.quantity + quantity
-                }`,
-              });
-              return {
-                items: state.items.map((item: CartItem) =>
-                  item.productId === productId
-                    ? { ...item, quantity: item.quantity + quantity }
-                    : item,
-                ),
-              };
-            }
-
-            toast.success("Đã thêm vào giỏ hàng", {
-              description: `${product.name} - Số lượng: ${quantity}`,
-            });
-            return {
-              items: [
-                ...state.items,
-                { productId, product, quantity } as CartItem,
-              ],
-            };
-          });
-
-          // Recalculate totals
-          get().updateTotals();
-        } catch (error) {
-          console.error("[v0] Failed to add item to cart:", error);
-          toast.error("Không thể thêm vào giỏ hàng", {
-            description: "Vui lòng thử lại sau.",
-          });
+          const cart = await cartApi.getCart();
+          set({ cart });
+        } catch (err) {
+          const message =
+            err instanceof Error ? err.message : "Failed to fetch cart";
+          set({ error: message });
+          toast.error(message);
         } finally {
-          set({ isLoading: false });
+          set({ loading: false });
         }
       },
 
-      removeItem: (productId: string) => {
-        set((state: CartStore) => {
-          const item = state.items.find(
-            (item: CartItem) => item.productId === productId,
-          );
-          if (item) {
-            toast.info("Đã xóa khỏi giỏ hàng", {
-              description: item.product.name,
-            });
-          }
-
-          return {
-            items: state.items.filter(
-              (item: CartItem) => item.productId !== productId,
-            ),
-          };
-        });
-
-        get().updateTotals();
-      },
-
-      updateQuantity: (productId: string, quantity: number) => {
-        if (quantity <= 0) {
-          get().removeItem(productId);
-          return;
+      addItem: async (productId: string, quantity: number) => {
+        set({ loading: true });
+        try {
+          const cart = await cartApi.addItem({ productId, quantity });
+          set({ cart, error: null });
+          toast.success(`Đã thêm vào giỏ hàng`);
+        } catch (err) {
+          const message =
+            err instanceof Error ? err.message : "Failed to add item";
+          set({ error: message });
+          toast.error(message);
+        } finally {
+          set({ loading: false });
         }
-
-        set((state: CartStore) => ({
-          items: state.items.map((item: CartItem) =>
-            item.productId === productId ? { ...item, quantity } : item,
-          ),
-        }));
-
-        get().updateTotals();
       },
 
-      clearCart: () => {
-        set({
-          items: [],
-          total: 0,
-          itemCount: 0,
-        });
+      updateItem: async (itemId: string, quantity: number) => {
+        set({ loading: true });
+        try {
+          // Get product ID from cart item
+          const item = get().cart?.items.find((i) => i.id === itemId);
+          if (!item) throw new Error("Item not found");
+
+          const cart = await cartApi.updateItem(itemId, {
+            productId: item.productId,
+            quantity,
+          });
+          set({ cart, error: null });
+          toast.success(`Đã cập nhật giỏ hàng`);
+        } catch (err) {
+          const message =
+            err instanceof Error ? err.message : "Failed to update item";
+          set({ error: message });
+          toast.error(message);
+        } finally {
+          set({ loading: false });
+        }
       },
 
-      updateTotals: () => {
-        set((state: CartStore) => {
-          const total = state.items.reduce(
-            (sum: number, item: CartItem) =>
-              sum + item.product.price * item.quantity,
-            0,
-          );
-          const itemCount = state.items.reduce(
-            (sum: number, item: CartItem) => sum + item.quantity,
-            0,
-          );
-          return { total, itemCount };
-        });
+      removeItem: async (itemId: string) => {
+        set({ loading: true });
+        try {
+          const cart = await cartApi.removeItem(itemId);
+          set({ cart, error: null });
+          toast.success(`Đã xoá khỏi giỏ hàng`);
+        } catch (err) {
+          const message =
+            err instanceof Error ? err.message : "Failed to remove item";
+          set({ error: message });
+          toast.error(message);
+        } finally {
+          set({ loading: false });
+        }
+      },
+
+      clearCart: async () => {
+        set({ loading: true });
+        try {
+          await cartApi.clearCart();
+          set({ cart: null, error: null });
+          toast.success(`Đã xoá giỏ hàng`);
+        } catch (err) {
+          const message =
+            err instanceof Error ? err.message : "Failed to clear cart";
+          set({ error: message });
+          toast.error(message);
+        } finally {
+          set({ loading: false });
+        }
+      },
+
+      getItemCount: () => {
+        const { cart } = get();
+        return cart?.items.length || 0;
+      },
+
+      getTotal: () => {
+        const { cart } = get();
+        return cart ? cart.totalInt / 100 : 0;
+      },
+
+      reset: () => {
+        set({ cart: null, loading: false, error: null });
       },
     }),
     {
       name: "cart-store",
+      partialize: (state) => ({ cart: state.cart }),
     },
   ),
 );

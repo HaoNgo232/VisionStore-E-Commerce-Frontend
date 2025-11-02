@@ -4,21 +4,29 @@ import Link from "next/link"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Star, ShoppingCart } from "lucide-react"
+import { ShoppingCart } from "lucide-react"
+import { useState } from "react"
 import type { Product } from "@/types"
-import { toast } from "sonner"
+import { useCartStore } from "@/stores/cart.store"
 
 interface ProductCardProps {
   product: Product
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const [isAdding, setIsAdding] = useState(false)
+  const addItem = useCartStore((state) => state.addItem)
+
   const price = (product.priceInt / 100).toLocaleString("vi-VN")
   const inStock = product.stock > 0
 
-  const handleAddToCart = () => {
-    toast.success(`Đã thêm ${product.name} vào giỏ hàng`)
-    // TODO: Integrate with cart store
+  const handleAddToCart = async () => {
+    setIsAdding(true)
+    try {
+      await addItem(product.id, 1)
+    } finally {
+      setIsAdding(false)
+    }
   }
 
   return (
@@ -57,7 +65,7 @@ export function ProductCard({ product }: ProductCardProps) {
         <Button
           size="icon"
           variant="outline"
-          disabled={!inStock}
+          disabled={!inStock || isAdding}
           onClick={handleAddToCart}
         >
           <ShoppingCart className="h-4 w-4" />

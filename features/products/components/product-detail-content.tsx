@@ -16,7 +16,7 @@ import {
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { ShoppingCart, Truck, Shield } from "lucide-react"
-import { toast } from "sonner"
+import { useCartStore } from "@/stores/cart.store"
 
 interface ProductDetailContentProps {
     productId: string
@@ -26,6 +26,8 @@ export function ProductDetailContent({ productId }: ProductDetailContentProps) {
     const { product, loading, error } = useProductDetail(productId)
     const [selectedImage, setSelectedImage] = useState(0)
     const [quantity, setQuantity] = useState(1)
+    const [isAdding, setIsAdding] = useState(false)
+    const addItem = useCartStore((state) => state.addItem)
 
     if (loading) {
         return <ProductDetailSkeleton />
@@ -44,9 +46,13 @@ export function ProductDetailContent({ productId }: ProductDetailContentProps) {
     const inStock = product.stock > 0
     const attributes = (product.attributes as Record<string, any>) || {}
 
-    const handleAddToCart = () => {
-        toast.success(`Đã thêm ${quantity}x ${product.name} vào giỏ hàng`)
-        // TODO: Integrate with cart store and ordersApi
+    const handleAddToCart = async () => {
+        setIsAdding(true)
+        try {
+            await addItem(product.id, quantity)
+        } finally {
+            setIsAdding(false)
+        }
     }
 
     return (
@@ -185,7 +191,7 @@ export function ProductDetailContent({ productId }: ProductDetailContentProps) {
                         <Button
                             size="lg"
                             className="w-full"
-                            disabled={!inStock}
+                            disabled={!inStock || isAdding}
                             onClick={handleAddToCart}
                         >
                             <ShoppingCart className="mr-2 h-5 w-5" />

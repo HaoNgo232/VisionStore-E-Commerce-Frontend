@@ -4,21 +4,53 @@ import { Button } from "@/components/ui/button"
 import { Minus, Plus, X } from "lucide-react"
 import type { CartItem as CartItemType } from "@/types"
 import Link from "next/link"
+import { useState } from "react"
 
 interface CartItemProps {
   item: CartItemType
-  onUpdateQuantity: (productId: string, quantity: number) => void
-  onRemove: (productId: string) => void
+  onUpdateQuantity: (itemId: string, quantity: number) => Promise<void>
+  onRemove: (itemId: string) => Promise<void>
 }
 
 export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
-  const { product, quantity } = item
+  const [updating, setUpdating] = useState(false)
+  const { quantity } = item
+  const product = item.product
+
+  if (!product) {
+    return null
+  }
+
+  const price = product.priceInt / 100
+  const totalPrice = price * quantity
+
+  const handleUpdateQuantity = async (newQuantity: number) => {
+    if (newQuantity <= 0) {
+      await handleRemove()
+      return
+    }
+    setUpdating(true)
+    try {
+      await onUpdateQuantity(item.id, newQuantity)
+    } finally {
+      setUpdating(false)
+    }
+  }
+
+  const handleRemove = async () => {
+    setUpdating(true)
+    try {
+      await onRemove(item.id)
+    } finally {
+      setUpdating(false)
+    }
+  }
 
   return (
     <div className="flex gap-4 py-4">
       <Link href={`/products/${product.id}`} className="shrink-0">
         <img
-          src={product.images[0] || "/placeholder.svg"}
+          src={product.imageUrls[0] || "/placeholder.svg"}
           alt={product.name}
           className="h-24 w-24 rounded-lg object-cover"
         />
@@ -30,11 +62,15 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
             <Link href={`/products/${product.id}`} className="font-semibold hover:text-primary transition-colors">
               {product.name}
             </Link>
-            <p className="text-sm text-muted-foreground">{product.brand}</p>
           </div>
-          <Button variant="ghost" size="icon" onClick={() => onRemove(product.id)}>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleRemove}
+            disabled={updating}
+          >
             <X className="h-4 w-4" />
-            <span className="sr-only">Remove item</span>
+            <span className="sr-only">Xoá sản phẩm</span>
           </Button>
         </div>
 
@@ -44,7 +80,8 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
               variant="ghost"
               size="icon"
               className="h-8 w-8"
-              onClick={() => onUpdateQuantity(product.id, quantity - 1)}
+              onClick={() => handleUpdateQuantity(quantity - 1)}
+              disabled={updating}
             >
               <Minus className="h-3 w-3" />
             </Button>
@@ -53,15 +90,20 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
               variant="ghost"
               size="icon"
               className="h-8 w-8"
-              onClick={() => onUpdateQuantity(product.id, quantity + 1)}
+              onClick={() => handleUpdateQuantity(quantity + 1)}
+              disabled={updating}
             >
               <Plus className="h-3 w-3" />
             </Button>
           </div>
 
           <div className="text-right">
-            <p className="font-semibold">${(product.price * quantity).toFixed(2)}</p>
-            <p className="text-sm text-muted-foreground">${product.price} each</p>
+            <p className="font-semibold">
+              {totalPrice.toLocaleString("vi-VN")}₫
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {price.toLocaleString("vi-VN")}₫ / cái
+            </p>
           </div>
         </div>
       </div>
