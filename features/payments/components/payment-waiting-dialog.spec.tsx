@@ -132,8 +132,8 @@ describe("PaymentWaitingDialog", () => {
     describe("Payment details", () => {
         it("displays correct amount", () => {
             render(<PaymentWaitingDialog {...mockProps} />);
-            // Check for the formatted price using a function matcher
-            expect(screen.getByText((content) => content.includes("100.000") && content.includes("₫"))).toBeInTheDocument();
+            // formatPrice returns "100.000 ₫" format
+            expect(screen.getByText(/100\.000/)).toBeInTheDocument();
         });
 
         it("displays correct order ID with DH prefix", () => {

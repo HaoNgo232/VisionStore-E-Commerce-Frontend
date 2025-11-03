@@ -15,7 +15,7 @@ import { toast } from "sonner"
 import Link from "next/link"
 import { PaymentMethod, Order, PaymentStatus } from "@/types"
 import { PaymentWaitingDialog } from "@/features/payments/components/payment-waiting-dialog"
-import { PaymentSuccessDialog } from "@/features/payments/components/payment-success-dialog"
+// PaymentSuccessDialog not used anymore - direct redirect instead
 
 export function CheckoutContent() {
     const router = useRouter()
@@ -26,10 +26,8 @@ export function CheckoutContent() {
     const [selectedPayment, setSelectedPayment] = useState<PaymentMethod>(PaymentMethod.COD)
     const [isSubmitting, setIsSubmitting] = useState(false)
 
-    // Dialog states for payment flow separation
+    // Dialog states for payment flow (only waiting dialog used)
     const [waitingDialogOpen, setWaitingDialogOpen] = useState(false)
-    const [successDialogOpen, setSuccessDialogOpen] = useState(false)
-    const [completedOrder, setCompletedOrder] = useState<Order | null>(null)
     const [qrCodeUrl, setQrCodeUrl] = useState<string>("")
     const [paymentId, setPaymentId] = useState<string>("")
     const [createdOrderId, setCreatedOrderId] = useState<string>("")
@@ -124,8 +122,12 @@ export function CheckoutContent() {
     // Dialog handlers for payment flow separation
     const handlePaymentSuccess = async (order: Order) => {
         setWaitingDialogOpen(false)
-        setCompletedOrder(order)
-        setSuccessDialogOpen(true)
+
+        // Show success toast immediately when payment detected
+        toast.success("🎉 Thanh toán thành công!", {
+            description: `Đơn hàng ${order.id} đã được thanh toán`,
+            duration: 5000,
+        })
 
         // Clear cart after successful payment
         try {
@@ -133,6 +135,9 @@ export function CheckoutContent() {
         } catch (e) {
             // Swallow non-critical cart clear errors
         }
+
+        // Redirect immediately to order details page (like COD flow)
+        router.push(`/orders/${order.id}`)
     }
 
     const handlePaymentTimeout = () => {
@@ -143,10 +148,6 @@ export function CheckoutContent() {
     const handlePaymentError = (error: string) => {
         setWaitingDialogOpen(false)
         toast.error(error)
-    }
-
-    const handleViewOrder = (orderId: string) => {
-        router.push(`/orders/${orderId}`)
     }
 
     if (cartLoading || addressesLoading) {
@@ -311,16 +312,6 @@ export function CheckoutContent() {
                 onTimeout={handlePaymentTimeout}
                 onError={handlePaymentError}
             />
-
-            {/* Payment Success Dialog */}
-            {completedOrder && (
-                <PaymentSuccessDialog
-                    open={successDialogOpen}
-                    onClose={() => setSuccessDialogOpen(false)}
-                    order={completedOrder}
-                    onViewOrder={handleViewOrder}
-                />
-            )}
         </div>
     )
 }

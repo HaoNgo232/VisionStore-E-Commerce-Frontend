@@ -8,13 +8,12 @@ import {
     DialogDescription,
     DialogHeader,
     DialogTitle,
+    DialogClose,
 } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertCircle, Clock, Copy, RotateCw, Loader2 } from "lucide-react";
+import { AlertCircle, Clock, Copy, RotateCw, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import { usePaymentPolling } from "../hooks/use-payment-polling";
-import { ordersApi } from "@/features/orders/services/orders.service";
-import type { Order } from "@/types";
 import { formatPrice } from "@/features/products/utils";
 import type { PaymentProcessResponse } from "@/types";
 
@@ -24,7 +23,7 @@ interface PaymentWaitingDialogProps {
     orderId: string;
     payment: PaymentProcessResponse;
     amountInt: number;
-    onSuccess?: (order: Order) => void;
+    onSuccess?: (payment: any) => void;
     onTimeout?: () => void;
     onError?: (error: string) => void;
 }
@@ -44,14 +43,7 @@ export function PaymentWaitingDialog({
 
     const { isPolling, attempts, error, stopPolling } = usePaymentPolling({
         orderId,
-        onSuccess: async () => {
-            try {
-                const order = await ordersApi.getById(orderId);
-                onSuccess?.(order);
-            } catch (e) {
-                onError?.("Không thể tải thông tin đơn hàng sau khi thanh toán");
-            }
-        },
+        onSuccess,
         onTimeout,
         onError,
         enabled: open,
@@ -107,19 +99,26 @@ export function PaymentWaitingDialog({
         }, 1000);
     };
 
-    const handleClose = () => {
-        if (isPolling) {
-            // Prevent closing during polling
+    // Prevent backdrop click from closing dialog when polling
+    const handleOpenChange = (newOpen: boolean) => {
+        if (!newOpen && isPolling) {
+            // Block backdrop click during polling
             return;
         }
+        onOpenChange(newOpen);
+    };
+
+    const handleForceClose = () => {
+        // User can force close even during polling
+        stopPolling();
         onOpenChange(false);
     };
 
     return (
-        <Dialog open={open} onOpenChange={handleClose}>
+        <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogContent
                 className="max-w-2xl max-h-[90vh] overflow-y-auto"
-                showCloseButton={!isPolling} // Hide close button during polling
+                showCloseButton={!isPolling}
             >
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
@@ -160,7 +159,7 @@ export function PaymentWaitingDialog({
                             <div className="space-y-3 rounded-lg bg-gray-50 p-4">
                                 <div className="flex justify-between">
                                     <span className="text-sm text-gray-600">Số tiền</span>
-                                    <span className="font-semibold">{amountVND}</span>
+                                    <span className="font-semibold">{amountVND}₫</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-sm text-gray-600">Mã đơn hàng</span>
@@ -300,6 +299,15 @@ export function PaymentWaitingDialog({
                             )}
                         </CardContent>
                     </Card>
+
+                    {/* Force Close Button */}
+                    <Button
+                        onClick={handleForceClose}
+                        variant="destructive"
+                        className="w-full"
+                    >
+                        Hủy bỏ thanh toán
+                    </Button>
                 </div>
             </DialogContent>
         </Dialog>

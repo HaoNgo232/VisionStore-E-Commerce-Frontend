@@ -41,6 +41,15 @@ export function PaymentSuccessDialog({
         if (open) {
             setIsAnimating(true);
             setCountdown(Math.ceil(redirectDelay / 1000));
+
+            // Play success sound (optional - browser support)
+            try {
+                const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTUIHm7A7+OZTA==');
+                audio.volume = 0.3;
+                audio.play().catch(() => { }); // Ignore if blocked by browser
+            } catch (e) {
+                // Ignore audio errors
+            }
         } else {
             setIsAnimating(false);
         }
@@ -73,25 +82,35 @@ export function PaymentSuccessDialog({
         if (onClose) onClose();
     };
 
+    // Prevent closing dialog during countdown
+    const handleOpenChange = (newOpen: boolean) => {
+        if (!newOpen && countdown > 0 && autoRedirect) {
+            // Prevent closing during auto-redirect countdown
+            return;
+        }
+        handleClose();
+    };
+
     const amountVND = formatPrice(order.totalInt);
 
     return (
-        <Dialog open={open} onOpenChange={handleClose}>
+        <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
                 <DialogHeader className="text-center">
                     <div className="flex justify-center mb-4">
                         <div className={`relative ${isAnimating ? 'animate-bounce' : ''}`}>
-                            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center shadow-lg">
                                 <CheckCircle className="w-10 h-10 text-green-600" data-testid="check-circle-icon" />
                             </div>
-                            {/* Success ripple effect */}
-                            <div className="absolute inset-0 rounded-full border-2 border-green-300 animate-ping opacity-20"></div>
+                            {/* Success ripple effect - multiple layers for better visibility */}
+                            <div className="absolute inset-0 rounded-full border-4 border-green-400 animate-ping opacity-30"></div>
+                            <div className="absolute inset-0 rounded-full border-2 border-green-300 animate-pulse opacity-40" style={{ animationDelay: '0.2s' }}></div>
                         </div>
                     </div>
-                    <DialogTitle className="text-xl font-semibold text-green-700">
+                    <DialogTitle className="text-2xl font-bold text-green-700 mb-2">
                         Thanh toán thành công! 🎉
                     </DialogTitle>
-                    <DialogDescription className="text-muted-foreground">
+                    <DialogDescription className="text-base text-muted-foreground">
                         Đơn hàng của bạn đã được xử lý thành công
                     </DialogDescription>
                 </DialogHeader>
@@ -132,13 +151,15 @@ export function PaymentSuccessDialog({
 
                     {/* Auto-redirect notice */}
                     {autoRedirect && countdown > 0 && (
-                        <div className="text-center p-3 bg-blue-50 rounded-lg border border-blue-200">
-                            <p className="text-sm text-blue-700">
-                                Chuyển đến trang chi tiết đơn hàng sau{" "}
-                                <span className="font-mono font-bold text-blue-800">
-                                    {countdown}s
-                                </span>
-                                ...
+                        <div className="text-center p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border-2 border-blue-300 shadow-sm">
+                            <p className="text-sm font-medium text-blue-800 mb-1">
+                                ⏱️ Tự động chuyển trang sau
+                            </p>
+                            <p className="text-3xl font-bold text-blue-900 tabular-nums">
+                                {countdown}s
+                            </p>
+                            <p className="text-xs text-blue-600 mt-1">
+                                Bạn có thể đóng hoặc xem chi tiết ngay
                             </p>
                         </div>
                     )}
