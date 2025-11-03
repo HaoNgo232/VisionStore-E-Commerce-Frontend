@@ -15,6 +15,7 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { ChevronRight, ShoppingBag } from "lucide-react"
+import { formatPrice } from "@/features/products/utils"
 import type { OrderStatus } from "@/types"
 
 const ORDER_STATUS_CONFIG: Record<OrderStatus, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
@@ -100,7 +101,7 @@ export function OrdersTab() {
                                     </TableCell>
                                     <TableCell className="text-center">{order.items?.length || 0}</TableCell>
                                     <TableCell className="text-right font-semibold">
-                                        {(order.totalInt / 100).toLocaleString("vi-VN")}₫
+                                        {formatPrice(order.totalInt)}
                                     </TableCell>
                                     <TableCell className="text-center">
                                         <Badge variant={ORDER_STATUS_CONFIG[order.status].variant}>

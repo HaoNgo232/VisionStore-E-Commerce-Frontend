@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/breadcrumb"
 import { ShoppingCart, Truck, Shield } from "lucide-react"
 import { useCartStore } from "@/stores/cart.store"
+import { formatPrice } from "@/features/products/utils"
 
 interface ProductDetailContentProps {
     productId: string
@@ -42,7 +43,7 @@ export function ProductDetailContent({ productId }: ProductDetailContentProps) {
         )
     }
 
-    const price = (product.priceInt / 100).toLocaleString("vi-VN")
+    const price = formatPrice(product.priceInt)
     const inStock = product.stock > 0
     const attributes = (product.attributes as Record<string, any>) || {}
 

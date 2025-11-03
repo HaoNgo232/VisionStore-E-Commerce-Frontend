@@ -106,7 +106,7 @@ export function CheckoutContent() {
         return <div className="container py-8">Đang tải...</div>
     }
 
-    const total = cart ? cart.totalInt / 100 : 0
+    const total = cart ? cart.totalInt : 0
 
     return (
         <div className="container py-8">
@@ -203,7 +203,7 @@ export function CheckoutContent() {
                                             </div>
                                         </div>
                                         <p className="font-semibold">
-                                            {((item.product?.priceInt || 0) / 100 * item.quantity).toLocaleString("vi-VN")}₫
+                                            {((item.product?.priceInt || 0) / item.quantity).toLocaleString("vi-VN")}₫
                                         </p>
                                     </div>
                                 ))}

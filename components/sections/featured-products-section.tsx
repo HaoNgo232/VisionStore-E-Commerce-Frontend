@@ -7,6 +7,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { ProductCardSkeleton } from "@/components/skeletons/product-card-skeleton"
 import { ShoppingCart } from "lucide-react"
 import { productsApi } from "@/features/products/services/products.service"
+import { formatPrice } from "@/features/products/utils"
 import type { Product } from "@/types"
 
 export function FeaturedProductsSection() {
@@ -58,7 +59,6 @@ export function FeaturedProductsSection() {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {products && products.length > 0 ? (
             products.map((product) => {
-              const price = product.priceInt / 100;
               const brand = product.attributes?.brand as string | undefined;
 
               return (
@@ -85,7 +85,7 @@ export function FeaturedProductsSection() {
                   <CardFooter className="p-4 pt-0 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="text-lg font-bold">
-                        {price.toLocaleString('vi-VN')} đ
+                        {formatPrice(product.priceInt)}
                       </span>
                     </div>
                     <Button size="icon" variant="outline">

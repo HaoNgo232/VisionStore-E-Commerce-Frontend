@@ -17,6 +17,7 @@ import { CheckCircle } from "lucide-react"
 import { ordersApi } from "@/features/orders/services/orders.service"
 import { paymentsApi } from "@/features/payments/services/payments.service"
 import { useCartStore } from "@/stores/cart.store"
+import { formatPrice } from "@/features/products/utils"
 import { toast } from "sonner"
 import type { Order, PaymentMethod } from "@/types"
 import { SepayQRDisplay } from "@/features/payments/components/sepay-qr-display"
@@ -177,7 +178,7 @@ export default function SuccessPage() {
                       </p>
                       <div className="rounded bg-white p-3 text-sm">
                         <p className="font-semibold">
-                          Tổng tiền: {(order.totalInt / 100).toLocaleString("vi-VN")}₫
+                          Tổng tiền: {formatPrice(order.totalInt)}₫
                         </p>
                       </div>
                       <Button
@@ -260,7 +261,7 @@ export default function SuccessPage() {
                               </p>
                             </div>
                             <p className="font-semibold">
-                              {((item.priceInt || 0) / 100).toLocaleString("vi-VN")}₫
+                              {formatPrice(item.priceInt || 0)}₫
                             </p>
                           </div>
                         ))}
@@ -295,7 +296,7 @@ export default function SuccessPage() {
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Tổng tiền hàng</span>
                       <span>
-                        {((order.totalInt || 0) / 100).toLocaleString("vi-VN")}₫
+                        {formatPrice(order.totalInt || 0)}₫
                       </span>
                     </div>
                     <div className="flex justify-between">
@@ -305,7 +306,7 @@ export default function SuccessPage() {
                     <div className="border-t pt-3 flex justify-between font-semibold text-lg">
                       <span>Tổng cộng</span>
                       <span>
-                        {((order.totalInt || 0) / 100).toLocaleString("vi-VN")}₫
+                        {formatPrice(order.totalInt || 0)}₫
                       </span>
                     </div>
                   </CardContent>

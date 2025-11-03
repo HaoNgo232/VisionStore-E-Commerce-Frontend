@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/command"
 import { Search, ShoppingBag, Home, Mail, User, ShoppingCart, Clock } from "lucide-react"
 import { useProducts } from "@/features/products/hooks/use-products"
+import { formatPrice } from "@/features/products/utils"
 import { useCallback, useEffect, useState } from "react"
 
 const RECENT_SEARCHES_KEY = "recent-searches"
@@ -129,7 +130,7 @@ export function CommandMenu() {
                     )}
                     {!loading && products?.slice(0, 8).map((product) => {
                         const brand = product.attributes?.brand as string | undefined;
-                        const price = (product.priceInt / 100).toLocaleString('vi-VN');
+                        const price = formatPrice(product.priceInt);
 
                         return (
                             <CommandItem

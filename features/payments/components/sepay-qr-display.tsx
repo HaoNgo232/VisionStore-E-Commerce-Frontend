@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { AlertCircle, CheckCircle, Clock, Copy, RotateCw } from "lucide-react"
 import { toast } from "sonner"
 import { usePaymentStatus } from "@/features/payments/hooks/use-payment-status"
+import { formatPrice } from "@/features/products/utils"
 import type { PaymentProcessResponse } from "@/types"
 
 interface SepayQRDisplayProps {
@@ -44,7 +45,7 @@ export function SepayQRDisplay({
     const [attempts, setAttempts] = useState(0)
     const [isRetrying, setIsRetrying] = useState(false)
 
-    const amountVND = (amountInt / 100).toLocaleString("vi-VN")
+    const amountVND = formatPrice(amountInt)
     const maxTimeout = 900 // 15 minutes in seconds
     const progressPercent = ((maxTimeout - timeRemaining) / maxTimeout) * 100
 
