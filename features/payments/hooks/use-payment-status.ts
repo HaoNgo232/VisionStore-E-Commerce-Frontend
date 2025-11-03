@@ -32,8 +32,8 @@ interface UsePaymentStatusResult {
  * const { payment, isPaid, loading } = usePaymentStatus({
  *   orderId: "order_123",
  *   autoStart: true,
- *   pollInterval: 3000,
- *   maxAttempts: 40 // 2 minutes
+ *   pollInterval: 5000, // 5 giây
+ *   maxAttempts: 180 // 15 phút (5s * 180 = 900s)
  * });
  *
  * if (isPaid) {
@@ -47,8 +47,8 @@ export function usePaymentStatus(
   const {
     orderId,
     autoStart = false,
-    pollInterval = 3000, // 3 seconds
-    maxAttempts = 300, // 15 minutes max
+    pollInterval = 5000, // 5 seconds - tránh spam API
+    maxAttempts = 180, // 15 minutes max (5s * 180 = 900s = 15min)
   } = options;
 
   const [payment, setPayment] = useState<Payment | null>(null);
