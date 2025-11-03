@@ -371,6 +371,8 @@ export function use[Domain]() {
 - Decode userId từ JWT token khi cần trong service layer
 - Check userId exists trước khi gửi API request
 - Validate userId not null/undefined
+- Using pnpm instead npm
+- Using Shadcn MCP môi khi làm các tác vụ liên quan đến UI
 
 ## Session Notes
 

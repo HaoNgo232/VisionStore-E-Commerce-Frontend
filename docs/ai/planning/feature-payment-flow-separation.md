@@ -12,7 +12,7 @@ created: 2025-11-03
 
 **What are the major checkpoints?**
 
-- [ ] **Milestone 1: Foundation** (Day 1-2) - Status badges + polling hook
+- [x] **Milestone 1: Foundation** (Day 1-2) - Status badges + polling hook
 - [ ] **Milestone 2: Core Dialogs** (Day 3-4) - PaymentWaitingDialog + PaymentSuccessDialog
 - [ ] **Milestone 3: Integration** (Day 5-6) - Refactor checkout + success page
 - [ ] **Milestone 4: Testing & Polish** (Day 7) - E2E tests + bug fixes
