@@ -182,7 +182,7 @@ export default function OrderDetailPage() {
                                     </div>
                                     <div>
                                         <p className="text-sm text-muted-foreground">Tổng tiền</p>
-                                        <p className="font-semibold text-lg">{formatPrice(order.totalInt)}₫</p>
+                                        <p className="font-semibold text-lg">{formatPrice(order.totalInt)}</p>
                                     </div>
                                 </div>
                             </CardContent>
@@ -211,12 +211,12 @@ export default function OrderDetailPage() {
                                                         Số lượng: {item.quantity}
                                                     </p>
                                                     <p className="text-sm text-muted-foreground">
-                                                        Giá: {formatPrice(item.priceInt || 0)}₫/cái
+                                                        Giá: {formatPrice(item.priceInt || 0)}/cái
                                                     </p>
                                                 </div>
                                                 <div className="text-right">
                                                     <p className="font-semibold">
-                                                        {formatPrice((item.priceInt || 0) * item.quantity)}₫
+                                                        {formatPrice((item.priceInt || 0) * item.quantity)}
                                                     </p>
                                                 </div>
                                             </div>
@@ -251,7 +251,7 @@ export default function OrderDetailPage() {
                             <CardContent className="space-y-3">
                                 <div className="flex justify-between">
                                     <span className="text-muted-foreground">Tổng tiền hàng</span>
-                                    <span className="font-medium">{formatPrice(order.totalInt || 0)}₫</span>
+                                    <span className="font-medium">{formatPrice(order.totalInt || 0)}</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-muted-foreground">Phí vận chuyển</span>
@@ -259,7 +259,7 @@ export default function OrderDetailPage() {
                                 </div>
                                 <div className="border-t pt-3 flex justify-between font-semibold text-lg">
                                     <span>Tổng cộng</span>
-                                    <span>{formatPrice(order.totalInt || 0)}₫</span>
+                                    <span>{formatPrice(order.totalInt || 0)}</span>
                                 </div>
                             </CardContent>
                         </Card>

@@ -12,14 +12,12 @@ import type {
 } from "@/types";
 import { useAuthStore } from "@/stores/auth.store";
 
-const userId = useAuthStore.getState().getUserId();
-
-if (!userId) {
-  throw new Error("User not authenticated - userId is missing");
-}
-
 export const ordersApi = {
   async getAll(): Promise<PaginatedOrdersResponse> {
+    const userId = useAuthStore.getState().getUserId();
+    if (!userId) {
+      throw new Error("User not authenticated - userId is missing");
+    }
     return apiGet<PaginatedOrdersResponse>("/orders", {
       params: { userId },
     });
@@ -30,6 +28,10 @@ export const ordersApi = {
   },
 
   async create(data: CreateOrderRequest): Promise<Order> {
+    const userId = useAuthStore.getState().getUserId();
+    if (!userId) {
+      throw new Error("User not authenticated - userId is missing");
+    }
     return apiPost<Order>("/orders", {
       ...data,
       userId,

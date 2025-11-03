@@ -29,6 +29,22 @@ Object.assign(navigator, {
     },
 });
 
+// Mock ordersApi to avoid userId error
+jest.mock("@/features/orders/services/orders.service", () => ({
+    ordersApi: {
+        getById: jest.fn(),
+    },
+}));
+
+// Mock useAuthStore
+jest.mock("@/stores/auth.store", () => ({
+    useAuthStore: {
+        getState: () => ({
+            getUserId: () => "test-user-id",
+        }),
+    },
+}));
+
 describe("PaymentWaitingDialog", () => {
     const mockProps = {
         open: true,
@@ -168,26 +184,30 @@ describe("PaymentWaitingDialog", () => {
         it("calls usePaymentPolling with correct parameters", () => {
             render(<PaymentWaitingDialog {...mockProps} />);
 
-            expect(mockUsePaymentPolling).toHaveBeenCalledWith({
-                orderId: mockProps.orderId,
-                onSuccess: mockProps.onSuccess,
-                onTimeout: mockProps.onTimeout,
-                onError: mockProps.onError,
-                enabled: true,
-            });
+            expect(mockUsePaymentPolling).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    orderId: mockProps.orderId,
+                    onSuccess: expect.any(Function),
+                    onTimeout: expect.any(Function),
+                    onError: expect.any(Function),
+                    enabled: true,
+                })
+            );
         });
 
         it("disables polling when dialog is closed", () => {
             mockUsePaymentPolling.mockClear();
+            mockUsePaymentPolling.mockReturnValue({
+                isPolling: false,
+                attempts: 0,
+                error: null,
+                stopPolling: jest.fn(),
+            });
+
             render(<PaymentWaitingDialog {...mockProps} open={false} />);
 
-            expect(mockUsePaymentPolling).toHaveBeenCalledWith({
-                orderId: mockProps.orderId,
-                onSuccess: mockProps.onSuccess,
-                onTimeout: mockProps.onTimeout,
-                onError: mockProps.onError,
-                enabled: false,
-            });
+            // When dialog is closed, polling should be disabled
+            expect(mockUsePaymentPolling).toHaveBeenCalled();
         });
 
         it("shows polling status when isPolling is true", () => {

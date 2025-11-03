@@ -42,7 +42,7 @@ export function CartSummary({
         </div>
         <div className="flex items-center justify-between">
           <span className="text-muted-foreground">Vận chuyển</span>
-          <span className="font-medium">{shippingFree ? "Miễn phí" : formatPrice(shipping) + "₫"}</span>
+          <span className="font-medium">{shippingFree ? "Miễn phí" : formatPrice(shipping) + ""}</span>
         </div>
         <Separator />
         <div className="flex items-center justify-between text-lg">

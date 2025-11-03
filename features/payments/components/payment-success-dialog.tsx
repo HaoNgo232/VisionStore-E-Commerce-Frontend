@@ -113,7 +113,7 @@ export function PaymentSuccessDialog({
                             </div>
                             <div className="flex justify-between items-center">
                                 <span className="text-sm text-green-700">Tổng tiền</span>
-                                <span className="font-semibold text-green-800">{amountVND}₫</span>
+                                <span className="font-semibold text-green-800">{amountVND}</span>
                             </div>
                             <div className="flex justify-between items-center">
                                 <span className="text-sm text-green-700">Phương thức</span>

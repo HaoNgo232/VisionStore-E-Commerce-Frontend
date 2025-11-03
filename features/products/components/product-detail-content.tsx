@@ -126,7 +126,7 @@ export function ProductDetailContent({ productId }: ProductDetailContentProps) {
 
                     {/* Price */}
                     <div className="space-y-2">
-                        <span className="text-4xl font-bold">{price}₫</span>
+                        <span className="text-4xl font-bold">{price}</span>
                         <p className="text-muted-foreground">SKU: {product.sku}</p>
                     </div>
 

@@ -147,7 +147,7 @@ export default function SuccessPage() {
                       </p>
                       <div className="rounded bg-white p-3 text-sm">
                         <p className="font-semibold">
-                          Tổng tiền: {formatPrice(order.totalInt)}₫
+                          Tổng tiền: {formatPrice(order.totalInt)}
                         </p>
                       </div>
                       <Button
@@ -211,7 +211,7 @@ export default function SuccessPage() {
                               </p>
                             </div>
                             <p className="font-semibold">
-                              {formatPrice(item.priceInt || 0)}₫
+                              {formatPrice(item.priceInt || 0)}
                             </p>
                           </div>
                         ))}
@@ -246,7 +246,7 @@ export default function SuccessPage() {
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Tổng tiền hàng</span>
                       <span>
-                        {formatPrice(order.totalInt || 0)}₫
+                        {formatPrice(order.totalInt || 0)}
                       </span>
                     </div>
                     <div className="flex justify-between">
@@ -256,7 +256,7 @@ export default function SuccessPage() {
                     <div className="border-t pt-3 flex justify-between font-semibold text-lg">
                       <span>Tổng cộng</span>
                       <span>
-                        {formatPrice(order.totalInt || 0)}₫
+                        {formatPrice(order.totalInt || 0)}
                       </span>
                     </div>
                   </CardContent>

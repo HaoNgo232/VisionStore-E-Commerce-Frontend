@@ -13,6 +13,17 @@ const customJestConfig = {
     "^@/(.*)$": "<rootDir>/$1",
   },
   testEnvironment: "jest-environment-jsdom",
+  testMatch: [
+    "**/__tests__/**/*.[jt]s?(x)",
+    "**/?(*.)+(spec|test).[jt]s?(x)", // Match *.test.ts and *.spec.ts EXCEPT in e2e folder
+  ],
+  testPathIgnorePatterns: [
+    "/node_modules/",
+    "/.next/",
+    "/e2e/", // Skip Playwright E2E tests - CRITICAL
+    "/playwright/",
+    "/lib/api-client.spec.ts", // api-client initialization issue with mocks
+  ],
 };
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async

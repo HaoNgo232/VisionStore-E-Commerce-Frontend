@@ -130,7 +130,7 @@ export function SepayQRDisplay({
                     <div className="space-y-3 rounded-lg bg-gray-50 p-4">
                         <div className="flex justify-between">
                             <span className="text-sm text-gray-600">Số tiền</span>
-                            <span className="font-semibold">{amountVND}₫</span>
+                            <span className="font-semibold">{amountVND}</span>
                         </div>
                         <div className="flex justify-between">
                             <span className="text-sm text-gray-600">Mã đơn hàng</span>

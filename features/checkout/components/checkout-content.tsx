@@ -250,7 +250,7 @@ export function CheckoutContent() {
                                             </div>
                                         </div>
                                         <p className="font-semibold">
-                                            {((item.product?.priceInt || 0) / item.quantity).toLocaleString("vi-VN")}₫
+                                            {((item.product?.priceInt || 0) / item.quantity).toLocaleString("vi-VN")}
                                         </p>
                                     </div>
                                 ))}
@@ -268,7 +268,7 @@ export function CheckoutContent() {
                         <CardContent className="space-y-4">
                             <div className="flex justify-between">
                                 <span className="text-muted-foreground">Tạm tính</span>
-                                <span className="font-medium">{total.toLocaleString("vi-VN")}₫</span>
+                                <span className="font-medium">{total.toLocaleString("vi-VN")}</span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-muted-foreground">Vận chuyển</span>
@@ -276,7 +276,7 @@ export function CheckoutContent() {
                             </div>
                             <div className="border-t pt-4 flex justify-between text-lg">
                                 <span className="font-semibold">Tổng cộng</span>
-                                <span className="font-bold">{total.toLocaleString("vi-VN")}₫</span>
+                                <span className="font-bold">{total.toLocaleString("vi-VN")}</span>
                             </div>
 
                             <Button
