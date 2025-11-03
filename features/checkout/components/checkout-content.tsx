@@ -6,6 +6,7 @@ import { useCart } from "@/features/cart/hooks/use-cart"
 import { useAddresses } from "@/features/addresses/hooks/use-addresses"
 import { useAuth } from "@/features/auth/hooks/use-auth"
 import { ordersApi } from "@/features/orders/services/orders.service"
+import { paymentsApi } from "@/features/payments/services/payments.service"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
@@ -19,7 +20,7 @@ import { PaymentSuccessDialog } from "@/features/payments/components/payment-suc
 export function CheckoutContent() {
     const router = useRouter()
     const { isAuthenticated } = useAuth()
-    const { cart, loading: cartLoading } = useCart()
+    const { cart, loading: cartLoading, clearCart } = useCart()
     const { addresses, loading: addressesLoading } = useAddresses()
     const [selectedAddressId, setSelectedAddressId] = useState<string>("")
     const [selectedPayment, setSelectedPayment] = useState<PaymentMethod>(PaymentMethod.COD)
@@ -31,6 +32,7 @@ export function CheckoutContent() {
     const [completedOrder, setCompletedOrder] = useState<Order | null>(null)
     const [qrCodeUrl, setQrCodeUrl] = useState<string>("")
     const [paymentId, setPaymentId] = useState<string>("")
+    const [createdOrderId, setCreatedOrderId] = useState<string>("")
 
     // Check if user logged in - use isAuthenticated instead of checking !user
     if (!isAuthenticated) {
@@ -105,10 +107,11 @@ export function CheckoutContent() {
                 // COD flow: redirect to success page
                 router.push(`/cart/success?orderId=${order.id}&paymentMethod=${selectedPayment}`)
             } else if (selectedPayment === PaymentMethod.SEPAY) {
-                // SePay flow: open waiting dialog
-                // TODO: Get paymentId and qrCodeUrl from order response
-                // setPaymentId(order.paymentId || "")
-                // setQrCodeUrl(order.qrCodeUrl || "")
+                // SePay flow: process payment to get QR, then open waiting dialog
+                setCreatedOrderId(order.id)
+                const payment = await paymentsApi.process(order.id, PaymentMethod.SEPAY, cart.totalInt)
+                setPaymentId(payment.paymentId)
+                setQrCodeUrl(payment.qrCode || "")
                 setWaitingDialogOpen(true)
             }
         } catch (err) {
@@ -126,7 +129,11 @@ export function CheckoutContent() {
         setSuccessDialogOpen(true)
 
         // Clear cart after successful payment
-        // TODO: Implement cart clearing
+        try {
+            await clearCart()
+        } catch (e) {
+            // Swallow non-critical cart clear errors
+        }
     }
 
     const handlePaymentTimeout = () => {
@@ -294,10 +301,10 @@ export function CheckoutContent() {
             <PaymentWaitingDialog
                 open={waitingDialogOpen}
                 onOpenChange={setWaitingDialogOpen}
-                orderId={completedOrder?.id || ""}
+                orderId={createdOrderId}
                 payment={{
                     paymentId: paymentId,
-                    status: "PENDING" as PaymentStatus,
+                    status: PaymentStatus.UNPAID,
                     qrCode: qrCodeUrl,
                 }}
                 amountInt={cart?.totalInt || 0}

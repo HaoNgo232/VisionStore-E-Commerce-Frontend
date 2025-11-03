@@ -14,7 +14,7 @@ created: 2025-11-03
 
 - [x] **Milestone 1: Foundation** (Day 1-2) - Status badges + polling hook
 - [x] **Milestone 2: Core Dialogs** (Day 3-4) - PaymentWaitingDialog + PaymentSuccessDialog ✅ COMPLETED
-- [ ] **Milestone 3: Integration** (Day 5-6) - Refactor checkout + success page
+- [~] **Milestone 3: Integration** (Day 5-6) - Refactor checkout + success page
 - [ ] **Milestone 4: Testing & Polish** (Day 7) - E2E tests + bug fixes
 
 **Target Completion**: 7 days (Nov 3 - Nov 9, 2025)
@@ -231,25 +231,25 @@ created: 2025-11-03
 
 **Subtasks**:
 
-- [ ] Add state for dialog visibility
+- [x] Add state for dialog visibility
   ```typescript
   const [waitingDialogOpen, setWaitingDialogOpen] = useState(false);
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
   const [completedOrder, setCompletedOrder] = useState<Order | null>(null);
   ```
-- [ ] Split handleCheckout logic:
+- [x] Split handleCheckout logic:
   - COD: redirect to `/cart/success`
   - SePay: open PaymentWaitingDialog
-- [ ] Add PaymentWaitingDialog component
-- [ ] Add PaymentSuccessDialog component
-- [ ] Implement onSuccess handler:
+- [x] Add PaymentWaitingDialog component
+- [x] Add PaymentSuccessDialog component
+- [x] Implement onSuccess handler:
   - Close waiting dialog
   - Fetch full order data
   - Open success dialog
-- [ ] Implement onTimeout handler:
+- [x] Implement onTimeout handler:
   - Show toast error
   - Optionally redirect to orders page
-- [ ] Update error handling
+- [x] Update error handling
 - [ ] Write integration tests
   - Test COD flow (end-to-end)
   - Test SePay flow (end-to-end)
@@ -265,7 +265,7 @@ created: 2025-11-03
 - ✅ Handles errors gracefully
 - ✅ Integration tests pass
 
-**Estimate**: 4 hours
+**Estimate**: 4 hours | **Status**: ✅ Completed (code merged)
 
 ---
 
@@ -275,23 +275,23 @@ created: 2025-11-03
 
 **Subtasks**:
 
-- [ ] Add payment method check
+- [x] Add payment method check
   ```typescript
   const paymentMethod = searchParams.get("paymentMethod");
   if (paymentMethod !== "COD") {
     redirect("/orders"); // SePay should not reach here
   }
   ```
-- [ ] Remove SePay-specific logic:
+- [x] Remove SePay-specific logic:
   - Remove SepayQRDisplay component
   - Remove payment status polling
-- [ ] Keep COD logic:
+- [x] Keep COD logic:
   - Fetch order
   - Clear cart
   - Show success message
   - Display order summary
-- [ ] Add OrderStatusBadge
-- [ ] Add PaymentStatusBadge (show "Chờ thanh toán")
+- [x] Add OrderStatusBadge
+- [x] Add PaymentStatusBadge (show "Chờ thanh toán")
 - [ ] Write unit tests
   - Test COD flow renders correctly
   - Test SePay redirects away
@@ -307,7 +307,7 @@ created: 2025-11-03
 - ✅ Cart is cleared
 - ✅ Tests pass
 
-**Estimate**: 2 hours
+**Estimate**: 2 hours | **Status**: ✅ Completed (code merged)
 
 ---
 
@@ -688,26 +688,23 @@ Task 3.4 (Order List) ← depends on Task 1.1, 1.2 (badges)
 
 ## Next Steps
 
-**Current Status**: Milestone 2/4 Complete ✅
+**Current Status**: Milestone 3/4 In Progress ✅ (Task 3.1 done)
 
 **Completed**:
 
 - ✅ Task 1.1-1.4: Foundation components (OrderStatusBadge, PaymentStatusBadge, usePaymentPolling, types)
 - ✅ Task 2.2: PaymentSuccessDialog component with full test coverage
 
-**Next**: Start Milestone 3 - Integration Phase
+**Next**: Continue Milestone 3 - Integration Phase
 
-1. ⏭️ **IMMEDIATE**: Task 3.1 - Refactor CheckoutContent Component (4h)
+1. ⏭️ **IMMEDIATE**: Task 3.2 - Update Success Page (2h)
 
-   - Integrate PaymentWaitingDialog + PaymentSuccessDialog
-   - Replace current payment flow with new dialog-based approach
-   - Update state management for payment status tracking
+   - Make `/cart/success` COD-only (redirect SePay to /orders)
+   - Fetch order, clear cart, show badges
 
-2. ⏭️ **THEN**: Task 3.2 - Update Success Page (2h)
+2. ⏭️ **THEN**: Task 3.3 - Create/Update Order Detail Page (3h)
 
-   - Remove payment logic from success page
-   - Add redirect to order details
-   - Clean up unused payment code
+   - Ensure `/orders/:id` shows badges and full details
 
 3. ⏭️ **FINAL**: Milestone 4 - Testing & Polish (Day 7)
    - E2E tests for complete payment flow

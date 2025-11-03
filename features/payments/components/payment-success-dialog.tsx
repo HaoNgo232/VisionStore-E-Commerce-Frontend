@@ -117,9 +117,7 @@ export function PaymentSuccessDialog({
                             </div>
                             <div className="flex justify-between items-center">
                                 <span className="text-sm text-green-700">Phương thức</span>
-                                <span className="font-semibold text-green-800">
-                                    {order.paymentStatus === "PAID" ? "SePay QR" : "Thanh toán khi nhận hàng"}
-                                </span>
+                                <span className="font-semibold text-green-800">SePay QR</span>
                             </div>
                             <div className="flex justify-between items-center">
                                 <span className="text-sm text-green-700">Trạng thái đơn hàng</span>

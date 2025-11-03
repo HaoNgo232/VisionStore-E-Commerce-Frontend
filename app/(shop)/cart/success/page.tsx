@@ -15,12 +15,13 @@ import {
 } from "@/components/ui/breadcrumb"
 import { CheckCircle } from "lucide-react"
 import { ordersApi } from "@/features/orders/services/orders.service"
-import { paymentsApi } from "@/features/payments/services/payments.service"
+// COD-only success page: no payment processing here
 import { useCartStore } from "@/stores/cart.store"
 import { formatPrice } from "@/features/products/utils"
 import { toast } from "sonner"
 import type { Order, PaymentMethod } from "@/types"
-import { SepayQRDisplay } from "@/features/payments/components/sepay-qr-display"
+import { OrderStatusBadge } from "@/features/orders/components/order-status-badge"
+import { PaymentStatusBadge } from "@/features/payments/components/payment-status-badge"
 
 export default function SuccessPage() {
   const router = useRouter()
@@ -31,8 +32,14 @@ export default function SuccessPage() {
   const paymentMethod = (searchParams.get("paymentMethod") as PaymentMethod) || "COD"
 
   const [order, setOrder] = useState<Order | null>(null)
-  const [paymentResponse, setPaymentResponse] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+
+  // Redirect non-COD payments away from this page
+  useEffect(() => {
+    if (paymentMethod !== "COD") {
+      router.push("/orders")
+    }
+  }, [paymentMethod, router])
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -46,9 +53,6 @@ export default function SuccessPage() {
         const fetchedOrder = await ordersApi.getById(orderId)
         setOrder(fetchedOrder)
         clearCart()
-
-        // Auto-process payment immediately after order is fetched
-        await processPaymentAuto(fetchedOrder)
       } catch (error) {
         console.error("Lỗi khi tải đơn hàng:", error)
         toast.error("Không thể tải chi tiết đơn hàng")
@@ -61,28 +65,7 @@ export default function SuccessPage() {
     fetchOrder()
   }, [orderId, router, clearCart])
 
-  /**
-   * Auto-process payment after order is fetched
-   * No user action needed - payment UI renders automatically
-   */
-  const processPaymentAuto = async (orderData: Order) => {
-    try {
-      const response = await paymentsApi.process(
-        orderId!,
-        paymentMethod,
-        orderData.totalInt
-      )
-
-      setPaymentResponse(response)
-
-      if (paymentMethod === "COD") {
-        toast.success("Đơn hàng đã được tạo. Bạn sẽ thanh toán khi nhận hàng.")
-      }
-    } catch (error: any) {
-      console.error("Payment processing error:", error)
-      toast.error(error.message || "Lỗi xử lý thanh toán")
-    }
-  }
+  // No payment processing here; SePay flow is handled via dialogs on checkout
 
   if (loading) {
     return (
@@ -152,22 +135,8 @@ export default function SuccessPage() {
               </div>
 
               <div className="lg:col-span-2 space-y-6">
-                {/* SePay QR Display */}
-                {paymentResponse && paymentMethod === "SEPAY" && (
-                  <SepayQRDisplay
-                    orderId={orderId!}
-                    payment={paymentResponse}
-                    amountInt={order.totalInt}
-                    onPaymentSuccess={() => {
-                      setTimeout(() => {
-                        router.push(`/profile#orders`)
-                      }, 2000)
-                    }}
-                  />
-                )}
-
                 {/* COD Confirmation */}
-                {paymentResponse && paymentMethod === "COD" && (
+                {paymentMethod === "COD" && (
                   <Card className="border-green-200 bg-green-50">
                     <CardHeader>
                       <CardTitle className="text-green-700">Thanh toán khi nhận hàng</CardTitle>
@@ -184,27 +153,10 @@ export default function SuccessPage() {
                       <Button
                         variant="default"
                         className="w-full"
-                        onClick={() => router.push(`/profile#orders`)}
+                        onClick={() => router.push(`/orders/${order.id}`)}
                       >
                         Xem chi tiết đơn hàng
                       </Button>
-                    </CardContent>
-                  </Card>
-                )}
-
-                {/* Payment Loading State */}
-                {!paymentResponse && loading === false && (
-                  <Card className="border-yellow-200 bg-yellow-50">
-                    <CardHeader>
-                      <CardTitle className="text-yellow-800">Đang xử lý thanh toán...</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center gap-3">
-                        <div className="h-6 w-6 rounded-full border-2 border-yellow-300 border-t-yellow-600 animate-spin" />
-                        <p className="text-sm text-yellow-700">
-                          Hệ thống đang chuẩn bị thanh toán, vui lòng chờ...
-                        </p>
-                      </div>
                     </CardContent>
                   </Card>
                 )}
@@ -225,14 +177,12 @@ export default function SuccessPage() {
                         </p>
                       </div>
                       <div>
-                        <p className="text-sm text-muted-foreground">Trạng thái</p>
-                        <p className="font-semibold capitalize">{order.status}</p>
+                        <p className="text-sm text-muted-foreground">Trạng thái đơn hàng</p>
+                        <OrderStatusBadge status={order.status} />
                       </div>
                       <div>
-                        <p className="text-sm text-muted-foreground">Phương thức thanh toán</p>
-                        <p className="font-semibold">
-                          {paymentMethod === "COD" ? "Thanh toán khi nhận" : "Chuyển khoản"}
-                        </p>
+                        <p className="text-sm text-muted-foreground">Trạng thái thanh toán</p>
+                        <PaymentStatusBadge status={order.paymentStatus} />
                       </div>
                     </div>
                   </CardContent>

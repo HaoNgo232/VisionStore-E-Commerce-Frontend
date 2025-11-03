@@ -178,7 +178,7 @@ interface UsePaymentPollingOptions {
 }
 
 export function usePaymentPolling(
-  paymentId: string,
+  orderId: string,
   options: UsePaymentPollingOptions = {},
 ) {
   const {
@@ -189,7 +189,6 @@ export function usePaymentPolling(
     onError,
   } = options;
 
-  const [status, setStatus] = useState<PaymentStatus>(PaymentStatus.UNPAID);
   const [isPolling, setIsPolling] = useState(false);
   const [attempts, setAttempts] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -198,15 +197,13 @@ export function usePaymentPolling(
   const retryCountRef = useRef(0);
 
   useEffect(() => {
-    if (!paymentId) return;
+    if (!orderId) return;
 
     setIsPolling(true);
 
     const poll = async () => {
       try {
-        const payment = await paymentsApi.getStatus(paymentId);
-
-        setStatus(payment.status);
+        const payment = await paymentsApi.getByOrder(orderId);
         setAttempts((prev) => prev + 1);
         retryCountRef.current = 0; // Reset retry on success
 
@@ -241,7 +238,7 @@ export function usePaymentPolling(
     return () => {
       stopPolling();
     };
-  }, [paymentId, interval, maxAttempts]);
+  }, [orderId, interval, maxAttempts]);
 
   const stopPolling = () => {
     if (intervalRef.current) {
@@ -251,13 +248,7 @@ export function usePaymentPolling(
     setIsPolling(false);
   };
 
-  return {
-    status,
-    isPolling,
-    attempts,
-    error,
-    stopPolling, // Allow manual stop
-  };
+  return { isPolling, attempts, error, stopPolling };
 }
 ```
 
@@ -386,9 +377,8 @@ export function PaymentWaitingDialog({
   const [timeLeft, setTimeLeft] = useState(15 * 60); // 15 minutes in seconds
 
   // Start polling
-  const { status, isPolling, attempts, error } = usePaymentPolling(paymentId, {
-    onSuccess: async (payment) => {
-      // Fetch full order data
+  const { isPolling, attempts, error } = usePaymentPolling(orderId, {
+    onSuccess: async () => {
       const order = await ordersApi.getById(orderId);
       onSuccess(order);
     },
@@ -469,7 +459,7 @@ export function PaymentWaitingDialog({
 
 **Key Points**:
 
-- `hideClose` prop prevents closing dialog during payment
+- Ẩn nút đóng khi đang polling để tránh đóng dialog giữa chừng
 - Countdown timer runs independently of polling
 - Fetch full order data on success (for PaymentSuccessDialog)
 - Error state displayed inline (no retry button yet, can add)
@@ -662,9 +652,11 @@ export function CheckoutContent() {
         // COD flow: redirect to success page
         router.push(`/cart/success?orderId=${order.id}&paymentMethod=COD`);
       } else if (selectedPayment === "SEPAY") {
-        // SePay flow: open waiting dialog
-        setPaymentId(order.paymentId || "");
-        setQrCodeUrl(order.qrCodeUrl || "");
+        // SePay flow: process payment to get QR then open dialog
+        const payment = await paymentsApi.process(order.id, "SEPAY", totalInt);
+        setCreatedOrderId(order.id);
+        setPaymentId(payment.paymentId || "");
+        setQrCodeUrl(payment.qrCode || "");
         setWaitingDialogOpen(true);
       }
     } catch (error) {

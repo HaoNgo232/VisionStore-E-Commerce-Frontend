@@ -224,17 +224,17 @@ sequenceDiagram
     OrderAPI-->>Checkout: Order created (id, paymentId)
 
     Checkout->>WaitingDialog: Open dialog with QR
-    WaitingDialog->>PaymentAPI: Start polling /payments/:id/status
+    WaitingDialog->>PaymentAPI: Start polling /payments/order/:orderId
 
     loop Every 5 seconds (max 180 times)
-        WaitingDialog->>PaymentAPI: GET /payments/:id/status
+        WaitingDialog->>PaymentAPI: GET /payments/order/:orderId
         PaymentAPI-->>WaitingDialog: {status: 'UNPAID'}
     end
 
     Note over PaymentAPI: User transfers money
     Note over PaymentAPI: Webhook updates DB
 
-    WaitingDialog->>PaymentAPI: GET /payments/:id/status
+    WaitingDialog->>PaymentAPI: GET /payments/order/:orderId
     PaymentAPI-->>WaitingDialog: {status: 'PAID'}
 
     WaitingDialog->>SuccessDialog: Close waiting, open success
@@ -280,7 +280,7 @@ Response: {
 #### 2. Get Payment Status (polling endpoint)
 
 ```typescript
-GET /api/payments/:id/status
+GET /api/payments/order/:orderId
 
 Response: {
   id: string;
@@ -326,9 +326,9 @@ Response: {
 ```typescript
 // features/payments/services/payments.service.ts
 export const paymentsApi = {
-  // Get payment status (polling)
-  async getStatus(paymentId: string): Promise<PaymentStatusResponse> {
-    return apiGet<PaymentStatusResponse>(`/payments/${paymentId}/status`);
+  // Get payment status by order (polling)
+  async getByOrder(orderId: string): Promise<Payment> {
+    return apiGet<Payment>(`/payments/order/${orderId}`);
   },
 
   // Process payment (existing, for COD)
@@ -378,12 +378,13 @@ export const ordersApi = {
 ```typescript
 interface PaymentWaitingDialogProps {
   open: boolean;
+  onOpenChange: (open: boolean) => void;
   orderId: string;
-  paymentId: string;
-  qrCodeUrl: string;
-  onSuccess: (order: Order) => void;
-  onTimeout: () => void;
-  onError: (error: string) => void;
+  payment: PaymentProcessResponse; // includes paymentId, qrCode
+  amountInt: number;
+  onSuccess?: (order: Order) => void;
+  onTimeout?: () => void;
+  onError?: (error: string) => void;
 }
 ```
 
@@ -393,7 +394,7 @@ interface PaymentWaitingDialogProps {
 - Show order amount and ID
 - Countdown timer (15 minutes)
 - Manual account info (for copy-paste)
-- Polling status every 5s
+- Polling status every 5s (by orderId)
 - Loading state indicator
 - Cannot be dismissed (modal)
 
@@ -517,21 +518,15 @@ const statusConfig = {
 
   ```typescript
   const handleCheckout = async () => {
-    // Create order (same)
     const order = await ordersApi.create(data);
-
-    // Branch based on payment method
     if (selectedPayment === "COD") {
-      // COD flow: redirect to success page
       router.push(`/cart/success?orderId=${order.id}&paymentMethod=COD`);
     } else if (selectedPayment === "SEPAY") {
-      // SePay flow: open waiting dialog
-      setWaitingDialogState({
-        open: true,
-        orderId: order.id,
-        paymentId: order.paymentId,
-        qrCodeUrl: order.qrCodeUrl,
-      });
+      const payment = await paymentsApi.process(order.id, "SEPAY", totalInt);
+      setWaitingDialogOpen(true);
+      setCreatedOrderId(order.id);
+      setPaymentId(payment.paymentId);
+      setQrCodeUrl(payment.qrCode || "");
     }
   };
   ```

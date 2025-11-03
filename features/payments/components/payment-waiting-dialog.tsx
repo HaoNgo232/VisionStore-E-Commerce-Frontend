@@ -13,6 +13,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertCircle, Clock, Copy, RotateCw, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { usePaymentPolling } from "../hooks/use-payment-polling";
+import { ordersApi } from "@/features/orders/services/orders.service";
+import type { Order } from "@/types";
 import { formatPrice } from "@/features/products/utils";
 import type { PaymentProcessResponse } from "@/types";
 
@@ -22,7 +24,7 @@ interface PaymentWaitingDialogProps {
     orderId: string;
     payment: PaymentProcessResponse;
     amountInt: number;
-    onSuccess?: (payment: any) => void;
+    onSuccess?: (order: Order) => void;
     onTimeout?: () => void;
     onError?: (error: string) => void;
 }
@@ -42,7 +44,14 @@ export function PaymentWaitingDialog({
 
     const { isPolling, attempts, error, stopPolling } = usePaymentPolling({
         orderId,
-        onSuccess,
+        onSuccess: async () => {
+            try {
+                const order = await ordersApi.getById(orderId);
+                onSuccess?.(order);
+            } catch (e) {
+                onError?.("Không thể tải thông tin đơn hàng sau khi thanh toán");
+            }
+        },
         onTimeout,
         onError,
         enabled: open,
