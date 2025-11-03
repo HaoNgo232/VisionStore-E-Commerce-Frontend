@@ -8,6 +8,7 @@ import { ShoppingCart } from "lucide-react"
 import { useState } from "react"
 import type { Product } from "@/types"
 import { useCartStore } from "@/stores/cart.store"
+import { formatPrice } from "@/features/products/utils"
 
 interface ProductCardProps {
   product: Product
@@ -17,7 +18,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const [isAdding, setIsAdding] = useState(false)
   const addItem = useCartStore((state) => state.addItem)
 
-  const price = (product.priceInt / 100).toLocaleString("vi-VN")
+  const price = formatPrice(product.priceInt)
   const inStock = product.stock > 0
 
   const handleAddToCart = async () => {
@@ -57,7 +58,7 @@ export function ProductCard({ product }: ProductCardProps) {
       </CardContent>
       <CardFooter className="p-4 pt-0 flex items-center justify-between">
         <div className="flex flex-col">
-          <span className="text-lg font-bold">{price}₫</span>
+          <span className="text-lg font-bold">{price}</span>
           {!inStock && (
             <span className="text-xs text-destructive">Hết hàng</span>
           )}

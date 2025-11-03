@@ -5,6 +5,7 @@ import { Minus, Plus, X } from "lucide-react"
 import type { CartItem as CartItemType } from "@/types"
 import Link from "next/link"
 import { useState } from "react"
+import { formatPrice } from "@/features/products/utils"
 
 interface CartItemProps {
   item: CartItemType
@@ -21,7 +22,7 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
     return null
   }
 
-  const price = product.priceInt / 100
+  const price = product.priceInt
   const totalPrice = price * quantity
 
   const handleUpdateQuantity = async (newQuantity: number) => {
@@ -99,10 +100,10 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
 
           <div className="text-right">
             <p className="font-semibold">
-              {totalPrice.toLocaleString("vi-VN")}₫
+              {formatPrice(totalPrice)}
             </p>
             <p className="text-sm text-muted-foreground">
-              {price.toLocaleString("vi-VN")}₫ / cái
+              {formatPrice(price)} / cái
             </p>
           </div>
         </div>

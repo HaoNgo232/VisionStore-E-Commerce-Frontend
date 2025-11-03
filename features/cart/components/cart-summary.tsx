@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import Link from "next/link"
+import { formatPrice } from "@/features/products/utils"
 
 interface CartSummaryProps {
   total: number
@@ -37,16 +38,16 @@ export function CartSummary({
         </div>
         <div className="flex items-center justify-between">
           <span className="text-muted-foreground">Tạm tính</span>
-          <span className="font-medium">{subtotal.toLocaleString("vi-VN")}₫</span>
+          <span className="font-medium">{formatPrice(subtotal)}</span>
         </div>
         <div className="flex items-center justify-between">
           <span className="text-muted-foreground">Vận chuyển</span>
-          <span className="font-medium">{shippingFree ? "Miễn phí" : shipping.toLocaleString("vi-VN") + "₫"}</span>
+          <span className="font-medium">{shippingFree ? "Miễn phí" : formatPrice(shipping) + "₫"}</span>
         </div>
         <Separator />
         <div className="flex items-center justify-between text-lg">
           <span className="font-semibold">Tổng cộng</span>
-          <span className="font-bold">{finalTotal.toLocaleString("vi-VN")}₫</span>
+          <span className="font-bold">{formatPrice(finalTotal)}</span>
         </div>
       </CardContent>
       {showCheckoutButton && (

@@ -117,12 +117,13 @@ export const useCartStore = create<CartStore>()(
 
       getItemCount: () => {
         const { cart } = get();
-        return cart?.items.length || 0;
+        // Return total quantity, not number of unique items
+        return cart?.items.reduce((sum, item) => sum + item.quantity, 0) || 0;
       },
 
       getTotal: () => {
         const { cart } = get();
-        return cart ? cart.totalInt / 100 : 0;
+        return cart ? cart.totalInt : 0;
       },
 
       reset: () => {
