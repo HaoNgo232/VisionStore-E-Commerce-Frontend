@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { useOrders } from "@/features/orders/hooks/use-orders"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -16,6 +17,7 @@ import {
 } from "@/components/ui/table"
 import { ChevronRight, ShoppingBag } from "lucide-react"
 import { formatPrice } from "@/features/products/utils"
+import { PaymentStatusBadge } from "@/features/payments/components/payment-status-badge"
 import type { OrderStatus } from "@/types"
 
 const ORDER_STATUS_CONFIG: Record<OrderStatus, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
@@ -27,6 +29,7 @@ const ORDER_STATUS_CONFIG: Record<OrderStatus, { label: string; variant: "defaul
 }
 
 export function OrdersTab() {
+    const router = useRouter()
     const { orders, loading, error, total } = useOrders()
     const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null)
 
@@ -88,7 +91,8 @@ export function OrdersTab() {
                                 <TableHead>Ngày đặt</TableHead>
                                 <TableHead className="text-center">Sản phẩm</TableHead>
                                 <TableHead className="text-right">Tổng tiền</TableHead>
-                                <TableHead className="text-center">Trạng thái</TableHead>
+                                <TableHead className="text-center">Trạng thái đơn</TableHead>
+                                <TableHead className="text-center">Thanh toán</TableHead>
                                 <TableHead className="text-right">Hành động</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -108,11 +112,14 @@ export function OrdersTab() {
                                             {ORDER_STATUS_CONFIG[order.status].label}
                                         </Badge>
                                     </TableCell>
+                                    <TableCell className="text-center">
+                                        <PaymentStatusBadge status={order.paymentStatus} />
+                                    </TableCell>
                                     <TableCell className="text-right">
                                         <Button
                                             variant="ghost"
                                             size="sm"
-                                            onClick={() => setExpandedOrderId(expandedOrderId === order.id ? null : order.id)}
+                                            onClick={() => router.push(`/orders/${order.id}`)}
                                             className="gap-1"
                                         >
                                             Chi tiết

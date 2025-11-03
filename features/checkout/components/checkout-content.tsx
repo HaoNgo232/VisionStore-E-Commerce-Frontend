@@ -100,14 +100,13 @@ export function CheckoutContent() {
                 })),
             })
 
-            toast.success("Đặt hàng thành công!")
-
             // Branch based on payment method
             if (selectedPayment === PaymentMethod.COD) {
-                // COD flow: redirect to success page
+                // COD flow: Show success toast and redirect to success page
+                toast.success("Đặt hàng thành công!")
                 router.push(`/cart/success?orderId=${order.id}&paymentMethod=${selectedPayment}`)
             } else if (selectedPayment === PaymentMethod.SEPAY) {
-                // SePay flow: process payment to get QR, then open waiting dialog
+                // SePay flow: Process payment to get QR, then open waiting dialog (no toast yet)
                 setCreatedOrderId(order.id)
                 const payment = await paymentsApi.process(order.id, PaymentMethod.SEPAY, cart.totalInt)
                 setPaymentId(payment.paymentId)
