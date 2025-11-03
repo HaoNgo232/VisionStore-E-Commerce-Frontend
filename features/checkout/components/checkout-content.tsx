@@ -12,7 +12,9 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
 import Link from "next/link"
-import { PaymentMethod } from "@/types"
+import { PaymentMethod, Order, PaymentStatus } from "@/types"
+import { PaymentWaitingDialog } from "@/features/payments/components/payment-waiting-dialog"
+import { PaymentSuccessDialog } from "@/features/payments/components/payment-success-dialog"
 
 export function CheckoutContent() {
     const router = useRouter()
@@ -22,6 +24,13 @@ export function CheckoutContent() {
     const [selectedAddressId, setSelectedAddressId] = useState<string>("")
     const [selectedPayment, setSelectedPayment] = useState<PaymentMethod>(PaymentMethod.COD)
     const [isSubmitting, setIsSubmitting] = useState(false)
+
+    // Dialog states for payment flow separation
+    const [waitingDialogOpen, setWaitingDialogOpen] = useState(false)
+    const [successDialogOpen, setSuccessDialogOpen] = useState(false)
+    const [completedOrder, setCompletedOrder] = useState<Order | null>(null)
+    const [qrCodeUrl, setQrCodeUrl] = useState<string>("")
+    const [paymentId, setPaymentId] = useState<string>("")
 
     // Check if user logged in - use isAuthenticated instead of checking !user
     if (!isAuthenticated) {
@@ -91,15 +100,47 @@ export function CheckoutContent() {
 
             toast.success("Đặt hàng thành công!")
 
-            // Clear cart and redirect
-            // Note: Cart will be cleared on server after payment
-            router.push(`/cart/success?orderId=${order.id}&paymentMethod=${selectedPayment}`)
+            // Branch based on payment method
+            if (selectedPayment === PaymentMethod.COD) {
+                // COD flow: redirect to success page
+                router.push(`/cart/success?orderId=${order.id}&paymentMethod=${selectedPayment}`)
+            } else if (selectedPayment === PaymentMethod.SEPAY) {
+                // SePay flow: open waiting dialog
+                // TODO: Get paymentId and qrCodeUrl from order response
+                // setPaymentId(order.paymentId || "")
+                // setQrCodeUrl(order.qrCodeUrl || "")
+                setWaitingDialogOpen(true)
+            }
         } catch (err) {
             const message = err instanceof Error ? err.message : "Đặt hàng thất bại"
             toast.error(message)
         } finally {
             setIsSubmitting(false)
         }
+    }
+
+    // Dialog handlers for payment flow separation
+    const handlePaymentSuccess = async (order: Order) => {
+        setWaitingDialogOpen(false)
+        setCompletedOrder(order)
+        setSuccessDialogOpen(true)
+
+        // Clear cart after successful payment
+        // TODO: Implement cart clearing
+    }
+
+    const handlePaymentTimeout = () => {
+        setWaitingDialogOpen(false)
+        toast.error("Thanh toán hết thời gian. Vui lòng thử lại.")
+    }
+
+    const handlePaymentError = (error: string) => {
+        setWaitingDialogOpen(false)
+        toast.error(error)
+    }
+
+    const handleViewOrder = (orderId: string) => {
+        router.push(`/orders/${orderId}`)
     }
 
     if (cartLoading || addressesLoading) {
@@ -248,6 +289,32 @@ export function CheckoutContent() {
                     </Card>
                 </div>
             </div>
+
+            {/* Payment Waiting Dialog */}
+            <PaymentWaitingDialog
+                open={waitingDialogOpen}
+                onOpenChange={setWaitingDialogOpen}
+                orderId={completedOrder?.id || ""}
+                payment={{
+                    paymentId: paymentId,
+                    status: "PENDING" as PaymentStatus,
+                    qrCode: qrCodeUrl,
+                }}
+                amountInt={cart?.totalInt || 0}
+                onSuccess={handlePaymentSuccess}
+                onTimeout={handlePaymentTimeout}
+                onError={handlePaymentError}
+            />
+
+            {/* Payment Success Dialog */}
+            {completedOrder && (
+                <PaymentSuccessDialog
+                    open={successDialogOpen}
+                    onClose={() => setSuccessDialogOpen(false)}
+                    order={completedOrder}
+                    onViewOrder={handleViewOrder}
+                />
+            )}
         </div>
     )
 }
