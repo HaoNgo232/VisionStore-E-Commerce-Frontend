@@ -177,7 +177,7 @@ describe("usePaymentPolling", () => {
         });
 
       renderHook(() =>
-        usePaymentPolling({ orderId: mockOrderId, enabled: true, onError })
+        usePaymentPolling({ orderId: mockOrderId, enabled: true, onError }),
       );
 
       // Wait for one polling cycle to complete
@@ -197,7 +197,7 @@ describe("usePaymentPolling", () => {
       mockPaymentsApi.getByOrder.mockRejectedValue(new Error("Network error"));
 
       const { result } = renderHook(() =>
-        usePaymentPolling({ orderId: mockOrderId, enabled: true, onError })
+        usePaymentPolling({ orderId: mockOrderId, enabled: true, onError }),
       );
 
       // Wait for one polling cycle to complete

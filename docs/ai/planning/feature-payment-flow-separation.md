@@ -149,23 +149,23 @@ created: 2025-11-03
 
 **Subtasks**:
 
-- [ ] Create component structure with shadcn Dialog
-- [ ] Add QR code display (reuse SepayQRDisplay or inline)
-- [ ] Integrate usePaymentPolling hook
-- [ ] Add countdown timer (15 minutes)
-- [ ] Display order info (ID, amount)
-- [ ] Add manual account info (copy buttons)
-- [ ] Add loading spinner during polling
-- [ ] Prevent dialog close (modal behavior)
-- [ ] Handle timeout state
-- [ ] Handle error state with retry button
-- [ ] Write unit tests (target: 100% coverage)
+- [x] Create component structure with shadcn Dialog
+- [x] Add QR code display (reuse SepayQRDisplay or inline)
+- [x] Integrate usePaymentPolling hook
+- [x] Add countdown timer (15 minutes)
+- [x] Display order info (ID, amount)
+- [x] Add manual account info (copy buttons)
+- [x] Add loading spinner during polling
+- [x] Prevent dialog close (modal behavior)
+- [x] Handle timeout state
+- [x] Handle error state with retry button
+- [x] Write unit tests (target: 100% coverage)
   - Test dialog opens with correct props
   - Test QR code renders
   - Test polling integration
   - Test timeout callback triggered
   - Test error callback triggered
-- [ ] Write integration test
+- [x] Write integration test
   - Test full polling flow (mock API)
 
 **Acceptance Criteria**:
