@@ -20,7 +20,8 @@ const RECENT_SEARCHES_KEY = "recent-searches"
 export function CommandMenu() {
     const router = useRouter()
     const [open, setOpen] = useState(false)
-    const { products, loading } = useProducts({})
+    const [searchInput, setSearchInput] = useState("")
+    const { products, loading } = useProducts({ search: searchInput || undefined })
     const [recentSearches, setRecentSearches] = useState<string[]>([])
 
     // Load recent searches from localStorage
@@ -29,7 +30,7 @@ export function CommandMenu() {
         if (saved) {
             try {
                 setRecentSearches(JSON.parse(saved))
-            } catch (e) {
+            } catch {
                 // Ignore parsing errors
             }
         }
@@ -48,6 +49,7 @@ export function CommandMenu() {
     }, [])
 
     const addRecentSearch = useCallback((search: string) => {
+        if (!search.trim()) return
         setRecentSearches((prev) => {
             const updated = [search, ...prev.filter((s) => s !== search)].slice(0, 5)
             localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated))
@@ -57,6 +59,7 @@ export function CommandMenu() {
 
     const runCommand = useCallback((command: () => void, searchTerm?: string) => {
         setOpen(false)
+        setSearchInput("")
         if (searchTerm) {
             addRecentSearch(searchTerm)
         }
@@ -65,7 +68,11 @@ export function CommandMenu() {
 
     return (
         <CommandDialog open={open} onOpenChange={setOpen}>
-            <CommandInput placeholder="Tìm kiếm sản phẩm, trang..." />
+            <CommandInput
+                placeholder="Tìm kiếm sản phẩm, trang..."
+                value={searchInput}
+                onValueChange={setSearchInput}
+            />
             <CommandList>
                 <CommandEmpty>Không tìm thấy kết quả.</CommandEmpty>
 
@@ -75,7 +82,10 @@ export function CommandMenu() {
                             {recentSearches.map((search, index) => (
                                 <CommandItem
                                     key={index}
-                                    onSelect={() => runCommand(() => router.push(`/products?search=${search}`))}
+                                    onSelect={() => runCommand(
+                                        () => router.push(`/products?search=${encodeURIComponent(search)}`),
+                                        search
+                                    )}
                                 >
                                     <Clock className="mr-2 h-4 w-4" />
                                     <span>{search}</span>
@@ -136,7 +146,10 @@ export function CommandMenu() {
                             <CommandItem
                                 key={product.id}
                                 value={`${product.name} ${brand || ''}`}
-                                onSelect={() => runCommand(() => router.push(`/products/slug/${product.slug}`), product.name)}
+                                onSelect={() => runCommand(
+                                    () => router.push(`/products/${product.slug}`),
+                                    product.name
+                                )}
                             >
                                 <div className="flex items-center gap-2 w-full">
                                     <img

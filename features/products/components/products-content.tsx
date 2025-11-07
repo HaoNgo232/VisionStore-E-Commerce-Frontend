@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 import { useProducts } from "@/features/products/hooks/use-products"
 import { useCartStore } from "@/stores/cart.store"
 import { ProductGrid } from "./product-grid"
@@ -12,10 +13,27 @@ import { SlidersHorizontal } from "lucide-react"
 import { toast } from "sonner"
 
 export function ProductsContent() {
+    const searchParams = useSearchParams()
     const [page, setPage] = useState(1)
     const [categorySlug, setCategorySlug] = useState<string | undefined>()
     const [search, setSearch] = useState<string | undefined>()
     const [sortBy, setSortBy] = useState<string>("")
+
+    // Sync search from URL params
+    useEffect(() => {
+        const urlSearch = searchParams.get("search")
+        const urlCategory = searchParams.get("categoryId")
+
+        if (urlSearch) {
+            setSearch(urlSearch)
+            setPage(1)
+        }
+
+        if (urlCategory) {
+            setCategorySlug(urlCategory)
+            setPage(1)
+        }
+    }, [searchParams])
 
     const { products, total, loading, error } = useProducts({
         page,
