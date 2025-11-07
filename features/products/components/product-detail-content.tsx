@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import { useState } from "react"
 import { useProductDetail } from "@/features/products/hooks/use-product-detail"
@@ -51,7 +51,7 @@ export function ProductDetailContent({ productId, productSlug }: ProductDetailCo
     const handleAddToCart = async () => {
         setIsAdding(true)
         try {
-            await addItem(product.id, quantity, product.priceInt)
+            await addItem(product.id, quantity)
         } finally {
             setIsAdding(false)
         }

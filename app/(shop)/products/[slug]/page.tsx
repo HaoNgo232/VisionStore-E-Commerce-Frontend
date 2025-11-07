@@ -1,7 +1,11 @@
-"use client"
+import { ProductDetailContent } from "@/features/products/components/product-detail-content";
+import { Suspense } from "react";
 
-import { ProductDetailContent } from "@/features/products/components/product-detail-content"
-
-export default function ProductDetailPage({ params }: { params: { slug: string } }) {
-  return <ProductDetailContent productSlug={params.slug} />
+export default async function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ProductDetailContent productSlug={slug} />
+    </Suspense>
+  );
 }
