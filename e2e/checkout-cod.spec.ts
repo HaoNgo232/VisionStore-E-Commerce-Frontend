@@ -80,7 +80,7 @@ test.describe("Checkout - COD Flow", () => {
     await expect(page.locator("text=Thanh toán khi nhận hàng")).toBeVisible();
 
     // Verify order ID displayed
-    const orderIdMatch = page.url().match(/orderId=([^&]+)/);
+    const orderIdMatch = /orderId=([^&]+)/.exec(page.url());
     expect(orderIdMatch).toBeTruthy();
     const orderId = orderIdMatch![1];
 

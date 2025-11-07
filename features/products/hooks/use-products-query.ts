@@ -3,15 +3,15 @@
  * Hooks for product data fetching with React Query
  */
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, type UseQueryResult } from "@tanstack/react-query";
 import { productsApi, type GetProductsParams } from "../services/products.service";
 import { queryKeys } from "@/lib/query-keys";
-import type { UpdateProductRequest, CreateProductRequest } from "@/types";
+import type { UpdateProductRequest, CreateProductRequest, Product, PaginatedResponse } from "@/types";
 
 /**
  * Get paginated products list
  */
-export function useProducts(params?: GetProductsParams) {
+export function useProducts(params?: GetProductsParams): UseQueryResult<PaginatedResponse<Product>, Error> {
   return useQuery({
     queryKey: queryKeys.products.list(params),
     queryFn: () => productsApi.getAll(params),
@@ -22,7 +22,7 @@ export function useProducts(params?: GetProductsParams) {
 /**
  * Get single product by ID
  */
-export function useProduct(productId: string) {
+export function useProduct(productId: string): UseQueryResult<Product, Error> {
   return useQuery({
     queryKey: queryKeys.products.detail(productId),
     queryFn: () => productsApi.getById(productId),
@@ -34,7 +34,7 @@ export function useProduct(productId: string) {
 /**
  * Get single product by slug
  */
-export function useProductBySlug(slug: string) {
+export function useProductBySlug(slug: string): UseQueryResult<Product, Error> {
   return useQuery({
     queryKey: queryKeys.products.bySlug(slug),
     queryFn: () => productsApi.getBySlug(slug),
@@ -53,7 +53,7 @@ export function useCreateProduct() {
     mutationFn: (data: CreateProductRequest) => productsApi.create(data),
     onSuccess: () => {
       // Invalidate products list
-      queryClient.invalidateQueries({
+      void queryClient.invalidateQueries({
         queryKey: queryKeys.products.lists(),
       });
     },
@@ -71,10 +71,10 @@ export function useUpdateProduct() {
       productsApi.update(id, data),
     onSuccess: (_, variables) => {
       // Invalidate specific product and list
-      queryClient.invalidateQueries({
+      void queryClient.invalidateQueries({
         queryKey: queryKeys.products.detail(variables.id),
       });
-      queryClient.invalidateQueries({
+      void queryClient.invalidateQueries({
         queryKey: queryKeys.products.lists(),
       });
     },
@@ -91,7 +91,7 @@ export function useDeleteProduct() {
     mutationFn: (productId: string) => productsApi.delete(productId),
     onSuccess: () => {
       // Invalidate products list
-      queryClient.invalidateQueries({
+      void queryClient.invalidateQueries({
         queryKey: queryKeys.products.lists(),
       });
     },

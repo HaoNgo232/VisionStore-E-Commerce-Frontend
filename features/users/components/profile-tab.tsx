@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { User } from "lucide-react"
 
-export function ProfileTab() {
+export function ProfileTab(): JSX.Element {
     return (
         <Card>
             <CardHeader>

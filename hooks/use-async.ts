@@ -1,11 +1,18 @@
 import { useState, useCallback } from "react";
-import { AsyncState } from "@/types";
+import type { AsyncState } from "@/types";
 import { createApiError } from "@/types";
 
 /**
  * Type-safe hook for async operations
  */
-export function useAsync<T, Args extends any[] = []>() {
+export function useAsync<T, Args extends unknown[] = []>(): AsyncState<T> & {
+  execute: (asyncFunction: (...args: Args) => Promise<T>, ...args: Args) => Promise<{ ok: true; value: T } | { ok: false; error: ReturnType<typeof createApiError> }>;
+  reset: () => void;
+  isIdle: boolean;
+  isLoading: boolean;
+  isSuccess: boolean;
+  isError: boolean;
+} {
   const [state, setState] = useState<AsyncState<T>>({ status: "idle" });
 
   const execute = useCallback(

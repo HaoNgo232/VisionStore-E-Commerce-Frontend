@@ -45,7 +45,7 @@ export function usePaymentPolling({
   }, []);
 
   const checkPaymentStatus = useCallback(async (): Promise<void> => {
-    if (!isMountedRef.current) return;
+    if (!isMountedRef.current) {return;}
 
     // Try up to MAX_RETRIES + 1 times (initial + retries)
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
@@ -81,14 +81,14 @@ export function usePaymentPolling({
   }, [orderId, onSuccess, onError, stopPolling]);
 
   const startPolling = useCallback(() => {
-    if (!enabled || !orderId) return;
+    if (!enabled || !orderId) {return;}
 
     setIsPolling(true);
     setAttempts(0);
     setError(null);
 
     const poll = async () => {
-      if (!isMountedRef.current) return;
+      if (!isMountedRef.current) {return;}
 
       // Increment attempts for each polling cycle
       setAttempts((prev) => {

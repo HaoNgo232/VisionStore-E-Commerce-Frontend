@@ -22,7 +22,7 @@ import { OrderStatusBadge } from "@/features/orders/components/order-status-badg
 import { PaymentStatusBadge } from "@/features/payments/components/payment-status-badge"
 import { usersApi } from "@/features/users/services/users.service"
 
-export default function OrderDetailPage() {
+export default function OrderDetailPage(): JSX.Element {
     const params = useParams()
     const router = useRouter()
     const orderId = params.id as string
@@ -66,7 +66,7 @@ export default function OrderDetailPage() {
             }
         }
 
-        fetchOrder()
+        void fetchOrder();
     }, [orderId])
 
     if (loading) {
@@ -87,7 +87,7 @@ export default function OrderDetailPage() {
             <ProtectedRoute>
                 <div className="container py-12">
                     <div className="text-center">
-                        <p className="text-muted-foreground mb-4">{error || "Không tìm thấy đơn hàng"}</p>
+                        <p className="text-muted-foreground mb-4">{error ?? "Không tìm thấy đơn hàng"}</p>
                         <Button onClick={() => router.back()}>Quay lại</Button>
                     </div>
                 </div>

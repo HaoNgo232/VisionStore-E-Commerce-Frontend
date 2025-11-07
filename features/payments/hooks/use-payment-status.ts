@@ -83,7 +83,7 @@ export function usePaymentStatus(
   }, [orderId]);
 
   const startPolling = useCallback(() => {
-    if (isPolling) return;
+    if (isPolling) {return;}
 
     setIsPolling(true);
     let _attempts = 0;

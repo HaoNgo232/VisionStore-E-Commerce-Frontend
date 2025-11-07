@@ -23,7 +23,7 @@ const benefits = [
   },
 ]
 
-export function BenefitsSection() {
+export function BenefitsSection(): JSX.Element {
   return (
     <section className="py-16 md:py-24 border-y">
       <div className="container">

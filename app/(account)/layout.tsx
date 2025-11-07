@@ -6,7 +6,7 @@ export default function AccountLayout({
   children,
 }: {
   children: React.ReactNode
-}) {
+}): JSX.Element {
   return (
     <div className="flex min-h-screen flex-col">
       <Header />

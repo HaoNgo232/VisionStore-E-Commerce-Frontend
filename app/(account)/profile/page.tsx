@@ -7,7 +7,7 @@ import { ProfileTab } from "@/features/users/components/profile-tab"
 import { ProtectedRoute } from "@/components/auth/protected-route"
 import { Package, MapPin, User } from "lucide-react"
 
-export default function ProfilePage() {
+export default function ProfilePage(): JSX.Element {
   return (
     <ProtectedRoute>
       <div className="container py-8">

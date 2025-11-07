@@ -10,7 +10,7 @@ import { productsApi } from "@/features/products/services/products.service"
 import { formatPrice } from "@/features/products/utils"
 import type { Product } from "@/types"
 
-export function FeaturedProductsSection() {
+export function FeaturedProductsSection(): JSX.Element {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -27,7 +27,7 @@ export function FeaturedProductsSection() {
       }
     };
 
-    fetchFeaturedProducts();
+    void fetchFeaturedProducts();
   }, [])
 
   if (loading) {
@@ -39,7 +39,7 @@ export function FeaturedProductsSection() {
             <p className="mt-4 text-muted-foreground">Discover our most popular eyewear</p>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {[...Array(4)].map((_, i) => (
+            {Array.from({ length: 4 }).map((_, i) => (
               <ProductCardSkeleton key={i} />
             ))}
           </div>
@@ -59,14 +59,14 @@ export function FeaturedProductsSection() {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {products && products.length > 0 ? (
             products.map((product) => {
-              const brand = product.attributes?.brand as string | undefined;
+              const brand = product.attributes?.brand ?? undefined;
 
               return (
                 <Card key={product.id} className="group overflow-hidden transition-shadow hover:shadow-lg">
                   <Link href={`/products/${product.slug}`}>
                     <div className="relative aspect-square overflow-hidden bg-muted">
                       <img
-                        src={product.imageUrls[0] || "/placeholder.svg"}
+                        src={product.imageUrls[0] ?? "/placeholder.svg"}
                         alt={product.name}
                         className="h-full w-full object-cover transition-transform group-hover:scale-105"
                       />

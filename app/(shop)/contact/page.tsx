@@ -14,7 +14,7 @@ import { siteConfig } from "@/config/site"
 import { toast } from "sonner"
 import { contactFormSchema, type ContactFormValues } from "@/lib/validations/forms"
 
-export default function ContactPage() {
+export default function ContactPage(): JSX.Element {
   const [submitted, setSubmitted] = useState(false)
 
   const form = useForm<ContactFormValues>({
@@ -159,7 +159,7 @@ export default function ContactPage() {
                 </div>
               ) : (
                 <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                  <form onSubmit={(e) => void form.handleSubmit(onSubmit)(e)} className="space-y-6">
                     <div className="grid gap-6 sm:grid-cols-2">
                       <FormField
                         control={form.control}

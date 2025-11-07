@@ -7,17 +7,21 @@
 
 import { useAuthStore } from "@/stores/auth.store";
 
-export function useAuth() {
-  const { accessToken, user, isAuthenticated, clearAuth } = useAuthStore();
+export function useAuth(): {
+  accessToken: string | null;
+  isAuthenticated: boolean;
+  logout: () => void;
+} {
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated());
+  const clearTokens = useAuthStore((state) => state.clearTokens);
 
   return {
     /** Access token for API calls */
     accessToken,
-    /** Current user object or null */
-    user,
     /** Check if user is authenticated */
-    isAuthenticated: isAuthenticated(),
+    isAuthenticated,
     /** Logout method */
-    logout: clearAuth,
+    logout: clearTokens,
   };
 }

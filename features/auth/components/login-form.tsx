@@ -27,7 +27,7 @@ export function LoginForm() {
         e.preventDefault();
 
         // Prevent double submission
-        if (loading) return;
+        if (loading) {return;}
 
         setError(null);
 

@@ -40,21 +40,21 @@ const categories = [
   { name: "Kids", href: "/products?category=kids", description: "Durable eyewear for children" },
 ]
 
-export function Header() {
+export function Header(): JSX.Element {
   const { accessToken, logout } = useAuth()
   const router = useRouter()
   const itemCount = useCartStore((state) => state.getItemCount())
 
-  const handleLogout = async () => {
+  const handleLogout = (): void => {
     try {
-      await authService.logout()
-      logout()
-      router.push("/home")
-      toast.success("Đã đăng xuất")
+      authService.logout();
+      logout();
+      void router.push("/home");
+      toast.success("Đã đăng xuất");
     } catch {
-      toast.error("Lỗi khi đăng xuất")
+      toast.error("Lỗi khi đăng xuất");
     }
-  }
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -145,7 +145,7 @@ export function Header() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   className="text-destructive focus:text-destructive cursor-pointer"
-                  onClick={handleLogout}
+                  onClick={() => void handleLogout()}
                 >
                   <LogOut className="mr-2 h-4 w-4" />
                   Đăng xuất
@@ -263,7 +263,7 @@ export function Header() {
                     </Link>
                     <button
                       className="flex items-center rounded-md px-3 py-2 text-base font-medium text-destructive transition-colors hover:bg-accent"
-                      onClick={handleLogout}
+                      onClick={() => void handleLogout()}
                     >
                       <LogOut className="mr-2 h-4 w-4" />
                       Log out

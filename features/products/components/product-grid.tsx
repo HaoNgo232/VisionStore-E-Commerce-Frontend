@@ -6,7 +6,7 @@ interface ProductGridProps {
   onAddToCart?: (productId: string) => void
 }
 
-export function ProductGrid({ products }: ProductGridProps) {
+export function ProductGrid({ products }: ProductGridProps): JSX.Element {
   if (products.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">

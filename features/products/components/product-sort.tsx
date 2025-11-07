@@ -7,7 +7,7 @@ interface ProductSortProps {
   onChange: (value: string) => void
 }
 
-export function ProductSort({ value, onChange }: ProductSortProps) {
+export function ProductSort({ value, onChange }: ProductSortProps): JSX.Element {
   return (
     <div className="flex items-center gap-2">
       <span className="text-sm text-muted-foreground">Sort by:</span>

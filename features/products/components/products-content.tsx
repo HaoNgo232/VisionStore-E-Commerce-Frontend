@@ -8,7 +8,7 @@ import { ProductSort } from "./product-sort"
 import { ProductGridSkeleton } from "@/components/skeletons/product-card-skeleton"
 import { Button } from "@/components/ui/button"
 
-export function ProductsContent() {
+export function ProductsContent(): JSX.Element {
     const searchParams = useSearchParams()
     const [page, setPage] = useState(1)
     const [categorySlug, setCategorySlug] = useState<string | undefined>()

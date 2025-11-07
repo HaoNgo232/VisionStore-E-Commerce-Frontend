@@ -17,7 +17,7 @@ import { useCallback, useEffect, useState } from "react"
 
 const RECENT_SEARCHES_KEY = "recent-searches"
 
-export function CommandMenu() {
+export function CommandMenu(): JSX.Element {
     const router = useRouter()
     const [open, setOpen] = useState(false)
     const [searchInput, setSearchInput] = useState("")
@@ -29,7 +29,10 @@ export function CommandMenu() {
         const saved = localStorage.getItem(RECENT_SEARCHES_KEY)
         if (saved) {
             try {
-                setRecentSearches(JSON.parse(saved))
+                const parsed = JSON.parse(saved) as unknown;
+                if (Array.isArray(parsed) && parsed.every((item): item is string => typeof item === "string")) {
+                    setRecentSearches(parsed);
+                }
             } catch {
                 // Ignore parsing errors
             }
@@ -49,7 +52,9 @@ export function CommandMenu() {
     }, [])
 
     const addRecentSearch = useCallback((search: string) => {
-        if (!search.trim()) return
+        if (!search.trim()) {
+          return;
+        }
         setRecentSearches((prev) => {
             const updated = [search, ...prev.filter((s) => s !== search)].slice(0, 5)
             localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated))
@@ -139,13 +144,13 @@ export function CommandMenu() {
                         </CommandItem>
                     )}
                     {!loading && products?.slice(0, 8).map((product) => {
-                        const brand = product.attributes?.brand as string | undefined;
+                        const brand = product.attributes?.brand;
                         const price = formatPrice(product.priceInt);
 
                         return (
                             <CommandItem
                                 key={product.id}
-                                value={`${product.name} ${brand || ''}`}
+                                value={`${product.name} ${brand ?? ''}`}
                                 onSelect={() => runCommand(
                                     () => router.push(`/products/${product.slug}`),
                                     product.name
@@ -153,7 +158,7 @@ export function CommandMenu() {
                             >
                                 <div className="flex items-center gap-2 w-full">
                                     <img
-                                        src={product.imageUrls?.[0] || "/placeholder.svg"}
+                                        src={product.imageUrls?.[0] ?? "/placeholder.svg"}
                                         alt={product.name}
                                         className="h-8 w-8 rounded object-cover"
                                     />

@@ -29,12 +29,12 @@ export function validateResponse<T>(
     return schema.parse(data);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      console.error(`[Validation Error] ${context || "Response"}:`, {
+      console.error(`[Validation Error] ${context ?? "Response"}:`, {
         errors: error.errors,
         data,
       });
       throw new ValidationError(
-        `Invalid ${context || "response"} format from backend`,
+        `Invalid ${context ?? "response"} format from backend`,
         error,
       );
     }

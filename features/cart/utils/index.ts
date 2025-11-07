@@ -71,7 +71,7 @@ export function hasCartItem(items: CartItem[], productId: string): boolean {
  * Format shipping estimate
  */
 export function formatShippingEstimate(days: number): string {
-  if (days === 0) return "Today";
-  if (days === 1) return "Tomorrow";
+  if (days === 0) {return "Today";}
+  if (days === 1) {return "Tomorrow";}
   return `${days} business days`;
 }

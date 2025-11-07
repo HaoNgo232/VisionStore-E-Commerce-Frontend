@@ -1,7 +1,7 @@
 import { ProductGridSkeleton } from "@/components/skeletons/product-card-skeleton"
 import { Skeleton } from "@/components/ui/skeleton"
 
-export default function ProductsLoading() {
+export default function ProductsLoading(): JSX.Element {
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="mb-8 space-y-2">

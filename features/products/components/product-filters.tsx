@@ -34,7 +34,7 @@ const frameTypes = [
   { value: "cat-eye", label: "Cat-Eye" },
 ]
 
-export function ProductFilters({ filters, onFiltersChange, onClearFilters }: ProductFiltersProps) {
+export function ProductFilters({ filters, onFiltersChange, onClearFilters }: ProductFiltersProps): JSX.Element {
   const [minPrice, maxPrice] = filters.priceRange || [0, 200]
 
   return (

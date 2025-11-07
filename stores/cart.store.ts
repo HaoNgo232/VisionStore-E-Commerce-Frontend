@@ -80,7 +80,9 @@ export const useCartStore = create<CartStore>()(
         try {
           // Get product ID from cart item
           const item = get().cart?.items.find((i) => i.id === itemId);
-          if (!item) throw new Error("Item not found");
+          if (!item) {
+            throw new Error("Item not found");
+          }
 
           const cart = await cartApi.updateItem(itemId, {
             productId: item.productId,
@@ -100,7 +102,9 @@ export const useCartStore = create<CartStore>()(
         try {
           // Get product ID from cart item
           const item = get().cart?.items.find((i) => i.id === itemId);
-          if (!item) throw new Error("Item not found");
+          if (!item) {
+            throw new Error("Item not found");
+          }
 
           const cart = await cartApi.removeItem(itemId, item.productId);
           set({ cart, error: null });
@@ -132,7 +136,7 @@ export const useCartStore = create<CartStore>()(
       getItemCount: () => {
         const { cart } = get();
         // Return total quantity, not number of unique items
-        return cart?.items.reduce((sum, item) => sum + item.quantity, 0) || 0;
+        return cart?.items.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
       },
 
       getTotal: () => {

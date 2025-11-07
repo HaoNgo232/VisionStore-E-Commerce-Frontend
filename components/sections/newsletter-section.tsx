@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Mail } from "lucide-react"
 
-export function NewsletterSection() {
+export function NewsletterSection(): JSX.Element {
   const [email, setEmail] = useState("")
   const [subscribed, setSubscribed] = useState(false)
 

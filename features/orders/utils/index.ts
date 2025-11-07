@@ -103,6 +103,6 @@ export function filterOrdersByStatus(
 /**
  * Get recent orders
  */
-export function getRecentOrders(orders: Order[], count: number = 5): Order[] {
+export function getRecentOrders(orders: Order[], count = 5): Order[] {
   return sortOrdersByDate(orders, "desc").slice(0, count);
 }

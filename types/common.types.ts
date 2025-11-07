@@ -39,7 +39,13 @@ export interface PaginatedResponse<T> {
  */
 export function createPaginatedResponseSchema<T extends z.ZodTypeAny>(
   itemSchema: T,
-) {
+): z.ZodObject<{
+  products: z.ZodArray<T>;
+  total: z.ZodNumber;
+  page: z.ZodNumber;
+  pageSize: z.ZodNumber;
+  totalPages: z.ZodNumber;
+}> {
   return z.object({
     products: z.array(itemSchema),
     total: z.number().int().nonnegative(),

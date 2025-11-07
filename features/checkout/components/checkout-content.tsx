@@ -13,7 +13,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
 import Link from "next/link"
-import { PaymentMethod, PaymentStatus, Payment } from "@/types"
+import { PaymentMethod, PaymentStatus, type Payment } from "@/types"
 import { PaymentWaitingDialog } from "@/features/payments/components/payment-waiting-dialog"
 import { formatPrice } from "@/features/products/utils"
 // PaymentSuccessDialog not used anymore - direct redirect instead
@@ -84,13 +84,13 @@ export default function CheckoutContent() {
         }
 
         // Validate cart exists and has items
-        if (!cart || !cart.items || cart.items.length === 0) {
+        if (!cart?.items || cart.items.length === 0) {
             toast.error("Giỏ hàng trống")
             return
         }
 
         // Validate all items have valid product data
-        const invalidItems = cart.items.filter(item => !item.product || !item.product.priceInt);
+        const invalidItems = cart.items.filter(item => !item.product?.priceInt);
         if (invalidItems.length > 0) {
             toast.error("Giỏ hàng chứa sản phẩm không hợp lệ. Vui lòng làm mới trang.")
             return

@@ -23,13 +23,14 @@ import type { Order, PaymentMethod } from "@/types"
 import { OrderStatusBadge } from "@/features/orders/components/order-status-badge"
 import { PaymentStatusBadge } from "@/features/payments/components/payment-status-badge"
 
-export default function SuccessPage() {
+export default function SuccessPage(): JSX.Element {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { clearCart } = useCartStore()
 
   const orderId = searchParams.get("orderId")
-  const paymentMethod = (searchParams.get("paymentMethod") as PaymentMethod) || "COD"
+  const paymentMethodParam = searchParams.get("paymentMethod")
+  const paymentMethod: PaymentMethod = (paymentMethodParam === "COD" || paymentMethodParam === "SEPAY") ? paymentMethodParam : "COD"
 
   const [order, setOrder] = useState<Order | null>(null)
   const [loading, setLoading] = useState(true)
@@ -37,32 +38,32 @@ export default function SuccessPage() {
   // Redirect non-COD payments away from this page
   useEffect(() => {
     if (paymentMethod !== "COD") {
-      router.push("/profile#orders")
+      void router.push("/profile#orders");
     }
   }, [paymentMethod, router])
 
   useEffect(() => {
     const fetchOrder = async () => {
       if (!orderId) {
-        router.push("/cart")
-        return
+        void router.push("/cart");
+        return;
       }
 
       try {
         setLoading(true)
         const fetchedOrder = await ordersApi.getById(orderId)
         setOrder(fetchedOrder)
-        clearCart()
+        void clearCart()
       } catch (error) {
         console.error("Lỗi khi tải đơn hàng:", error)
         toast.error("Không thể tải chi tiết đơn hàng")
-        router.push("/cart")
+        void router.push("/cart")
       } finally {
         setLoading(false)
       }
     }
 
-    fetchOrder()
+    void fetchOrder()
   }, [orderId, router, clearCart])
 
   // No payment processing here; SePay flow is handled via dialogs on checkout
@@ -195,23 +196,23 @@ export default function SuccessPage() {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
-                        {order.items.map((item: any) => (
+                        {order.items.map((item) => (
                           <div key={item.productId} className="flex gap-4 pb-4 border-b last:border-0">
-                            {item.product?.images?.[0] && (
+                            {item.imageUrls?.[0] && (
                               <img
-                                src={item.product.images[0]}
-                                alt={item.product?.name || "Product"}
+                                src={item.imageUrls[0]}
+                                alt={item.productName ?? "Product"}
                                 className="h-16 w-16 rounded object-cover"
                               />
                             )}
                             <div className="flex-1">
-                              <p className="font-medium">{item.product?.name || "Sản phẩm"}</p>
+                              <p className="font-medium">{item.productName ?? "Sản phẩm"}</p>
                               <p className="text-sm text-muted-foreground">
                                 Số lượng: {item.quantity}
                               </p>
                             </div>
                             <p className="font-semibold">
-                              {formatPrice(item.priceInt || 0)}
+                              {formatPrice(item.priceInt ?? 0)}
                             </p>
                           </div>
                         ))}
@@ -246,7 +247,7 @@ export default function SuccessPage() {
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Tổng tiền hàng</span>
                       <span>
-                        {formatPrice(order.totalInt || 0)}
+                        {formatPrice(order.totalInt ?? 0)}
                       </span>
                     </div>
                     <div className="flex justify-between">
@@ -256,7 +257,7 @@ export default function SuccessPage() {
                     <div className="border-t pt-3 flex justify-between font-semibold text-lg">
                       <span>Tổng cộng</span>
                       <span>
-                        {formatPrice(order.totalInt || 0)}
+                        {formatPrice(order.totalInt ?? 0)}
                       </span>
                     </div>
                   </CardContent>

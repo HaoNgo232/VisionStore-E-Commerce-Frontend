@@ -73,7 +73,7 @@ export function createAddressId(id: string): AddressId {
 /**
  * Ensure array type
  */
-export type EnsureArray<T> = T extends any[] ? T : T[];
+export type EnsureArray<T> = T extends unknown[] ? T : T[];
 
 /**
  * Nullable type

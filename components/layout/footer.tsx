@@ -23,7 +23,7 @@ const footerLinks = {
   ],
 }
 
-export function Footer() {
+export function Footer(): JSX.Element {
   return (
     <footer className="border-t bg-muted/40">
       <div className="container py-12 md:py-16">

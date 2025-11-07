@@ -35,16 +35,24 @@ export const productsApi = {
     params?: GetProductsParams,
   ): Promise<PaginatedResponse<Product>> {
     const queryParams = new URLSearchParams();
-    if (params?.page) queryParams.append("page", String(params.page));
-    if (params?.pageSize)
+    if (params?.page) {
+      queryParams.append("page", String(params.page));
+    }
+    if (params?.pageSize) {
       queryParams.append("pageSize", String(params.pageSize));
-    if (params?.categorySlug)
+    }
+    if (params?.categorySlug) {
       queryParams.append("categorySlug", params.categorySlug);
-    if (params?.search) queryParams.append("search", params.search);
-    if (params?.minPriceInt)
+    }
+    if (params?.search) {
+      queryParams.append("search", params.search);
+    }
+    if (params?.minPriceInt) {
       queryParams.append("minPriceInt", String(params.minPriceInt));
-    if (params?.maxPriceInt)
+    }
+    if (params?.maxPriceInt) {
       queryParams.append("maxPriceInt", String(params.maxPriceInt));
+    }
 
     const query = queryParams.toString();
     return apiGetValidated<PaginatedResponse<Product>>(

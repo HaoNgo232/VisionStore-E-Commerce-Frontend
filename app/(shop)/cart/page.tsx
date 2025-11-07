@@ -8,7 +8,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 
-export default function CartPage() {
+export default function CartPage(): JSX.Element {
   return (
     <div>
       <div className="border-b">

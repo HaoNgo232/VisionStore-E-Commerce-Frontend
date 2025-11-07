@@ -54,7 +54,7 @@ export function groupByCategory(
   products: Product[],
 ): Record<string, Product[]> {
   return products.reduce((acc, product) => {
-    const categoryId = product.categoryId || "uncategorized";
+    const categoryId = product.categoryId ?? "uncategorized";
     if (!acc[categoryId]) {
       acc[categoryId] = [];
     }
@@ -80,8 +80,8 @@ export function searchProducts(products: Product[], query: string): Product[] {
   const lowercaseQuery = query.toLowerCase();
 
   return products.filter((product) => {
-    const brand = product.attributes?.brand || "";
-    const description = product.description || "";
+    const brand = product.attributes?.brand ?? "";
+    const description = product.description ?? "";
 
     return (
       product.name.toLowerCase().includes(lowercaseQuery) ||

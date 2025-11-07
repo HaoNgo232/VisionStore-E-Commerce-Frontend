@@ -10,7 +10,11 @@ import { getErrorMessage } from "@/lib/api-client";
 import { usersApi } from "@/features/users/services/users.service";
 import type { User } from "@/types";
 
-export function useUserProfile() {
+export function useUserProfile(): {
+  user: User | null;
+  loading: boolean;
+  error: string | null;
+} {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +33,7 @@ export function useUserProfile() {
       }
     };
 
-    fetch();
+    void fetch();
   }, []);
 
   return { user, loading, error };

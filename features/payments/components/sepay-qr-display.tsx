@@ -51,7 +51,7 @@ export function SepayQRDisplay({
 
     // Update countdown timer
     useEffect(() => {
-        if (isPaid || error) return
+        if (isPaid || error) {return}
 
         const interval = setInterval(() => {
             setTimeRemaining((prev) => (prev > 0 ? prev - 1 : 0))

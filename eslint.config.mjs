@@ -12,6 +12,9 @@ export default [
   ...typescriptEslint.configs.stylisticTypeChecked,
 
   {
+    ignores: ["jest.setup.js", "**/*.config.js", "**/*.config.mjs"],
+  },
+  {
     files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"],
     languageOptions: {
       ecmaVersion: 2022,

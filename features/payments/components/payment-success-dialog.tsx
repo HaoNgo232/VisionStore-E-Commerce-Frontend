@@ -57,14 +57,14 @@ export function PaymentSuccessDialog({
 
     // Countdown timer for auto-redirect
     useEffect(() => {
-        if (!open || !autoRedirect || countdown <= 0) return;
+        if (!open || !autoRedirect || countdown <= 0) {return;}
 
         const interval = setInterval(() => {
             setCountdown((prev) => {
                 if (prev <= 1) {
                     // Auto redirect when countdown reaches 0
                     onViewOrder(order.id);
-                    if (onClose) onClose();
+                    if (onClose) {onClose();}
                     return 0;
                 }
                 return prev - 1;
@@ -76,11 +76,11 @@ export function PaymentSuccessDialog({
 
     const handleViewOrder = () => {
         onViewOrder(order.id);
-        if (onClose) onClose();
+        if (onClose) {onClose();}
     };
 
     const handleClose = () => {
-        if (onClose) onClose();
+        if (onClose) {onClose();}
     };
 
     // Prevent closing dialog during countdown

@@ -11,18 +11,18 @@
 "use client";
 
 import axios, {
-  AxiosError,
-  AxiosRequestConfig,
-  InternalAxiosRequestConfig,
+  type AxiosError,
+  type AxiosRequestConfig,
+  type InternalAxiosRequestConfig,
 } from "axios";
-import { z } from "zod";
+import { type z } from "zod";
 import { useAuthStore } from "@/stores/auth.store";
 import type { ApiError } from "@/types/common.types";
 import { validateResponse } from "./validation-utils";
 
 // API Configuration
 export const API_CONFIG = {
-  BASE_URL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000",
+  BASE_URL: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000",
   TIMEOUT: 10000,
   RETRY_COUNT: 3,
   RETRY_DELAY: 1000,
@@ -48,7 +48,7 @@ apiClient.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error),
+  (error: unknown) => Promise.reject(error instanceof Error ? error : new Error(String(error))),
 );
 
 /**
@@ -73,7 +73,7 @@ apiClient.interceptors.response.use(
         const { refreshToken } = useAuthStore.getState();
         if (!refreshToken) {
           // No refresh token - logout user
-          useAuthStore.getState().clearAuth();
+          useAuthStore.getState().clearTokens();
           throw new Error("No refresh token available");
         }
 
@@ -103,14 +103,14 @@ apiClient.interceptors.response.use(
         return apiClient(originalRequest);
       } catch (refreshError) {
         // Refresh failed - logout user
-        useAuthStore.getState().clearAuth();
+        useAuthStore.getState().clearTokens();
 
         // Redirect to login (client-side only)
         if (typeof window !== "undefined") {
           window.location.href = "/login";
         }
 
-        return Promise.reject(refreshError);
+        return Promise.reject(refreshError instanceof Error ? refreshError : new Error(String(refreshError)));
       }
     }
 

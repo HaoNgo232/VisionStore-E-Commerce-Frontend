@@ -33,7 +33,7 @@ const categories = [
   },
 ]
 
-export function CategoriesSection() {
+export function CategoriesSection(): JSX.Element {
   return (
     <section className="py-16 md:py-24 bg-muted/40">
       <div className="container">

@@ -17,7 +17,7 @@ interface ProtectedRouteProps {
 export function ProtectedRoute({
     children,
     redirectTo = "/auth/login",
-}: ProtectedRouteProps) {
+}: ProtectedRouteProps): React.ReactElement | null {
     const router = useRouter()
     const { isAuthenticated } = useAuth()
     const [isChecking, setIsChecking] = useState(true)

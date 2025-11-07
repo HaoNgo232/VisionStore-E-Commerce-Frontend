@@ -11,7 +11,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 
-export default function CheckoutPage() {
+export default function CheckoutPage(): JSX.Element {
   return (
     <ProtectedRoute>
       <div>

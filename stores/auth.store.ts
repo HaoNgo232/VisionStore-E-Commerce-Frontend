@@ -27,7 +27,9 @@ interface JWTPayload {
 function decodeToken(token: string): JWTPayload | null {
   try {
     const parts = token.split(".");
-    if (parts.length !== 3) return null;
+    if (parts.length !== 3) {
+      return null;
+    }
 
     const payload = parts[1];
     const decoded = JSON.parse(atob(payload)) as JWTPayload;
@@ -69,7 +71,7 @@ export const useAuthStore = create<AuthStore>()(
        */
       setTokens: (accessToken: string, refreshToken: string) => {
         const payload = decodeToken(accessToken);
-        const userId = payload?.sub || null;
+        const userId = payload?.sub ?? null;
         set({ accessToken, refreshToken, userId });
       },
 
@@ -97,10 +99,12 @@ export const useAuthStore = create<AuthStore>()(
        */
       getUserId: () => {
         const { userId, accessToken } = get();
-        if (userId) return userId;
+        if (userId) {
+          return userId;
+        }
         if (accessToken) {
           const payload = decodeToken(accessToken);
-          return payload?.sub || null;
+          return payload?.sub ?? null;
         }
         return null;
       },

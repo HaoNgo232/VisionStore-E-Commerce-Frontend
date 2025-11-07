@@ -15,7 +15,11 @@ interface UseProductDetailParams {
   slug?: string;
 }
 
-export function useProductDetail({ id, slug }: UseProductDetailParams) {
+export function useProductDetail({ id, slug }: UseProductDetailParams): {
+  product: Product | null;
+  loading: boolean;
+  error: string | null;
+} {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -50,7 +54,7 @@ export function useProductDetail({ id, slug }: UseProductDetailParams) {
     };
 
     if (id || slug) {
-      fetch();
+      void fetch();
     }
   }, [id, slug]);
 

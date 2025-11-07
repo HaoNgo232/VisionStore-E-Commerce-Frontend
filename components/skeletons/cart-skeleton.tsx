@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 
-export function CartItemSkeleton() {
+export function CartItemSkeleton(): JSX.Element {
     return (
         <Card>
             <CardContent className="p-4">
@@ -26,7 +26,7 @@ export function CartItemSkeleton() {
     )
 }
 
-export function CartSkeleton() {
+export function CartSkeleton(): JSX.Element {
     return (
         <div className="container mx-auto px-4 py-8">
             <Skeleton className="h-9 w-48 mb-8" />

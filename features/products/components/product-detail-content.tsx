@@ -24,7 +24,7 @@ interface ProductDetailContentProps {
     productSlug?: string
 }
 
-export function ProductDetailContent({ productId, productSlug }: ProductDetailContentProps) {
+export function ProductDetailContent({ productId, productSlug }: ProductDetailContentProps): JSX.Element {
     const { product, loading, error } = useProductDetail({ id: productId, slug: productSlug })
     const [selectedImage, setSelectedImage] = useState(0)
     const [quantity, setQuantity] = useState(1)

@@ -20,7 +20,12 @@ interface UseProductsParams {
   maxPriceInt?: number;
 }
 
-export function useProducts(params?: UseProductsParams) {
+export function useProducts(params?: UseProductsParams): {
+  products: Product[];
+  total: number;
+  loading: boolean;
+  error: string | null;
+} {
   const [products, setProducts] = useState<Product[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -45,7 +50,7 @@ export function useProducts(params?: UseProductsParams) {
       }
     };
 
-    fetch();
+    void fetch();
   }, [
     params?.page,
     params?.pageSize,

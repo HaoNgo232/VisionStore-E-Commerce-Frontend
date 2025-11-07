@@ -4,7 +4,7 @@ import { CategoriesSection } from "@/components/sections/categories-section"
 import { BenefitsSection } from "@/components/sections/benefits-section"
 import { NewsletterSection } from "@/components/sections/newsletter-section"
 
-export default function HomePage() {
+export default function HomePage(): JSX.Element {
   return (
     <>
       <HeroSection />

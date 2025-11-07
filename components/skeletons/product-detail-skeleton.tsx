@@ -1,7 +1,7 @@
 import { Skeleton } from "@/components/ui/skeleton"
 import { Card, CardContent } from "@/components/ui/card"
 
-export function ProductDetailSkeleton() {
+export function ProductDetailSkeleton(): JSX.Element {
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="grid gap-8 lg:grid-cols-2">

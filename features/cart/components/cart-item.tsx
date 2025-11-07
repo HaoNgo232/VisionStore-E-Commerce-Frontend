@@ -19,7 +19,7 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
   const product = item.product
 
   // Safety check: ensure product data exists
-  if (!product || !product.id || typeof product.priceInt !== 'number') {
+  if (!product?.id || typeof product.priceInt !== 'number') {
     console.error('Invalid cart item data:', item);
     return null;
   }
