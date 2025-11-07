@@ -46,7 +46,7 @@ export function ProductDetailContent({ productId, productSlug }: ProductDetailCo
 
     const price = formatPrice(product.priceInt)
     const inStock = product.stock > 0
-    const attributes = (product.attributes as Record<string, string | number | boolean | null>) || {}
+    const attributes = product.attributes || null
 
     const handleAddToCart = async () => {
         setIsAdding(true)
@@ -134,30 +134,30 @@ export function ProductDetailContent({ productId, productSlug }: ProductDetailCo
                     <Separator />
 
                     {/* Attributes */}
-                    {(attributes.brand || attributes.frameType || attributes.material || attributes.color) && (
+                    {attributes && (attributes.brand || attributes.frameShape || attributes.frameMaterial || attributes.color) && (
                         <div className="space-y-3">
                             {attributes.brand && (
                                 <div>
                                     <span className="text-sm font-medium">Hãng:</span>
-                                    <p className="text-sm text-muted-foreground">{String(attributes.brand)}</p>
+                                    <p className="text-sm text-muted-foreground">{attributes.brand}</p>
                                 </div>
                             )}
-                            {attributes.frameType && (
+                            {attributes.frameShape && (
                                 <div>
-                                    <span className="text-sm font-medium">Loại khung:</span>
-                                    <p className="text-sm text-muted-foreground">{String(attributes.frameType)}</p>
+                                    <span className="text-sm font-medium">Kiểu khung:</span>
+                                    <p className="text-sm text-muted-foreground">{attributes.frameShape}</p>
                                 </div>
                             )}
-                            {attributes.material && (
+                            {attributes.frameMaterial && (
                                 <div>
-                                    <span className="text-sm font-medium">Chất liệu:</span>
-                                    <p className="text-sm text-muted-foreground">{String(attributes.material)}</p>
+                                    <span className="text-sm font-medium">Chất liệu khung:</span>
+                                    <p className="text-sm text-muted-foreground">{attributes.frameMaterial}</p>
                                 </div>
                             )}
                             {attributes.color && (
                                 <div>
                                     <span className="text-sm font-medium">Màu sắc:</span>
-                                    <p className="text-sm text-muted-foreground">{String(attributes.color)}</p>
+                                    <p className="text-sm text-muted-foreground">{attributes.color}</p>
                                 </div>
                             )}
                         </div>

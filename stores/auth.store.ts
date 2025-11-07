@@ -1,27 +1,36 @@
 /**
  * Authentication Store
- * Manages auth tokens and user state using Zustand
+ * Manages auth tokens only - user data comes from React Query
  */
 
 "use client";
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { User, AuthResponse } from "@/types";
+
+/**
+ * JWT Payload interface
+ */
+interface JWTPayload {
+  sub: string;
+  email: string;
+  role: "ADMIN" | "CUSTOMER";
+  iat?: number;
+  exp?: number;
+  [key: string]: unknown; // Allow additional claims
+}
 
 /**
  * Decode JWT token payload
  * JWT format: header.payload.signature
  */
-function decodeToken(
-  token: string,
-): { sub?: string; [key: string]: any } | null {
+function decodeToken(token: string): JWTPayload | null {
   try {
     const parts = token.split(".");
     if (parts.length !== 3) return null;
 
     const payload = parts[1];
-    const decoded = JSON.parse(atob(payload));
+    const decoded = JSON.parse(atob(payload)) as JWTPayload;
     return decoded;
   } catch {
     return null;
@@ -29,17 +38,14 @@ function decodeToken(
 }
 
 interface AuthStore {
-  // State
+  // State - only tokens, user data from React Query
   accessToken: string | null;
   refreshToken: string | null;
   userId: string | null;
-  user: User | null;
 
   // Methods
   setTokens: (accessToken: string, refreshToken: string) => void;
-  setUser: (user: User) => void;
-  setAuth: (payload: AuthResponse) => void;
-  clearAuth: () => void;
+  clearTokens: () => void;
   isAuthenticated: () => boolean;
   getUserId: () => string | null;
 }
@@ -47,6 +53,7 @@ interface AuthStore {
 /**
  * Auth store with localStorage persistence
  * Tokens are persisted to localStorage and restored on app load
+ * Note: User data is managed by React Query, not Zustand
  */
 export const useAuthStore = create<AuthStore>()(
   persist(
@@ -55,7 +62,6 @@ export const useAuthStore = create<AuthStore>()(
       accessToken: null,
       refreshToken: null,
       userId: null,
-      user: null,
 
       /**
        * Set tokens (called after login or token refresh)
@@ -68,35 +74,13 @@ export const useAuthStore = create<AuthStore>()(
       },
 
       /**
-       * Set user profile
-       */
-      setUser: (user: User) => {
-        set({ user });
-      },
-
-      /**
-       * Set complete auth response (login/register)
-       * Extracts userId from accessToken JWT
-       */
-      setAuth: (payload: AuthResponse) => {
-        const decoded = decodeToken(payload.accessToken);
-        const userId = decoded?.sub || null;
-        set({
-          accessToken: payload.accessToken,
-          refreshToken: payload.refreshToken,
-          userId,
-        });
-      },
-
-      /**
        * Clear all auth data (logout)
        */
-      clearAuth: () => {
+      clearTokens: () => {
         set({
           accessToken: null,
           refreshToken: null,
           userId: null,
-          user: null,
         });
       },
 
@@ -127,7 +111,6 @@ export const useAuthStore = create<AuthStore>()(
         accessToken: state.accessToken,
         refreshToken: state.refreshToken,
         userId: state.userId,
-        user: state.user,
       }),
     },
   ),

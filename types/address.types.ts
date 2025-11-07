@@ -3,6 +3,8 @@
  * Shipping addresses and related types
  */
 
+import { z } from "zod";
+
 export interface Address {
   id: string;
   userId: string;
@@ -15,6 +17,22 @@ export interface Address {
   isDefault: boolean;
   createdAt: string;
 }
+
+/**
+ * Zod schema for Address
+ */
+export const AddressSchema = z.object({
+  id: z.string().uuid(),
+  userId: z.string().uuid(),
+  fullName: z.string().min(1),
+  phone: z.string().min(10),
+  street: z.string().min(1),
+  ward: z.string().min(1),
+  district: z.string().min(1),
+  city: z.string().min(1),
+  isDefault: z.boolean(),
+  createdAt: z.string().datetime(),
+});
 
 /**
  * Create address request

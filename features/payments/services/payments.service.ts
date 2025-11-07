@@ -1,14 +1,21 @@
 /**
  * Payments API Service
- * Handles payment processing (COD, SePay) and status checking
+ * Handles payment processing (COD, SePay) and status checking with runtime validation
  */
 
-import { apiClient } from "@/lib/api-client";
+import {
+  apiPostValidated,
+  apiGetValidated,
+} from "@/lib/api-client";
 import type {
   PaymentProcessRequest,
   PaymentProcessResponse,
   Payment,
   PaymentMethod,
+} from "@/types";
+import {
+  PaymentProcessResponseSchema,
+  PaymentSchema,
 } from "@/types";
 
 export const paymentsApi = {
@@ -30,11 +37,11 @@ export const paymentsApi = {
       amountInt,
     };
 
-    const response = await apiClient.post<PaymentProcessResponse>(
+    return apiPostValidated<PaymentProcessResponse, PaymentProcessRequest>(
       "/payments/process",
+      PaymentProcessResponseSchema,
       payload,
     );
-    return response.data;
   },
 
   /**
@@ -43,8 +50,10 @@ export const paymentsApi = {
    * @returns Payment details including status and metadata
    */
   async getByOrder(orderId: string): Promise<Payment> {
-    const response = await apiClient.get<Payment>(`/payments/order/${orderId}`);
-    return response.data;
+    return apiGetValidated<Payment>(
+      `/payments/order/${orderId}`,
+      PaymentSchema,
+    );
   },
 
   /**
@@ -53,8 +62,7 @@ export const paymentsApi = {
    * @returns Payment details
    */
   async getById(paymentId: string): Promise<Payment> {
-    const response = await apiClient.get<Payment>(`/payments/${paymentId}`);
-    return response.data;
+    return apiGetValidated<Payment>(`/payments/${paymentId}`, PaymentSchema);
   },
 
   /**
@@ -64,9 +72,10 @@ export const paymentsApi = {
    * @returns Updated payment with PAID status
    */
   async confirmCod(orderId: string): Promise<Payment> {
-    const response = await apiClient.post<Payment>(
+    return apiPostValidated<Payment, Record<string, never>>(
       `/payments/confirm-cod/${orderId}`,
+      PaymentSchema,
+      {},
     );
-    return response.data;
   },
 };

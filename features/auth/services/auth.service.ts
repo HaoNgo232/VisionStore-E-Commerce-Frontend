@@ -1,18 +1,29 @@
 /**
  * Authentication Service
- * Handles all authentication API calls
+ * Handles all authentication API calls with runtime validation
  */
 
-import { apiPost, getErrorMessage } from "@/lib/api-client";
+import {
+  apiPostValidated,
+  apiGetValidated,
+  getErrorMessage,
+} from "@/lib/api-client";
 import { useAuthStore } from "@/stores/auth.store";
 import type {
   LoginRequest,
   RegisterRequest,
   AuthResponse,
+  TokenRefreshRequest,
   TokenRefreshResponse,
   VerifyTokenResponse,
   User,
 } from "@/types";
+import {
+  AuthResponseSchema,
+  TokenRefreshResponseSchema,
+  VerifyTokenResponseSchema,
+  UserSchema,
+} from "@/types/auth.types";
 
 export const authService = {
   /**
@@ -20,9 +31,15 @@ export const authService = {
    */
   async login(credentials: LoginRequest): Promise<AuthResponse> {
     try {
-      const response = await apiPost<AuthResponse>("/auth/login", credentials);
-      // Auto-save tokens and user to store
-      useAuthStore.getState().setAuth(response);
+      const response = await apiPostValidated<AuthResponse, LoginRequest>(
+        "/auth/login",
+        AuthResponseSchema,
+        credentials,
+      );
+      // Save tokens to store
+      useAuthStore
+        .getState()
+        .setTokens(response.accessToken, response.refreshToken);
       return response;
     } catch (error) {
       throw new Error(getErrorMessage(error));
@@ -34,9 +51,15 @@ export const authService = {
    */
   async register(data: RegisterRequest): Promise<AuthResponse> {
     try {
-      const response = await apiPost<AuthResponse>("/auth/register", data);
-      // Auto-save tokens and user to store
-      useAuthStore.getState().setAuth(response);
+      const response = await apiPostValidated<AuthResponse, RegisterRequest>(
+        "/auth/register",
+        AuthResponseSchema,
+        data,
+      );
+      // Save tokens to store
+      useAuthStore
+        .getState()
+        .setTokens(response.accessToken, response.refreshToken);
       return response;
     } catch (error) {
       throw new Error(getErrorMessage(error));
@@ -48,9 +71,10 @@ export const authService = {
    */
   async refresh(refreshToken: string): Promise<TokenRefreshResponse> {
     try {
-      const response = await apiPost<TokenRefreshResponse>("/auth/refresh", {
-        refreshToken,
-      });
+      const response = await apiPostValidated<
+        TokenRefreshResponse,
+        TokenRefreshRequest
+      >("/auth/refresh", TokenRefreshResponseSchema, { refreshToken });
       // Update tokens in store
       useAuthStore
         .getState()
@@ -58,7 +82,7 @@ export const authService = {
       return response;
     } catch (error) {
       // If refresh fails, clear auth
-      useAuthStore.getState().clearAuth();
+      useAuthStore.getState().clearTokens();
       throw new Error(getErrorMessage(error));
     }
   },
@@ -68,8 +92,11 @@ export const authService = {
    */
   async verifyToken(): Promise<VerifyTokenResponse> {
     try {
-      const response = await apiPost<VerifyTokenResponse>("/auth/verify", {});
-      return response;
+      return await apiPostValidated<VerifyTokenResponse, Record<string, never>>(
+        "/auth/verify",
+        VerifyTokenResponseSchema,
+        {},
+      );
     } catch (error) {
       throw new Error(getErrorMessage(error));
     }
@@ -80,10 +107,13 @@ export const authService = {
    */
   async getCurrentUser(): Promise<User> {
     try {
-      const response = await apiPost<User>("/auth/me", {});
-      // Update user in store
-      useAuthStore.getState().setUser(response);
-      return response;
+      // Note: Backend might use GET /auth/me or POST /auth/me
+      // Using POST for now, can be changed to GET if needed
+      return await apiPostValidated<User, Record<string, never>>(
+        "/auth/me",
+        UserSchema,
+        {},
+      );
     } catch (error) {
       throw new Error(getErrorMessage(error));
     }
@@ -94,6 +124,6 @@ export const authService = {
    * Note: Backend will invalidate the token
    */
   logout(): void {
-    useAuthStore.getState().clearAuth();
+    useAuthStore.getState().clearTokens();
   },
 };

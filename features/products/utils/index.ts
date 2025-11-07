@@ -41,53 +41,6 @@ export function formatPrice(price: number, currency: string = "VND"): string {
 }
 
 /**
- * Calculate discount percentage
- */
-export function calculateDiscount(
-  originalPrice: number,
-  salePrice: number,
-): number {
-  if (originalPrice <= salePrice) return 0;
-  return Math.round(((originalPrice - salePrice) / originalPrice) * 100);
-}
-
-/**
- * Check if product is on sale
- */
-export function isOnSale(product: Product): boolean {
-  const originalPrice = product.attributes?.originalPriceInt as
-    | number
-    | undefined;
-
-  if (!originalPrice) return false;
-  return originalPrice > product.priceInt;
-}
-
-/**
- * Get price display text
- */
-export function getPriceDisplay(product: Product): {
-  current: string;
-  original?: string;
-  discount?: number;
-} {
-  const current = formatPrice(product.priceInt);
-  const originalPrice = product.attributes?.originalPriceInt as
-    | number
-    | undefined;
-
-  if (!originalPrice) {
-    return { current };
-  }
-
-  return {
-    current,
-    original: formatPrice(originalPrice),
-    discount: calculateDiscount(originalPrice, product.priceInt),
-  };
-}
-
-/**
  * Filter products by stock status
  */
 export function filterInStock(products: Product[]): Product[] {
@@ -127,7 +80,7 @@ export function searchProducts(products: Product[], query: string): Product[] {
   const lowercaseQuery = query.toLowerCase();
 
   return products.filter((product) => {
-    const brand = (product.attributes?.brand as string) || "";
+    const brand = product.attributes?.brand || "";
     const description = product.description || "";
 
     return (

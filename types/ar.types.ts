@@ -4,6 +4,8 @@
 
  */
 
+import { z } from "zod";
+
 export interface ARSnapshot {
   id: string;
   userId: string | null;
@@ -12,6 +14,18 @@ export interface ARSnapshot {
   metadata?: Record<string, unknown> | null;
   createdAt: string;
 }
+
+/**
+ * Zod schema for ARSnapshot
+ */
+export const ARSnapshotSchema = z.object({
+  id: z.string().uuid(),
+  userId: z.string().uuid().nullable(),
+  productId: z.string().uuid(),
+  imageUrl: z.string().url(),
+  metadata: z.record(z.unknown()).nullable().optional(),
+  createdAt: z.string().datetime(),
+});
 
 export interface ARSnapshotResponse {
   id: string;
@@ -28,6 +42,16 @@ export interface PaginatedARSnapshotsResponse {
   page: number;
   pageSize: number;
 }
+
+/**
+ * Zod schema for PaginatedARSnapshotsResponse
+ */
+export const PaginatedARSnapshotsResponseSchema = z.object({
+  snapshots: z.array(ARSnapshotSchema),
+  total: z.number().int().nonnegative(),
+  page: z.number().int().positive(),
+  pageSize: z.number().int().positive(),
+});
 
 export interface ARSnapshotCreateResponse {
   id: string;

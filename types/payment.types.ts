@@ -3,6 +3,24 @@
  * Payment methods, transactions, and payment processing
  */
 
+import { z } from "zod";
+
+export enum PaymentMethod {
+  COD = "COD",
+  SEPAY = "SEPAY",
+}
+
+export enum PaymentStatus {
+  UNPAID = "UNPAID",
+  PAID = "PAID",
+}
+
+/**
+ * Zod schemas for enums
+ */
+export const PaymentMethodSchema = z.nativeEnum(PaymentMethod);
+export const PaymentStatusSchema = z.nativeEnum(PaymentStatus);
+
 export interface Payment {
   id: string;
   orderId: string;
@@ -14,15 +32,19 @@ export interface Payment {
   updatedAt: string; // Date serialized from API
 }
 
-export enum PaymentMethod {
-  COD = "COD",
-  SEPAY = "SEPAY",
-}
-
-export enum PaymentStatus {
-  UNPAID = "UNPAID",
-  PAID = "PAID",
-}
+/**
+ * Zod schema for Payment
+ */
+export const PaymentSchema = z.object({
+  id: z.string().uuid(),
+  orderId: z.string().uuid(),
+  method: PaymentMethodSchema,
+  amountInt: z.number().int().nonnegative(),
+  status: PaymentStatusSchema,
+  payload: z.record(z.unknown()).nullable().optional(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+});
 
 export interface PaymentProcessRequest {
   orderId: string;
@@ -37,6 +59,17 @@ export interface PaymentProcessResponse {
   qrCode?: string; // QR code cho bank transfer
   message?: string;
 }
+
+/**
+ * Zod schema for PaymentProcessResponse
+ */
+export const PaymentProcessResponseSchema = z.object({
+  paymentId: z.string().uuid(),
+  status: PaymentStatusSchema,
+  paymentUrl: z.string().url().optional(),
+  qrCode: z.string().optional(),
+  message: z.string().optional(),
+});
 
 export interface PaymentVerifyRequest {
   orderId: string;

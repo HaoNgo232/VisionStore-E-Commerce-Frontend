@@ -1,17 +1,27 @@
 /**
  * Products Service
- * API integration for product catalog
+ * API integration for product catalog with runtime validation
  */
 
-import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api-client";
+import {
+  apiGetValidated,
+  apiPostValidated,
+  apiPatchValidated,
+  apiDelete,
+} from "@/lib/api-client";
 import type {
   Product,
   PaginatedResponse,
   CreateProductRequest,
   UpdateProductRequest,
 } from "@/types";
+import { ProductSchema } from "@/types/product.types";
+import { createPaginatedResponseSchema } from "@/types/common.types";
 
-interface GetProductsParams {
+// Create paginated products schema
+const PaginatedProductsSchema = createPaginatedResponseSchema(ProductSchema);
+
+export interface GetProductsParams {
   page?: number;
   pageSize?: number;
   categorySlug?: string;
@@ -37,31 +47,40 @@ export const productsApi = {
       queryParams.append("maxPriceInt", String(params.maxPriceInt));
 
     const query = queryParams.toString();
-    return apiGet<PaginatedResponse<Product>>(
+    return apiGetValidated<PaginatedResponse<Product>>(
       `/products${query ? `?${query}` : ""}`,
+      PaginatedProductsSchema,
     );
   },
 
   async getById(productId: string): Promise<Product> {
-    return apiGet<Product>(`/products/${productId}`);
+    return apiGetValidated<Product>(`/products/${productId}`, ProductSchema);
   },
 
   async create(data: CreateProductRequest): Promise<Product> {
-    return apiPost<Product>("/products", data);
+    return apiPostValidated<Product, CreateProductRequest>(
+      "/products",
+      ProductSchema,
+      data,
+    );
   },
 
   async getBySlug(slug: string): Promise<Product> {
-    return apiGet<Product>(`/products/slug/${slug}`);
+    return apiGetValidated<Product>(`/products/slug/${slug}`, ProductSchema);
   },
 
   async update(
     productId: string,
     data: UpdateProductRequest,
   ): Promise<Product> {
-    return apiPatch<Product>(`/products/${productId}`, data);
+    return apiPatchValidated<Product, UpdateProductRequest>(
+      `/products/${productId}`,
+      ProductSchema,
+      data,
+    );
   },
 
   async delete(productId: string): Promise<void> {
-    return apiDelete(`/products/${productId}`);
+    return apiDelete<void>(`/products/${productId}`);
   },
 };

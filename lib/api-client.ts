@@ -15,8 +15,10 @@ import axios, {
   AxiosRequestConfig,
   InternalAxiosRequestConfig,
 } from "axios";
+import { z } from "zod";
 import { useAuthStore } from "@/stores/auth.store";
 import type { ApiError } from "@/types/common.types";
+import { validateResponse } from "./validation-utils";
 
 // API Configuration
 export const API_CONFIG = {
@@ -158,36 +160,36 @@ export async function apiGet<T>(
 /**
  * Helper for POST requests
  */
-export async function apiPost<T>(
+export async function apiPost<TResponse = unknown, TRequest = unknown>(
   endpoint: string,
-  data?: any,
+  data?: TRequest,
   config?: AxiosRequestConfig,
-): Promise<T> {
-  const response = await apiClient.post<T>(endpoint, data, config);
+): Promise<TResponse> {
+  const response = await apiClient.post<TResponse>(endpoint, data, config);
   return response.data;
 }
 
 /**
  * Helper for PUT requests
  */
-export async function apiPut<T>(
+export async function apiPut<TResponse = unknown, TRequest = unknown>(
   endpoint: string,
-  data?: any,
+  data?: TRequest,
   config?: AxiosRequestConfig,
-): Promise<T> {
-  const response = await apiClient.put<T>(endpoint, data, config);
+): Promise<TResponse> {
+  const response = await apiClient.put<TResponse>(endpoint, data, config);
   return response.data;
 }
 
 /**
  * Helper for PATCH requests
  */
-export async function apiPatch<T>(
+export async function apiPatch<TResponse = unknown, TRequest = unknown>(
   endpoint: string,
-  data?: any,
+  data?: TRequest,
   config?: AxiosRequestConfig,
-): Promise<T> {
-  const response = await apiClient.patch<T>(endpoint, data, config);
+): Promise<TResponse> {
+  const response = await apiClient.patch<TResponse>(endpoint, data, config);
   return response.data;
 }
 
@@ -200,4 +202,55 @@ export async function apiDelete<T>(
 ): Promise<T> {
   const response = await apiClient.delete<T>(endpoint, config);
   return response.data;
+}
+
+/**
+ * Validated GET request - validates response with Zod schema
+ */
+export async function apiGetValidated<T>(
+  endpoint: string,
+  schema: z.ZodSchema<T>,
+  config?: AxiosRequestConfig,
+): Promise<T> {
+  const response = await apiGet<unknown>(endpoint, config);
+  return validateResponse(response, schema, `GET ${endpoint}`);
+}
+
+/**
+ * Validated POST request - validates response with Zod schema
+ */
+export async function apiPostValidated<TResponse, TRequest = unknown>(
+  endpoint: string,
+  schema: z.ZodSchema<TResponse>,
+  data?: TRequest,
+  config?: AxiosRequestConfig,
+): Promise<TResponse> {
+  const response = await apiPost<unknown, TRequest>(endpoint, data, config);
+  return validateResponse(response, schema, `POST ${endpoint}`);
+}
+
+/**
+ * Validated PUT request - validates response with Zod schema
+ */
+export async function apiPutValidated<TResponse, TRequest = unknown>(
+  endpoint: string,
+  schema: z.ZodSchema<TResponse>,
+  data?: TRequest,
+  config?: AxiosRequestConfig,
+): Promise<TResponse> {
+  const response = await apiPut<unknown, TRequest>(endpoint, data, config);
+  return validateResponse(response, schema, `PUT ${endpoint}`);
+}
+
+/**
+ * Validated PATCH request - validates response with Zod schema
+ */
+export async function apiPatchValidated<TResponse, TRequest = unknown>(
+  endpoint: string,
+  schema: z.ZodSchema<TResponse>,
+  data?: TRequest,
+  config?: AxiosRequestConfig,
+): Promise<TResponse> {
+  const response = await apiPatch<unknown, TRequest>(endpoint, data, config);
+  return validateResponse(response, schema, `PATCH ${endpoint}`);
 }

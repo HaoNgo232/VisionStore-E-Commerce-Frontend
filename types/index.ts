@@ -12,7 +12,11 @@ export type {
   AsyncState,
 } from "./common.types";
 
-export { createApiError } from "./common.types";
+export {
+  createApiError,
+  ApiErrorSchema,
+  createPaginatedResponseSchema,
+} from "./common.types";
 
 // Auth Types
 export type {
@@ -25,7 +29,14 @@ export type {
   VerifyTokenResponse,
 } from "./auth.types";
 
-export { UserRole } from "./auth.types";
+export {
+  UserRole,
+  UserRoleSchema,
+  UserSchema,
+  AuthResponseSchema,
+  TokenRefreshResponseSchema,
+  VerifyTokenResponseSchema,
+} from "./auth.types";
 
 // User Types
 export type {
@@ -46,6 +57,12 @@ export type {
   ProductAttributes,
 } from "./product.types";
 
+export {
+  ProductSchema,
+  ProductAttributesSchema,
+  ProductReviewSchema,
+} from "./product.types";
+
 // Category Types
 export type {
   Category,
@@ -53,6 +70,8 @@ export type {
   CreateCategoryRequest,
   UpdateCategoryRequest,
 } from "./category.types";
+
+export { CategorySchema } from "./category.types";
 
 // Address Types
 export type {
@@ -62,6 +81,8 @@ export type {
   AddressSuggestion,
 } from "./address.types";
 
+export { AddressSchema } from "./address.types";
+
 // Cart Types
 export type {
   CartItem,
@@ -70,6 +91,8 @@ export type {
   AddToCartRequest,
   UpdateCartItemRequest,
 } from "./cart.types";
+
+export { CartSchema, CartItemSchema } from "./cart.types";
 
 // Order Types
 export type {
@@ -81,7 +104,15 @@ export type {
   PaginatedOrdersResponse,
 } from "./order.types";
 
-export { OrderStatus, PaymentStatus } from "./order.types";
+export {
+  OrderStatus,
+  PaymentStatus,
+  OrderStatusSchema,
+  PaymentStatusSchema,
+  OrderSchema,
+  OrderItemSchema,
+  PaginatedOrdersResponseSchema,
+} from "./order.types";
 
 // Payment Types
 export type {
@@ -92,7 +123,13 @@ export type {
   PaymentVerifyResponse,
 } from "./payment.types";
 
-export { PaymentMethod } from "./payment.types";
+export {
+  PaymentMethod,
+  PaymentMethodSchema,
+  PaymentStatusSchema as PaymentStatusSchemaFromPayment,
+  PaymentSchema,
+  PaymentProcessResponseSchema,
+} from "./payment.types";
 // Note: PaymentStatus is exported from order.types
 
 // AR Types
@@ -106,4 +143,9 @@ export type {
   ProductPerformanceResponse,
   UserCohortResponse,
   DateRangeQuery,
+} from "./ar.types";
+
+export {
+  ARSnapshotSchema,
+  PaginatedARSnapshotsResponseSchema,
 } from "./ar.types";

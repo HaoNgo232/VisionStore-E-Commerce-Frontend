@@ -1,50 +1,72 @@
 /**
  * Categories Service
- * Handles all category-related API calls
+ * Handles all category-related API calls with runtime validation
  */
 
-import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api-client";
+import {
+  apiGetValidated,
+  apiPostValidated,
+  apiPatchValidated,
+  apiDelete,
+} from "@/lib/api-client";
 import type {
   Category,
   CategoryTree,
   CreateCategoryRequest,
   UpdateCategoryRequest,
 } from "@/types";
+import { CategorySchema, z } from "@/types";
+
+// CategoryTree schema - recursive
+const CategoryTreeSchema: z.ZodType<CategoryTree> = CategorySchema.extend({
+  children: z.lazy(() => z.array(CategoryTreeSchema).optional()),
+});
 
 export const categoriesApi = {
   /**
    * Fetch all categories
    */
   async getAll(): Promise<Category[]> {
-    return apiGet<Category[]>("/categories");
+    return apiGetValidated<Category[]>("/categories", z.array(CategorySchema));
   },
 
   /**
    * Fetch categories as tree structure (with nesting)
    */
   async getTree(): Promise<CategoryTree[]> {
-    return apiGet<CategoryTree[]>("/categories/tree");
+    return apiGetValidated<CategoryTree[]>(
+      "/categories/tree",
+      z.array(CategoryTreeSchema),
+    );
   },
 
   /**
    * Fetch single category by ID
    */
   async getById(id: string): Promise<Category> {
-    return apiGet<Category>(`/categories/${id}`);
+    return apiGetValidated<Category>(`/categories/${id}`, CategorySchema);
   },
 
   /**
    * Create new category (admin only)
    */
   async create(data: CreateCategoryRequest): Promise<Category> {
-    return apiPost<Category>("/categories", data);
+    return apiPostValidated<Category, CreateCategoryRequest>(
+      "/categories",
+      CategorySchema,
+      data,
+    );
   },
 
   /**
    * Update category (admin only)
    */
   async update(id: string, data: UpdateCategoryRequest): Promise<Category> {
-    return apiPatch<Category>(`/categories/${id}`, data);
+    return apiPatchValidated<Category, UpdateCategoryRequest>(
+      `/categories/${id}`,
+      CategorySchema,
+      data,
+    );
   },
 
   /**

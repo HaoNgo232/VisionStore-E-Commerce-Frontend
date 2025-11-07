@@ -3,6 +3,8 @@
  * Product category and related types
  */
 
+import { z } from "zod";
+
 export interface Category {
   id: string;
   name: string;
@@ -14,6 +16,20 @@ export interface Category {
   parent?: Category | null;
   children?: Category[];
 }
+
+/**
+ * Zod schema for Category (without nested relations)
+ */
+export const CategorySchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().min(1),
+  slug: z.string().min(1),
+  description: z.string().nullable(),
+  parentId: z.string().uuid().nullable(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+  // Note: parent and children are optional populated fields
+});
 
 /**
  * Category tree structure (with nested children)
