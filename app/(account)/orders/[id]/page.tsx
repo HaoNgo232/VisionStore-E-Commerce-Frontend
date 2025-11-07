@@ -17,9 +17,10 @@ import { ArrowLeft } from "lucide-react"
 import { ordersApi } from "@/features/orders/services/orders.service"
 import { formatPrice } from "@/features/products/utils"
 import { toast } from "sonner"
-import type { Order } from "@/types"
+import type { Order, Address } from "@/types"
 import { OrderStatusBadge } from "@/features/orders/components/order-status-badge"
 import { PaymentStatusBadge } from "@/features/payments/components/payment-status-badge"
+import { usersApi } from "@/features/users/services/users.service"
 
 export default function OrderDetailPage() {
     const params = useParams()
@@ -27,6 +28,7 @@ export default function OrderDetailPage() {
     const orderId = params.id as string
 
     const [order, setOrder] = useState<Order | null>(null)
+    const [address, setAddress] = useState<Address | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
@@ -43,6 +45,17 @@ export default function OrderDetailPage() {
                 setError(null)
                 const fetchedOrder = await ordersApi.getById(orderId)
                 setOrder(fetchedOrder)
+
+                // Lấy thông tin địa chỉ nếu có addressId
+                if (fetchedOrder.addressId) {
+                    try {
+                        const fetchedAddress = await usersApi.getAddressById(fetchedOrder.addressId)
+                        setAddress(fetchedAddress)
+                    } catch (addressErr) {
+                        console.warn("Không thể tải thông tin địa chỉ:", addressErr)
+                        // Không dừng loading nếu lấy địa chỉ thất bại
+                    }
+                }
             } catch (err) {
                 const errorMessage = err instanceof Error ? err.message : "Không thể tải chi tiết đơn hàng"
                 console.error("Error fetching order:", err)
@@ -227,21 +240,40 @@ export default function OrderDetailPage() {
                         )}
 
                         {/* Shipping Address */}
-                        {order.addressId && (
+                        {address ? (
+                            <Card className="mb-6">
+                                <CardHeader>
+                                    <CardTitle>Địa chỉ giao hàng</CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-3">
+                                    <div>
+                                        <p className="text-sm text-muted-foreground">Họ tên</p>
+                                        <p className="font-semibold">{address.fullName}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-muted-foreground">Số điện thoại</p>
+                                        <p className="font-semibold">{address.phone}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-muted-foreground">Địa chỉ</p>
+                                        <p className="font-semibold">
+                                            {address.street}, {address.ward}, {address.district}, {address.city}
+                                        </p>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ) : order.addressId ? (
                             <Card className="mb-6">
                                 <CardHeader>
                                     <CardTitle>Địa chỉ giao hàng</CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <p className="text-sm text-muted-foreground mb-2">
-                                        ID địa chỉ: {order.addressId}
-                                    </p>
                                     <p className="text-sm text-muted-foreground">
-                                        Chi tiết địa chỉ sẽ được hiển thị trong email xác nhận
+                                        Không thể tải thông tin địa chỉ (ID: {order.addressId})
                                     </p>
                                 </CardContent>
                             </Card>
-                        )}
+                        ) : null}
 
                         {/* Order Summary */}
                         <Card>

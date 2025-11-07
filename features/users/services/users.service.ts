@@ -4,7 +4,7 @@
  */
 
 import { apiGet, apiPatch } from "@/lib/api-client";
-import type { User } from "@/types";
+import type { User, Address } from "@/types";
 import type { UpdateProfileRequest } from "@/types/user.types";
 
 export const usersApi = {
@@ -14,5 +14,9 @@ export const usersApi = {
 
   async updateProfile(data: UpdateProfileRequest): Promise<User> {
     return apiPatch<User>("/users/profile", data);
+  },
+
+  async getAddressById(addressId: string): Promise<Address> {
+    return apiGet<Address>(`/addresses/${addressId}`);
   },
 };
