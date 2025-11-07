@@ -373,6 +373,7 @@ export function use[Domain]() {
 - Validate userId not null/undefined
 - Using pnpm instead npm
 - Using Shadcn MCP môi khi làm các tác vụ liên quan đến UI
+- Using brave search mcp tìm tài liệu trước khi debug
 
 ## Session Notes
 
