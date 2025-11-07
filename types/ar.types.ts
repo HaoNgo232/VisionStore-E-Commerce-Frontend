@@ -13,6 +13,15 @@ export interface ARSnapshot {
   createdAt: string;
 }
 
+export interface ARSnapshotResponse {
+  id: string;
+  userId: string | null;
+  productId: string;
+  imageUrl: string; // URL của ảnh snapshot (user chụp với AR)
+  metadata?: Record<string, unknown> | null; // Metadata như camera position, lighting, etc.
+  createdAt: Date;
+}
+
 export interface PaginatedARSnapshotsResponse {
   snapshots: ARSnapshot[];
   total: number;
@@ -31,7 +40,7 @@ export interface ARSnapshotCreateResponse {
  */
 export interface UploadARSnapshotRequest {
   productId: string;
-  imageUrl: string; // URL after upload
+  image: File; // File object for the image
   metadata?: Record<string, unknown>;
 }
 
@@ -52,12 +61,12 @@ export interface SalesSummaryResponse {
 export interface ProductPerformanceResponse {
   fromAt: string;
   toAt: string;
-  products: Array<{
+  products: {
     productId: string;
     productName: string;
     totalQuantitySold: number;
     totalRevenueInt: number; // cents
-  }>;
+  }[];
 }
 
 /**

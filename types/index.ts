@@ -94,6 +94,7 @@ export { PaymentMethod } from "./payment.types";
 // AR Types
 export type {
   ARSnapshot,
+  ARSnapshotResponse,
   PaginatedARSnapshotsResponse,
   ARSnapshotCreateResponse,
   UploadARSnapshotRequest,
