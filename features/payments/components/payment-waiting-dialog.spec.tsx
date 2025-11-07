@@ -2,6 +2,7 @@ import { render, screen, fireEvent, waitFor, act } from "@testing-library/react"
 import { PaymentWaitingDialog } from "./payment-waiting-dialog";
 import { usePaymentPolling } from "../hooks/use-payment-polling";
 import { PaymentStatus } from "@/types";
+import { toast } from "sonner";
 
 // Mock the usePaymentPolling hook
 jest.mock("../hooks/use-payment-polling", () => ({
@@ -160,7 +161,7 @@ describe("PaymentWaitingDialog", () => {
             fireEvent.click(orderCopyButton!);
 
             expect(navigator.clipboard.writeText).toHaveBeenCalledWith("DHorder-123");
-            expect(require("sonner").toast.success).toHaveBeenCalledWith("Đã sao chép mã đơn hàng");
+            expect(toast.success).toHaveBeenCalledWith("Đã sao chép mã đơn hàng");
         });
 
         it("copies account info when account copy button is clicked", async () => {
@@ -176,7 +177,7 @@ describe("PaymentWaitingDialog", () => {
 
             const expectedAccountInfo = `Ngân hàng: Vietcombank\nSố tài khoản: 1234567890\nTên tài khoản: CONG TY TNHH E-COMMERCE\nNội dung: DHorder-123`;
             expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expectedAccountInfo);
-            expect(require("sonner").toast.success).toHaveBeenCalledWith("Đã sao chép thông tin tài khoản");
+            expect(toast.success).toHaveBeenCalledWith("Đã sao chép thông tin tài khoản");
         });
     });
 
