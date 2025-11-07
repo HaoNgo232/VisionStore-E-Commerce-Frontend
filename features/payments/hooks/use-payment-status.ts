@@ -55,7 +55,6 @@ export function usePaymentStatus(
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPolling, setIsPolling] = useState(false);
-  const [attempts, setAttempts] = useState(0);
 
   const isPaid = payment?.status === "PAID";
 
@@ -70,7 +69,6 @@ export function usePaymentStatus(
       // Stop polling if payment is paid
       if (fetchedPayment.status === "PAID") {
         setIsPolling(false);
-        setAttempts(0);
         return true; // Payment completed
       }
 
@@ -84,39 +82,26 @@ export function usePaymentStatus(
     }
   }, [orderId]);
 
-  // Auto-start polling if requested
-  useEffect(() => {
-    if (autoStart && !isPolling) {
-      startPolling();
-    }
-  }, [autoStart]); // Only run on mount
-
   const startPolling = useCallback(() => {
     if (isPolling) return;
 
     setIsPolling(true);
-    setAttempts(0);
+    let _attempts = 0;
 
     const interval = setInterval(async () => {
       const isDone = await checkPaymentStatus();
 
-      setAttempts((prev) => {
-        const nextAttempt = prev + 1;
+      _attempts++;
 
-        // Stop polling after max attempts
-        if (nextAttempt >= maxAttempts) {
-          clearInterval(interval);
-          setIsPolling(false);
-          if (!isDone) {
-            setError(
-              "Quá thời gian chờ. Vui lòng kiểm tra trạng thái đơn hàng.",
-            );
-          }
-          return maxAttempts;
+      // Stop polling after max attempts
+      if (_attempts >= maxAttempts) {
+        clearInterval(interval);
+        setIsPolling(false);
+        if (!isDone) {
+          setError("Quá thời gian chờ. Vui lòng kiểm tra trạng thái đơn hàng.");
         }
-
-        return nextAttempt;
-      });
+        return;
+      }
 
       if (isDone) {
         clearInterval(interval);
@@ -130,9 +115,15 @@ export function usePaymentStatus(
     };
   }, [checkPaymentStatus, isPolling, maxAttempts, pollInterval]);
 
+  // Auto-start polling if requested
+  useEffect(() => {
+    if (autoStart && !isPolling) {
+      startPolling();
+    }
+  }, [autoStart, isPolling, startPolling]);
+
   const stopPolling = useCallback(() => {
     setIsPolling(false);
-    setAttempts(0);
   }, []);
 
   return {

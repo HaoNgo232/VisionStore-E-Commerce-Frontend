@@ -196,7 +196,7 @@ export default function OrderDetailPage() {
                                 </CardHeader>
                                 <CardContent>
                                     <div className="space-y-4">
-                                        {order.items.map((item: any) => (
+                                        {order.items.map((item: Order["items"][number] & { product?: { name?: string; imageUrls?: string[] } }) => (
                                             <div key={item.id} className="flex gap-4 pb-4 border-b last:border-0">
                                                 {item.product?.imageUrls?.[0] && (
                                                     <img

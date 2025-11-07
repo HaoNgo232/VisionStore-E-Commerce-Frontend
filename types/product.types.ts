@@ -5,17 +5,26 @@
 
 import type { Category } from "./category.types";
 
+export interface ProductAttributes {
+  brand?: string;
+  frameType?: string;
+  material?: string;
+  color?: string;
+  originalPriceInt?: number;
+  [key: string]: unknown; // Allow additional attributes
+}
+
 export interface Product {
   id: string;
   sku: string;
   name: string;
   slug: string;
-  priceInt: number; // cents format (199900 = 1,999.00 VND)
+  priceInt: number; // VND format (199900 = 199,900 VND)
   stock: number; // Available quantity
   description: string | null;
   imageUrls: string[]; // Image URLs
   categoryId: string | null;
-  attributes: Record<string, unknown> | null; // Contains brand, frameType, material, color, etc.
+  attributes: ProductAttributes | null; // Typed attributes
   model3dUrl: string | null;
   createdAt: string;
   updatedAt: string;
@@ -27,7 +36,7 @@ export interface Product {
  */
 export interface ProductFilters {
   categoryId?: string;
-  priceRange?: [number, number]; // [min, max] in cents
+  priceRange?: [number, number]; // [min, max] in VND
   search?: string;
   sortBy?: ProductSortBy;
   page?: number;
@@ -52,7 +61,7 @@ export interface CreateProductRequest {
   sku: string;
   name: string;
   slug: string;
-  priceInt: number; // cents
+  priceInt: number; // VND
   stock: number;
   description?: string;
   imageUrls: string[];

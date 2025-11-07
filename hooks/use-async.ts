@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
-import type { AsyncState, ApiError } from "@/types/api";
-import { createApiError } from "@/types/api";
+import { AsyncState } from "@/types";
+import { createApiError } from "@/types";
 
 /**
  * Type-safe hook for async operations

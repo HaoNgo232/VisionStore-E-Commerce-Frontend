@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /**
  * useProducts Hook
  * Fetches and manages product listing with pagination

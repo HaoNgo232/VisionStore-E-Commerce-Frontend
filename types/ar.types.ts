@@ -51,8 +51,8 @@ export interface SalesSummaryResponse {
   fromAt: string; // Date serialized to string
   toAt: string;
   totalOrders: number;
-  totalRevenueInt: number; // cents
-  averageOrderValueInt: number; // cents
+  totalRevenueInt: number; // VND
+  averageOrderValueInt: number; // VND
 }
 
 /**
@@ -65,7 +65,7 @@ export interface ProductPerformanceResponse {
     productId: string;
     productName: string;
     totalQuantitySold: number;
-    totalRevenueInt: number; // cents
+    totalRevenueInt: number; // VND
   }[];
 }
 

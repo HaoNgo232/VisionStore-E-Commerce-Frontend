@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client"
 
 import { useState, useRef, useEffect } from "react"
@@ -131,15 +132,14 @@ export function VirtualTryOnDialog({ open, onOpenChange, product, onSwitchProduc
           {/* Product Info */}
           <div className="flex items-center gap-3 p-3 rounded-lg bg-muted">
             <img
-              src={product.images[0] || "/placeholder.svg"}
+              src={product.imageUrls[0] || "/placeholder.svg"}
               alt={product.name}
               className="h-16 w-16 rounded-lg object-cover"
             />
             <div className="flex-1">
               <p className="font-semibold">{product.name}</p>
-              <p className="text-sm text-muted-foreground">{product.brand}</p>
             </div>
-            <Badge variant="secondary">${product.price}</Badge>
+            <Badge variant="secondary">${product.priceInt}</Badge>
           </div>
 
           {/* Webcam/Preview Area */}

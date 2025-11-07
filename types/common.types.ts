@@ -42,3 +42,23 @@ export interface ApiResponseWithMeta<T> {
     version: string;
   };
 }
+
+/**
+ * Async operation state
+ */
+export type AsyncState<T> =
+  | { status: "idle" }
+  | { status: "loading" }
+  | { status: "success"; data: T }
+  | { status: "error"; error: ApiError };
+
+/**
+ * Create an API error object
+ */
+export function createApiError(code: string, message: string): ApiError {
+  return {
+    statusCode: 500,
+    message,
+    error: code,
+  };
+}

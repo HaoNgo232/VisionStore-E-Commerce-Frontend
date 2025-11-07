@@ -23,7 +23,7 @@ export function PaymentStatusBadge({ status, className }: PaymentStatusBadgeProp
     const config = statusConfig[status];
 
     return (
-        <Badge variant={config.variant} className={className}>
+        <Badge variant={config.variant} className={className} data-testid="payment-status-badge">
             {config.label}
         </Badge>
     );

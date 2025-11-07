@@ -25,10 +25,25 @@ export function LoginForm() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Prevent double submission
+        if (loading) return;
+
         setError(null);
 
+        // Validation
         if (!email || !password) {
             setError("Vui lòng nhập email và mật khẩu");
+            return;
+        }
+
+        if (!email.includes('@')) {
+            setError("Email không hợp lệ");
+            return;
+        }
+
+        if (password.length < 6) {
+            setError("Mật khẩu phải có ít nhất 6 ký tự");
             return;
         }
 
@@ -39,8 +54,15 @@ export function LoginForm() {
             router.push("/home");
         } catch (err) {
             const message = getErrorMessage(err);
-            setError(message);
-            toast.error(message);
+            // User-friendly error messages
+            const friendlyMessage = message.toLowerCase().includes('unauthorized') || message.toLowerCase().includes('401')
+                ? "Email hoặc mật khẩu không chính xác"
+                : message.toLowerCase().includes('network')
+                    ? "Lỗi kết nối. Vui lòng kiểm tra internet"
+                    : message;
+
+            setError(friendlyMessage);
+            toast.error(friendlyMessage);
         } finally {
             setLoading(false);
         }

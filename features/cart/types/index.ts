@@ -2,7 +2,7 @@
  * Cart feature specific types
  */
 
-import type { Cart, CartItem } from "@/types";
+import type { Cart } from "@/types";
 
 export interface CartTotals {
   subtotal: number;

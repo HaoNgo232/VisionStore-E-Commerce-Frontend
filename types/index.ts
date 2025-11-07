@@ -9,7 +9,10 @@ export type {
   PaginatedResponse,
   ApiResponse,
   ApiResponseWithMeta,
+  AsyncState,
 } from "./common.types";
+
+export { createApiError } from "./common.types";
 
 // Auth Types
 export type {
@@ -40,6 +43,7 @@ export type {
   CreateProductRequest,
   UpdateProductRequest,
   ProductReview,
+  ProductAttributes,
 } from "./product.types";
 
 // Category Types

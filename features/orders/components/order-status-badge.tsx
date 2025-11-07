@@ -51,7 +51,7 @@ export function OrderStatusBadge({
     const config = statusConfig[status];
 
     return (
-        <Badge variant={config.variant} className={className}>
+        <Badge variant={config.variant} className={className} data-testid="order-status-badge">
             {config.label}
         </Badge>
     );

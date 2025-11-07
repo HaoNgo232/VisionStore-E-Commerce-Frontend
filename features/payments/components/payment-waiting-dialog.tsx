@@ -8,10 +8,9 @@ import {
     DialogDescription,
     DialogHeader,
     DialogTitle,
-    DialogClose,
 } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertCircle, Clock, Copy, RotateCw, Loader2, X } from "lucide-react";
+import { AlertCircle, Clock, Copy, RotateCw, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { usePaymentPolling } from "../hooks/use-payment-polling";
 import { formatPrice } from "@/features/products/utils";
@@ -53,20 +52,29 @@ export function PaymentWaitingDialog({
     const maxTimeout = 900; // 15 minutes in seconds
     const progressPercent = ((maxTimeout - timeRemaining) / maxTimeout) * 100;
 
-    // Update countdown timer
+    // Update countdown timer - only when dialog is open AND polling
     useEffect(() => {
-        if (!isPolling || !open) return;
+        if (!isPolling || !open) {
+            // Reset timer when dialog closes
+            if (!open) {
+                setTimeRemaining(900);
+            }
+            return;
+        }
 
         const interval = setInterval(() => {
             setTimeRemaining((prev) => {
                 if (prev <= 1) {
+                    clearInterval(interval);
                     return 0;
                 }
                 return prev - 1;
             });
         }, 1000);
 
-        return () => clearInterval(interval);
+        return () => {
+            clearInterval(interval);
+        };
     }, [isPolling, open]);
 
     // Reset timer when dialog opens
@@ -147,6 +155,7 @@ export function PaymentWaitingDialog({
                                             src={payment.qrCode}
                                             alt="SePay QR Code"
                                             className="h-48 w-48"
+                                            data-testid="qr-code"
                                             onError={(e) => {
                                                 console.error("Failed to load QR code:", e);
                                             }}
@@ -159,7 +168,7 @@ export function PaymentWaitingDialog({
                             <div className="space-y-3 rounded-lg bg-gray-50 p-4">
                                 <div className="flex justify-between">
                                     <span className="text-sm text-gray-600">Số tiền</span>
-                                    <span className="font-semibold">{amountVND}₫</span>
+                                    <span className="font-semibold">{amountVND}</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-sm text-gray-600">Mã đơn hàng</span>
@@ -262,7 +271,7 @@ export function PaymentWaitingDialog({
                                     <div className="space-y-2">
                                         <div className="flex items-center justify-between text-sm">
                                             <span className="text-blue-700 font-medium">⏱️ Thời gian còn lại</span>
-                                            <span className="font-mono text-lg font-bold text-blue-600">
+                                            <span className="font-mono text-lg font-bold text-blue-600" data-testid="countdown-timer">
                                                 {Math.floor(timeRemaining / 60)}:{String(timeRemaining % 60).padStart(2, "0")}
                                             </span>
                                         </div>

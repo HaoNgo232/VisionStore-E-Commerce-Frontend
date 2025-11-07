@@ -2,7 +2,29 @@
  * Product feature utilities
  */
 
-import type { Product } from "@/types";
+import type { Product, ProductAttributes } from "@/types";
+
+/**
+ * Safely get product attribute with type checking
+ */
+export function getProductAttribute<K extends keyof ProductAttributes>(
+  product: Product,
+  key: K,
+): ProductAttributes[K] | undefined {
+  if (!product.attributes || typeof product.attributes !== "object") {
+    return undefined;
+  }
+  return product.attributes[key];
+}
+
+/**
+ * Check if product has valid attributes
+ */
+export function hasValidAttributes(
+  product: Product,
+): product is Product & { attributes: ProductAttributes } {
+  return product.attributes !== null && typeof product.attributes === "object";
+}
 
 /**
  * Format price with currency (real price - no conversion)

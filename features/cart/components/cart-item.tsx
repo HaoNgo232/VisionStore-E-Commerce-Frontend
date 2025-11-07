@@ -18,8 +18,10 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
   const { quantity } = item
   const product = item.product
 
-  if (!product) {
-    return null
+  // Safety check: ensure product data exists
+  if (!product || !product.id || typeof product.priceInt !== 'number') {
+    console.error('Invalid cart item data:', item);
+    return null;
   }
 
   const price = product.priceInt
@@ -48,8 +50,8 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
   }
 
   return (
-    <div className="flex gap-4 py-4 px-5">
-      <Link href={`/products/${product.id}`} className="shrink-0">
+    <div className="flex gap-4 py-4 px-5" data-testid="cart-item">
+      <Link href={`/products/${product.slug ?? product.id}`} className="shrink-0">
         <img
           src={product.imageUrls[0] || "/placeholder.svg"}
           alt={product.name}
@@ -60,7 +62,7 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
       <div className="flex flex-1 flex-col gap-2">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <Link href={`/products/${product.id}`} className="font-semibold hover:text-primary transition-colors">
+            <Link href={`/products/${product.slug ?? product.id}`} className="font-semibold hover:text-primary transition-colors">
               {product.name}
             </Link>
           </div>

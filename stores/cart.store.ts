@@ -46,17 +46,38 @@ export const useCartStore = create<CartStore>()(
         }
       },
 
-      addItem: async (productId: string, quantity: number) => {
+      addItem: async (
+        productId: string,
+        quantity: number,
+        priceInt?: number,
+      ) => {
+        // Prevent multiple simultaneous adds
+        if (get().loading) {
+          console.warn("Add to cart already in progress");
+          return;
+        }
+
         set({ loading: true });
         try {
-          const cart = await cartApi.addItem({ productId, quantity });
+          if (!priceInt || priceInt <= 0) {
+            throw new Error("Giá sản phẩm không hợp lệ");
+          }
+          if (quantity <= 0) {
+            throw new Error("Số lượng phải lớn hơn 0");
+          }
+
+          const cart = await cartApi.addItem({ productId, quantity, priceInt });
           set({ cart, error: null });
-          toast.success(`Đã thêm vào giỏ hàng`);
+          toast.success(`Đã thêm ${quantity} sản phẩm vào giỏ hàng`);
         } catch (err) {
           const message =
-            err instanceof Error ? err.message : "Failed to add item";
+            err instanceof Error ? err.message : "Không thể thêm vào giỏ hàng";
           set({ error: message });
-          toast.error(message);
+
+          // Only show toast if not a duplicate request
+          if (!message.includes("progress")) {
+            toast.error(message);
+          }
         } finally {
           set({ loading: false });
         }

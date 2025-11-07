@@ -16,7 +16,8 @@ export interface CartItem {
     name: string;
     priceInt: number;
     imageUrls: string[];
-  } | null;
+    slug?: string;
+  };
 }
 
 export interface Cart {
@@ -24,7 +25,7 @@ export interface Cart {
   sessionId: string;
   userId: string | null;
   items: CartItem[];
-  totalInt: number; // cents
+  totalInt: number; // VND
   createdAt: string; // Date serialized from API
   updatedAt: string; // Date serialized from API
 }
@@ -45,6 +46,7 @@ export interface SyncCartRequest {
 export interface AddToCartRequest {
   productId: string;
   quantity: number;
+  priceInt: number;
 }
 
 /**

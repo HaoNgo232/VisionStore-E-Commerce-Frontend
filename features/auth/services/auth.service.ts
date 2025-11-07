@@ -9,7 +9,6 @@ import type {
   LoginRequest,
   RegisterRequest,
   AuthResponse,
-  TokenRefreshRequest,
   TokenRefreshResponse,
   VerifyTokenResponse,
   User,

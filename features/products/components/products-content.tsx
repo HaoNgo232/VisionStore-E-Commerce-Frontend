@@ -3,14 +3,10 @@
 import { useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { useProducts } from "@/features/products/hooks/use-products"
-import { useCartStore } from "@/stores/cart.store"
 import { ProductGrid } from "./product-grid"
 import { ProductSort } from "./product-sort"
 import { ProductGridSkeleton } from "@/components/skeletons/product-card-skeleton"
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { SlidersHorizontal } from "lucide-react"
-import { toast } from "sonner"
 
 export function ProductsContent() {
     const searchParams = useSearchParams()

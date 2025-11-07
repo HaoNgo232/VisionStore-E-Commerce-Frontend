@@ -15,9 +15,10 @@ import { toast } from "sonner"
 import Link from "next/link"
 import { PaymentMethod, Order, PaymentStatus } from "@/types"
 import { PaymentWaitingDialog } from "@/features/payments/components/payment-waiting-dialog"
+import { formatPrice } from "@/features/products/utils"
 // PaymentSuccessDialog not used anymore - direct redirect instead
 
-export function CheckoutContent() {
+export default function CheckoutContent() {
     const router = useRouter()
     const { isAuthenticated } = useAuth()
     const { cart, loading: cartLoading, clearCart } = useCart()
@@ -76,13 +77,28 @@ export function CheckoutContent() {
     }
 
     const handleCheckout = async () => {
+        // Validate address
         if (!selectedAddressId) {
             toast.error("Vui lòng chọn địa chỉ giao hàng")
             return
         }
 
-        if (!cart) {
-            toast.error("Giỏ hàng không tìm thấy")
+        // Validate cart exists and has items
+        if (!cart || !cart.items || cart.items.length === 0) {
+            toast.error("Giỏ hàng trống")
+            return
+        }
+
+        // Validate all items have valid product data
+        const invalidItems = cart.items.filter(item => !item.product || !item.product.priceInt);
+        if (invalidItems.length > 0) {
+            toast.error("Giỏ hàng chứa sản phẩm không hợp lệ. Vui lòng làm mới trang.")
+            return
+        }
+
+        // Validate total amount
+        if (cart.totalInt <= 0) {
+            toast.error("Tổng giá trị đơn hàng không hợp lệ")
             return
         }
 
@@ -132,7 +148,7 @@ export function CheckoutContent() {
         // Clear cart after successful payment
         try {
             await clearCart()
-        } catch (e) {
+        } catch {
             // Swallow non-critical cart clear errors
         }
 
@@ -172,7 +188,7 @@ export function CheckoutContent() {
                             <RadioGroup value={selectedAddressId} onValueChange={setSelectedAddressId}>
                                 <div className="space-y-3">
                                     {addresses.map((address) => (
-                                        <div key={address.id} className="flex items-start space-x-3 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer">
+                                        <div key={address.id} className="flex items-start space-x-3 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer" data-testid="address-option">
                                             <RadioGroupItem value={address.id} id={address.id} className="mt-1" />
                                             <Label htmlFor={address.id} className="flex-1 cursor-pointer">
                                                 <div className="font-semibold">{address.fullName}</div>
@@ -251,7 +267,7 @@ export function CheckoutContent() {
                                             </div>
                                         </div>
                                         <p className="font-semibold">
-                                            {((item.product?.priceInt || 0) / item.quantity).toLocaleString("vi-VN")}
+                                            {formatPrice((item.product?.priceInt || 0) * item.quantity)}
                                         </p>
                                     </div>
                                 ))}
@@ -269,7 +285,7 @@ export function CheckoutContent() {
                         <CardContent className="space-y-4">
                             <div className="flex justify-between">
                                 <span className="text-muted-foreground">Tạm tính</span>
-                                <span className="font-medium">{total.toLocaleString("vi-VN")}</span>
+                                <span className="font-medium">{formatPrice(total)}</span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-muted-foreground">Vận chuyển</span>
@@ -277,7 +293,7 @@ export function CheckoutContent() {
                             </div>
                             <div className="border-t pt-4 flex justify-between text-lg">
                                 <span className="font-semibold">Tổng cộng</span>
-                                <span className="font-bold">{total.toLocaleString("vi-VN")}</span>
+                                <span className="font-bold">{formatPrice(total)}</span>
                             </div>
 
                             <Button

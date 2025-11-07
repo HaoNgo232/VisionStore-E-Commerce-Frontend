@@ -127,14 +127,18 @@ export function usePaymentPolling({
     };
   }, [enabled, orderId, startPolling, stopPolling]);
 
-  // Cleanup on unmount
+  // Cleanup on unmount - ensure interval is cleared
   useEffect(() => {
     isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;
-      stopPolling();
+      // Force stop polling on unmount
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
     };
-  }, [stopPolling]);
+  }, []);
 
   return {
     isPolling,

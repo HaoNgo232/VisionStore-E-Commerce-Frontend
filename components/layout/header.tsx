@@ -261,7 +261,10 @@ export function Header() {
                       <Settings className="mr-2 h-4 w-4" />
                       Settings
                     </Link>
-                    <button className="flex items-center rounded-md px-3 py-2 text-base font-medium text-destructive transition-colors hover:bg-accent">
+                    <button
+                      className="flex items-center rounded-md px-3 py-2 text-base font-medium text-destructive transition-colors hover:bg-accent"
+                      onClick={handleLogout}
+                    >
                       <LogOut className="mr-2 h-4 w-4" />
                       Log out
                     </button>

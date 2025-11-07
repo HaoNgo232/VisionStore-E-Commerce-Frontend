@@ -91,7 +91,7 @@ describe("PaymentSuccessDialog", () => {
             const codOrder = {
                 ...mockOrder,
                 paymentStatus: PaymentStatus.UNPAID,
-                status: "PENDING" as any
+                status: OrderStatus.PENDING,
             };
             render(<PaymentSuccessDialog {...mockProps} order={codOrder} />);
             // Check that payment status badge shows UNPAID

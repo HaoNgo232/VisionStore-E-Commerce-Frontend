@@ -37,7 +37,7 @@ export default function SuccessPage() {
   // Redirect non-COD payments away from this page
   useEffect(() => {
     if (paymentMethod !== "COD") {
-      router.push("/orders")
+      router.push("/profile#orders")
     }
   }, [paymentMethod, router])
 

@@ -3,7 +3,7 @@
  */
 
 import type { CartItem } from "@/types";
-import type { CartTotals, CartValidation, CartValidationError } from "../types";
+import type { CartTotals } from "../types";
 
 /**
  * Calculate cart totals
@@ -18,14 +18,14 @@ export function calculateCartTotals(
   } = {},
 ): CartTotals {
   const {
-    shippingCost = 5.99,
+    shippingCost = 30000, // 30,000 VND
     taxRate = 0.1,
     discountAmount = 0,
-    freeShippingThreshold = 50,
+    freeShippingThreshold = 500000, // 500,000 VND
   } = options;
 
   const subtotal = items.reduce(
-    (sum, item) => sum + item.product.price * item.quantity,
+    (sum, item) => sum + item.product.priceInt * item.quantity,
     0,
   );
 
@@ -40,37 +40,6 @@ export function calculateCartTotals(
     tax,
     discount,
     total,
-  };
-}
-
-/**
- * Validate cart items
- */
-export function validateCart(items: CartItem[]): CartValidation {
-  const errors: CartValidationError[] = [];
-
-  // Check if cart is empty
-  if (items.length === 0) {
-    errors.push({
-      type: "min_order",
-      message: "Cart is empty",
-    });
-  }
-
-  // Check stock availability
-  items.forEach((item) => {
-    if (!item.product.inStock) {
-      errors.push({
-        type: "out_of_stock",
-        message: `${item.product.name} is out of stock`,
-        itemId: item.productId,
-      });
-    }
-  });
-
-  return {
-    isValid: errors.length === 0,
-    errors,
   };
 }
 

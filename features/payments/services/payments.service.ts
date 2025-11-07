@@ -3,7 +3,7 @@
  * Handles payment processing (COD, SePay) and status checking
  */
 
-import { apiClient, getErrorMessage } from "@/lib/api-client";
+import { apiClient } from "@/lib/api-client";
 import type {
   PaymentProcessRequest,
   PaymentProcessResponse,

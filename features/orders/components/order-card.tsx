@@ -3,18 +3,20 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import type { Order } from "@/types"
+import { OrderStatus } from "@/types"
 import { Package, Truck, CheckCircle, XCircle, Clock } from "lucide-react"
+import { formatPrice } from "@/features/products/utils"
 
 interface OrderCardProps {
   order: Order
 }
 
-const statusConfig = {
-  pending: { label: "Pending", icon: Clock, variant: "secondary" as const },
-  processing: { label: "Processing", icon: Package, variant: "default" as const },
-  shipped: { label: "Shipped", icon: Truck, variant: "default" as const },
-  delivered: { label: "Delivered", icon: CheckCircle, variant: "default" as const },
-  cancelled: { label: "Cancelled", icon: XCircle, variant: "destructive" as const },
+const statusConfig: Record<OrderStatus, { label: string; icon: any; variant: any }> = {
+  [OrderStatus.PENDING]: { label: "Pending", icon: Clock, variant: "secondary" as const },
+  [OrderStatus.PROCESSING]: { label: "Processing", icon: Package, variant: "default" as const },
+  [OrderStatus.SHIPPED]: { label: "Shipped", icon: Truck, variant: "default" as const },
+  [OrderStatus.DELIVERED]: { label: "Delivered", icon: CheckCircle, variant: "default" as const },
+  [OrderStatus.CANCELLED]: { label: "Cancelled", icon: XCircle, variant: "destructive" as const },
 }
 
 export function OrderCard({ order }: OrderCardProps) {
@@ -49,16 +51,12 @@ export function OrderCard({ order }: OrderCardProps) {
         <div className="space-y-3">
           {order.items.map((item) => (
             <div key={item.productId} className="flex gap-3">
-              <img
-                src={item.product.images[0] || "/placeholder.svg"}
-                alt={item.product.name}
-                className="h-16 w-16 rounded-lg object-cover"
-              />
+              <div className="h-16 w-16 rounded-lg bg-muted" />
               <div className="flex-1">
-                <p className="font-medium text-sm">{item.product.name}</p>
+                <p className="font-medium text-sm">Product ID: {item.productId}</p>
                 <p className="text-sm text-muted-foreground">Quantity: {item.quantity}</p>
               </div>
-              <p className="font-semibold text-sm">${(item.product.price * item.quantity).toFixed(2)}</p>
+              <p className="font-semibold text-sm">{formatPrice(item.priceInt * item.quantity)}</p>
             </div>
           ))}
         </div>
@@ -69,13 +67,13 @@ export function OrderCard({ order }: OrderCardProps) {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-muted-foreground">Total Amount</p>
-            <p className="text-lg font-bold">${order.total.toFixed(2)}</p>
+            <p className="text-lg font-bold">{formatPrice(order.totalInt)}</p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm">
               View Details
             </Button>
-            {order.status === "shipped" && order.trackingNumber && (
+            {order.status === OrderStatus.SHIPPED && (
               <Button variant="outline" size="sm">
                 Track Order
               </Button>
@@ -85,19 +83,13 @@ export function OrderCard({ order }: OrderCardProps) {
 
         {/* Shipping Address */}
         <div className="rounded-lg bg-muted p-3 text-sm">
-          <p className="font-medium mb-1">Shipping Address</p>
+          <p className="font-medium mb-1">Order Information</p>
           <p className="text-muted-foreground">
-            {order.shippingAddress.fullName}
+            Order Status: {statusConfig[order.status].label}
             <br />
-            {order.shippingAddress.addressLine1}
-            {order.shippingAddress.addressLine2 && (
-              <>
-                <br />
-                {order.shippingAddress.addressLine2}
-              </>
-            )}
+            Payment Status: {order.paymentStatus}
             <br />
-            {order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.postalCode}
+            Address ID: {order.addressId}
           </p>
         </div>
       </CardContent>

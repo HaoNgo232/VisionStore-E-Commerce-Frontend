@@ -1,6 +1,7 @@
 import { Progress } from "@/components/ui/progress"
 import { Truck } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { formatPrice } from "@/features/products/utils"
 
 interface FreeShippingProgressProps {
     currentTotal: number
@@ -9,7 +10,7 @@ interface FreeShippingProgressProps {
 
 export function FreeShippingProgress({
     currentTotal,
-    freeShippingThreshold = 50
+    freeShippingThreshold = 500000 // 500,000 VND
 }: FreeShippingProgressProps) {
     const progress = Math.min((currentTotal / freeShippingThreshold) * 100, 100)
     const remaining = Math.max(freeShippingThreshold - currentTotal, 0)
@@ -29,7 +30,7 @@ export function FreeShippingProgress({
                         </p>
                     ) : (
                         <p className="text-sm font-medium">
-                            Thêm <span className="font-bold text-primary">${remaining.toFixed(2)}</span> để được miễn phí vận chuyển
+                            Thêm <span className="font-bold text-primary">{formatPrice(remaining)}</span> để được miễn phí vận chuyển
                         </p>
                     )}
                 </div>
@@ -42,7 +43,7 @@ export function FreeShippingProgress({
 
             {!isQualified && (
                 <p className="text-xs text-muted-foreground">
-                    Đã đạt ${currentTotal.toFixed(2)} / ${freeShippingThreshold.toFixed(2)}
+                    Đã đạt {formatPrice(currentTotal)} / {formatPrice(freeShippingThreshold)}
                 </p>
             )}
         </div>

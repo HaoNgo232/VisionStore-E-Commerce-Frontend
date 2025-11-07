@@ -3,6 +3,7 @@
  */
 
 import type { Order } from "@/types";
+import { OrderStatus } from "@/types";
 import type { OrderSummary } from "../types";
 
 /**
@@ -10,11 +11,11 @@ import type { OrderSummary } from "../types";
  */
 export function getOrderStatusLabel(status: Order["status"]): string {
   const labels: Record<Order["status"], string> = {
-    pending: "Pending",
-    processing: "Processing",
-    shipped: "Shipped",
-    delivered: "Delivered",
-    cancelled: "Cancelled",
+    [OrderStatus.PENDING]: "Pending",
+    [OrderStatus.PROCESSING]: "Processing",
+    [OrderStatus.SHIPPED]: "Shipped",
+    [OrderStatus.DELIVERED]: "Delivered",
+    [OrderStatus.CANCELLED]: "Cancelled",
   };
   return labels[status];
 }
@@ -24,11 +25,11 @@ export function getOrderStatusLabel(status: Order["status"]): string {
  */
 export function getOrderStatusColor(status: Order["status"]): string {
   const colors: Record<Order["status"], string> = {
-    pending: "text-yellow-600",
-    processing: "text-blue-600",
-    shipped: "text-purple-600",
-    delivered: "text-green-600",
-    cancelled: "text-red-600",
+    [OrderStatus.PENDING]: "text-yellow-600",
+    [OrderStatus.PROCESSING]: "text-blue-600",
+    [OrderStatus.SHIPPED]: "text-purple-600",
+    [OrderStatus.DELIVERED]: "text-green-600",
+    [OrderStatus.CANCELLED]: "text-red-600",
   };
   return colors[status];
 }
@@ -37,7 +38,10 @@ export function getOrderStatusColor(status: Order["status"]): string {
  * Check if order can be cancelled
  */
 export function canCancelOrder(order: Order): boolean {
-  return order.status === "pending" || order.status === "processing";
+  return (
+    order.status === OrderStatus.PENDING ||
+    order.status === OrderStatus.PROCESSING
+  );
 }
 
 /**
@@ -56,7 +60,7 @@ export function formatOrderDate(date: string): string {
  */
 export function calculateOrderSummary(orders: Order[]): OrderSummary {
   const totalOrders = orders.length;
-  const totalSpent = orders.reduce((sum, order) => sum + order.total, 0);
+  const totalSpent = orders.reduce((sum, order) => sum + order.totalInt, 0);
   const averageOrderValue = totalOrders > 0 ? totalSpent / totalOrders : 0;
 
   const ordersByStatus = orders.reduce((acc, order) => {

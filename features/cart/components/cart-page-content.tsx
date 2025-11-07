@@ -41,7 +41,7 @@ export function CartPageContent() {
             <div className="container py-16 text-center">
                 <h1 className="text-2xl font-bold">Vui lòng đăng nhập</h1>
                 <p className="text-muted-foreground mt-2">Bạn cần đăng nhập để xem giỏ hàng</p>
-                <Link href="/login" className="text-primary hover:underline mt-4 inline-block">
+                <Link href="/auth/login" className="text-primary hover:underline mt-4 inline-block">
                     Đăng nhập ngay
                 </Link>
             </div>
@@ -69,12 +69,24 @@ export function CartPageContent() {
     if (!cart?.items || cart.items.length === 0) {
         console.log("[CartPageContent] Empty cart")
         return (
-            <div className="container py-16 text-center">
-                <h1 className="text-2xl font-bold">Giỏ hàng trống</h1>
-                <p className="text-muted-foreground mt-2">Bạn chưa có sản phẩm nào trong giỏ hàng</p>
-                <Link href="/products" className="text-primary hover:underline mt-4 inline-block">
-                    Bắt đầu mua sắm
-                </Link>
+            <div className="container py-16">
+                <div className="max-w-md mx-auto text-center space-y-6">
+                    <div className="w-24 h-24 mx-auto bg-muted rounded-full flex items-center justify-center">
+                        <svg className="w-12 h-12 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 className="text-2xl font-bold mb-2">Giỏ hàng trống</h1>
+                        <p className="text-muted-foreground">
+                            Chưa có sản phẩm nào trong giỏ hàng của bạn.<br />
+                            Khám phá bộ sưu tập kính mắt của chúng tôi ngay!
+                        </p>
+                    </div>
+                    <Link href="/products" className="inline-flex items-center justify-center rounded-md bg-primary px-8 py-3 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90 transition-colors">
+                        Khám phá sản phẩm
+                    </Link>
+                </div>
             </div>
         )
     }

@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useOrders } from "@/features/orders/hooks/use-orders"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -31,7 +30,6 @@ const ORDER_STATUS_CONFIG: Record<OrderStatus, { label: string; variant: "defaul
 export function OrdersTab() {
     const router = useRouter()
     const { orders, loading, error, total } = useOrders()
-    const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null)
 
     if (error) {
         return (

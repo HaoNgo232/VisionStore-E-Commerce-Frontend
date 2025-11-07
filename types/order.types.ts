@@ -10,7 +10,7 @@ export interface Order {
   addressId: string | null;
   status: OrderStatus;
   paymentStatus: PaymentStatus;
-  totalInt: number; // cents
+  totalInt: number; // VND
   items: OrderItem[];
   createdAt: string; // Date serialized from API
   updatedAt: string; // Date serialized from API
@@ -21,7 +21,7 @@ export interface OrderItem {
   orderId: string;
   productId: string;
   quantity: number;
-  priceInt: number; // Price at time of purchase (cents)
+  priceInt: number; // Price at time of purchase (VND)
   createdAt: string; // JSON serialized from Date
 }
 
@@ -43,7 +43,7 @@ export interface CreateOrderRequest {
   items: {
     productId: string;
     quantity: number;
-    priceInt: number; // Price snapshot in cents
+    priceInt: number; // Price snapshot in VND
   }[];
 }
 

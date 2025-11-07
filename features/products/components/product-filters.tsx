@@ -6,6 +6,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Slider } from "@/components/ui/slider"
 import { Button } from "@/components/ui/button"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { formatPrice } from "@/features/products/utils"
 import type { ProductFilters as ProductFiltersType } from "@/types"
 
 interface ProductFiltersProps {
@@ -53,8 +54,8 @@ export function ProductFilters({ filters, onFiltersChange, onClearFilters }: Pro
           </AccordionTrigger>
           <AccordionContent>
             <RadioGroup
-              value={filters.category || ""}
-              onValueChange={(value) => onFiltersChange({ category: value as any })}
+              value={filters.categoryId || ""}
+              onValueChange={(value) => onFiltersChange({ categoryId: value })}
               className="space-y-3"
             >
               <div className="flex items-center space-x-2">
@@ -84,14 +85,14 @@ export function ProductFilters({ filters, onFiltersChange, onClearFilters }: Pro
             <div className="pt-2 space-y-4">
               <Slider
                 min={0}
-                max={200}
-                step={10}
+                max={2000000} // 2,000,000 VND
+                step={50000} // 50,000 VND steps
                 value={[minPrice, maxPrice]}
                 onValueChange={(value) => onFiltersChange({ priceRange: value as [number, number] })}
               />
               <div className="flex items-center justify-between text-sm text-muted-foreground">
-                <span>${minPrice}</span>
-                <span>${maxPrice}</span>
+                <span>{formatPrice(minPrice)}</span>
+                <span>{formatPrice(maxPrice)}</span>
               </div>
             </div>
           </AccordionContent>
@@ -108,11 +109,10 @@ export function ProductFilters({ filters, onFiltersChange, onClearFilters }: Pro
                 <div key={brand} className="flex items-center space-x-2">
                   <Checkbox
                     id={brand}
-                    checked={filters.brand === brand}
-                    onCheckedChange={(checked) => onFiltersChange({ brand: checked ? brand : undefined })}
+                    disabled
                   />
-                  <Label htmlFor={brand} className="font-normal cursor-pointer">
-                    {brand}
+                  <Label htmlFor={brand} className="font-normal cursor-pointer text-muted-foreground">
+                    {brand} (Coming soon)
                   </Label>
                 </div>
               ))}
@@ -131,13 +131,10 @@ export function ProductFilters({ filters, onFiltersChange, onClearFilters }: Pro
                 <div key={type.value} className="flex items-center space-x-2">
                   <Checkbox
                     id={type.value}
-                    checked={filters.frameType === type.value}
-                    onCheckedChange={(checked) =>
-                      onFiltersChange({ frameType: checked ? (type.value as any) : undefined })
-                    }
+                    disabled
                   />
-                  <Label htmlFor={type.value} className="font-normal cursor-pointer">
-                    {type.label}
+                  <Label htmlFor={type.value} className="font-normal cursor-pointer text-muted-foreground">
+                    {type.label} (Coming soon)
                   </Label>
                 </div>
               ))}
@@ -154,11 +151,10 @@ export function ProductFilters({ filters, onFiltersChange, onClearFilters }: Pro
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="inStock"
-                checked={filters.inStock || false}
-                onCheckedChange={(checked) => onFiltersChange({ inStock: checked as boolean })}
+                disabled
               />
-              <Label htmlFor="inStock" className="font-normal cursor-pointer">
-                In Stock Only
+              <Label htmlFor="inStock" className="font-normal cursor-pointer text-muted-foreground">
+                In Stock Only (Coming soon)
               </Label>
             </div>
           </AccordionContent>

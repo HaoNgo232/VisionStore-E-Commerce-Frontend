@@ -7,7 +7,7 @@ export interface Payment {
   id: string;
   orderId: string;
   method: PaymentMethod;
-  amountInt: number; // cents
+  amountInt: number; // VND
   status: PaymentStatus;
   payload?: Record<string, unknown> | null;
   createdAt: string; // Date serialized from API
@@ -27,7 +27,7 @@ export enum PaymentStatus {
 export interface PaymentProcessRequest {
   orderId: string;
   method: PaymentMethod;
-  amountInt: number; // cents
+  amountInt: number; // VND
 }
 
 export interface PaymentProcessResponse {

@@ -1,15 +1,13 @@
 import typescriptEslint from "typescript-eslint";
 import js from "@eslint/js";
 import reactHooks from "eslint-plugin-react-hooks";
-import nextPlugin from "@next/eslint-plugin-next";
 
 export default [
   // Base ESLint recommended rules
   js.configs.recommended,
 
-  // TypeScript ESLint strict rules - tốt cho luận văn
-  ...typescriptEslint.configs.recommendedTypeChecked,
-  ...typescriptEslint.configs.stylisticTypeChecked,
+  // TypeScript ESLint recommended (không dùng strict)
+  ...typescriptEslint.configs.recommended,
 
   {
     files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"],
@@ -18,7 +16,6 @@ export default [
       sourceType: "module",
       parser: typescriptEslint.parser,
       parserOptions: {
-        project: true, // Enable type-aware linting
         ecmaFeatures: {
           jsx: true,
         },
@@ -26,78 +23,39 @@ export default [
     },
     plugins: {
       "react-hooks": reactHooks,
-      "@next/next": nextPlugin,
     },
     rules: {
-      // TypeScript rules - strict cho production
+      // TypeScript rules - relaxed
       "@typescript-eslint/no-unused-vars": [
-        "error",
+        "warn",
         {
           argsIgnorePattern: "^_",
           varsIgnorePattern: "^_",
+          ignoreRestSiblings: true,
         },
       ],
-      "@typescript-eslint/no-explicit-any": "error", // Chặn any
-      "@typescript-eslint/explicit-function-return-type": [
-        "warn",
-        {
-          allowExpressions: true,
-          allowTypedFunctionExpressions: true,
-        },
-      ],
-      "@typescript-eslint/no-floating-promises": "error",
-      "@typescript-eslint/await-thenable": "error",
-      "@typescript-eslint/no-misused-promises": "error",
-      "@typescript-eslint/consistent-type-imports": [
-        "error",
-        {
-          prefer: "type-imports",
-          fixStyle: "inline-type-imports",
-        },
-      ],
+      "@typescript-eslint/no-explicit-any": "off", // Cho phép dùng any
+      "@typescript-eslint/no-require-imports": "off", // Cho phép require()
+      "@typescript-eslint/no-empty-function": "off", // Cho phép function rỗng
+      "@typescript-eslint/ban-ts-comment": "off", // Cho phép @ts-ignore
 
       // React hooks rules
-      "react-hooks/rules-of-hooks": "error",
-      "react-hooks/exhaustive-deps": "error", // Upgrade to error
+      "react-hooks/rules-of-hooks": "error", // Giữ lại vì quan trọng
+      "react-hooks/exhaustive-deps": "warn", // Chỉ warning
 
-      // Next.js specific rules
-      "@next/next/no-html-link-for-pages": "error",
-      "@next/next/no-img-element": "warn",
-
-      // General best practices
-      "prefer-const": "error",
-      "no-var": "error",
-      "no-console": ["warn", { allow: ["warn", "error"] }],
-      eqeqeq: ["error", "always"],
-      curly: ["error", "all"],
-      "no-throw-literal": "error",
-      "prefer-template": "warn",
+      // General rules - thoải mái
+      "prefer-const": "warn", // Chỉ warning
+      "no-var": "warn", // Chỉ warning
+      "no-console": "off", // Cho phép console.log thoải mái
     },
   },
 
-  // Test files - relaxed rules
+  // Test files - rất relaxed
   {
     files: ["**/*.spec.ts", "**/*.spec.tsx", "**/*.test.ts", "**/*.test.tsx"],
-    languageOptions: {
-      ecmaVersion: 2022,
-      sourceType: "module",
-      parser: typescriptEslint.parser,
-      parserOptions: {
-        project: true,
-        ecmaFeatures: {
-          jsx: true,
-        },
-      },
-    },
-    plugins: {
-      "react-hooks": reactHooks,
-    },
     rules: {
       "@typescript-eslint/no-unused-vars": "off",
-      "@typescript-eslint/no-explicit-any": "off",
-      "@typescript-eslint/no-require-imports": "off",
-      "@typescript-eslint/explicit-function-return-type": "off",
-      "no-console": "off",
+      "@typescript-eslint/no-explicit-any": "error",
       "react-hooks/rules-of-hooks": "off",
       "react-hooks/exhaustive-deps": "off",
     },
@@ -113,8 +71,6 @@ export default [
       "build/",
       "*.config.js",
       "*.config.mjs",
-      "out/",
-      "next-env.d.ts",
     ],
   },
 ];

@@ -47,7 +47,7 @@ export function PaymentSuccessDialog({
                 const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTUIHm7A7+OZTA==');
                 audio.volume = 0.3;
                 audio.play().catch(() => { }); // Ignore if blocked by browser
-            } catch (e) {
+            } catch {
                 // Ignore audio errors
             }
         } else {
@@ -63,7 +63,8 @@ export function PaymentSuccessDialog({
             setCountdown((prev) => {
                 if (prev <= 1) {
                     // Auto redirect when countdown reaches 0
-                    handleViewOrder();
+                    onViewOrder(order.id);
+                    if (onClose) onClose();
                     return 0;
                 }
                 return prev - 1;
@@ -71,7 +72,7 @@ export function PaymentSuccessDialog({
         }, 1000);
 
         return () => clearInterval(interval);
-    }, [open, autoRedirect, countdown]);
+    }, [open, autoRedirect, countdown, onViewOrder, order.id, onClose]);
 
     const handleViewOrder = () => {
         onViewOrder(order.id);
@@ -95,7 +96,7 @@ export function PaymentSuccessDialog({
 
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
-            <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto" data-testid="payment-success-dialog">
                 <DialogHeader className="text-center">
                     <div className="flex justify-center mb-4">
                         <div className={`relative ${isAnimating ? 'animate-bounce' : ''}`}>

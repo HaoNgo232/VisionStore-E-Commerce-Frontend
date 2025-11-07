@@ -29,7 +29,12 @@ export function useProductDetail({ id, slug }: UseProductDetailParams) {
         // Ưu tiên lấy by slug nếu có, nếu không thì lấy by id
         let data: Product;
         if (slug) {
-          data = await productsApi.getBySlug(slug);
+          try {
+            data = await productsApi.getBySlug(slug);
+          } catch {
+            // Fallback: nếu slug không hợp lệ, thử lấy theo ID
+            data = await productsApi.getById(slug);
+          }
         } else if (id) {
           data = await productsApi.getById(id);
         } else {

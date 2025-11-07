@@ -51,7 +51,7 @@ export function ProductDetailContent({ productId, productSlug }: ProductDetailCo
     const handleAddToCart = async () => {
         setIsAdding(true)
         try {
-            await addItem(product.id, quantity)
+            await addItem(product.id, quantity, product.priceInt)
         } finally {
             setIsAdding(false)
         }
