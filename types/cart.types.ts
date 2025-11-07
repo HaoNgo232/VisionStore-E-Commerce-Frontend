@@ -46,7 +46,6 @@ export interface SyncCartRequest {
 export interface AddToCartRequest {
   productId: string;
   quantity: number;
-  priceInt: number;
 }
 
 /**

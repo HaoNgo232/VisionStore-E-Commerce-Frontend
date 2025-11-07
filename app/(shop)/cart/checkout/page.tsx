@@ -1,6 +1,6 @@
 "use client"
 
-import { CheckoutContent } from "@/features/checkout/components/checkout-content"
+import CheckoutContent from "@/features/checkout/components/checkout-content"
 import { ProtectedRoute } from "@/components/auth/protected-route"
 import {
   Breadcrumb,

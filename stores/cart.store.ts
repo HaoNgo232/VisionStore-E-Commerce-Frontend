@@ -46,11 +46,7 @@ export const useCartStore = create<CartStore>()(
         }
       },
 
-      addItem: async (
-        productId: string,
-        quantity: number,
-        priceInt?: number,
-      ) => {
+      addItem: async (productId: string, quantity: number) => {
         // Prevent multiple simultaneous adds
         if (get().loading) {
           console.warn("Add to cart already in progress");
@@ -59,14 +55,11 @@ export const useCartStore = create<CartStore>()(
 
         set({ loading: true });
         try {
-          if (!priceInt || priceInt <= 0) {
-            throw new Error("Giá sản phẩm không hợp lệ");
-          }
           if (quantity <= 0) {
             throw new Error("Số lượng phải lớn hơn 0");
           }
 
-          const cart = await cartApi.addItem({ productId, quantity, priceInt });
+          const cart = await cartApi.addItem({ productId, quantity });
           set({ cart, error: null });
           toast.success(`Đã thêm ${quantity} sản phẩm vào giỏ hàng`);
         } catch (err) {

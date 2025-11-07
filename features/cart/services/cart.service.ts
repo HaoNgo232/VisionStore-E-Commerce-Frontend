@@ -12,7 +12,7 @@ export const cartApi = {
     return apiGet<Cart>("/cart");
   },
 
-  async addItem(data: AddToCartRequest & { priceInt: number }): Promise<Cart> {
+  async addItem(data: AddToCartRequest): Promise<Cart> {
     const userId = useAuthStore.getState().getUserId();
     if (!userId) {
       throw new Error("User not authenticated");

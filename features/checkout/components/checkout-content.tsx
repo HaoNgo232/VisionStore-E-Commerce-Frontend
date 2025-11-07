@@ -13,7 +13,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
 import Link from "next/link"
-import { PaymentMethod, Order, PaymentStatus } from "@/types"
+import { PaymentMethod, PaymentStatus, Payment } from "@/types"
 import { PaymentWaitingDialog } from "@/features/payments/components/payment-waiting-dialog"
 import { formatPrice } from "@/features/products/utils"
 // PaymentSuccessDialog not used anymore - direct redirect instead
@@ -136,12 +136,12 @@ export default function CheckoutContent() {
     }
 
     // Dialog handlers for payment flow separation
-    const handlePaymentSuccess = async (order: Order) => {
+    const handlePaymentSuccess = async (payment: Payment) => {
         setWaitingDialogOpen(false)
 
         // Show success toast immediately when payment detected
         toast.success("🎉 Thanh toán thành công!", {
-            description: `Đơn hàng ${order.id} đã được thanh toán`,
+            description: `Đơn hàng ${payment.orderId} đã được thanh toán`,
             duration: 5000,
         })
 
@@ -153,7 +153,7 @@ export default function CheckoutContent() {
         }
 
         // Redirect immediately to order details page (like COD flow)
-        router.push(`/orders/${order.id}`)
+        router.push(`/orders/${payment.orderId}`)
     }
 
     const handlePaymentTimeout = () => {
@@ -223,7 +223,10 @@ export default function CheckoutContent() {
                         <CardContent>
                             <RadioGroup value={selectedPayment} onValueChange={(value) => setSelectedPayment(value as PaymentMethod)}>
                                 <div className="space-y-3">
-                                    <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer">
+                                    <div
+                                        className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer"
+                                        onClick={() => setSelectedPayment(PaymentMethod.COD)}
+                                    >
                                         <RadioGroupItem value={PaymentMethod.COD} id="cod" />
                                         <Label htmlFor="cod" className="flex-1 cursor-pointer">
                                             <div className="font-semibold">Thanh toán khi nhận hàng (COD)</div>
@@ -232,7 +235,10 @@ export default function CheckoutContent() {
                                             </div>
                                         </Label>
                                     </div>
-                                    <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer">
+                                    <div
+                                        className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer"
+                                        onClick={() => setSelectedPayment(PaymentMethod.SEPAY)}
+                                    >
                                         <RadioGroupItem value={PaymentMethod.SEPAY} id="sepay" />
                                         <Label htmlFor="sepay" className="flex-1 cursor-pointer">
                                             <div className="font-semibold">Chuyển khoản ngân hàng (SePay)</div>

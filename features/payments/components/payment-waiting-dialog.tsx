@@ -191,7 +191,7 @@ export function PaymentWaitingDialog({
                             </div>
 
                             {/* Manual Account Info */}
-                            <div className="rounded-lg bg-blue-50 p-4">
+                            {/* <div className="rounded-lg bg-blue-50 p-4">
                                 <div className="flex items-center justify-between mb-2">
                                     <span className="text-sm font-semibold text-blue-800">
                                         Thông tin chuyển khoản thủ công
@@ -211,10 +211,10 @@ export function PaymentWaitingDialog({
                                     <div>👤 Tên tài khoản: CONG TY TNHH E-COMMERCE</div>
                                     <div>📝 Nội dung: DH{orderId}</div>
                                 </div>
-                            </div>
+                            </div> */}
 
                             {/* Instructions */}
-                            <div className="rounded-lg bg-blue-50 p-4 text-sm text-blue-800">
+                            {/* <div className="rounded-lg bg-blue-50 p-4 text-sm text-blue-800">
                                 <p className="font-semibold mb-2">Hướng dẫn thanh toán:</p>
                                 <ol className="list-inside list-decimal space-y-1">
                                     <li>Mở ứng dụng ngân hàng trên điện thoại</li>
@@ -222,12 +222,12 @@ export function PaymentWaitingDialog({
                                     <li>Quét mã QR ở trên hoặc nhập thông tin thủ công</li>
                                     <li>Xác nhận và hoàn tất thanh toán</li>
                                 </ol>
-                            </div>
+                            </div> */}
                         </CardContent>
                     </Card>
 
                     {/* Status Card */}
-                    <Card className={error ? "border-red-200 bg-red-50" : "border-blue-200 bg-blue-50"}>
+                    {/* <Card className={error ? "border-red-200 bg-red-50" : "border-blue-200 bg-blue-50"}>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 {isPolling && <Loader2 className="h-5 w-5 animate-spin text-blue-500" />}
@@ -266,9 +266,9 @@ export function PaymentWaitingDialog({
                                     </Button>
                                 </>
                             ) : (
-                                <>
-                                    {/* Progress Indicator */}
-                                    <div className="space-y-2">
+                                <> */}
+                    {/* Progress Indicator */}
+                    {/* <div className="space-y-2">
                                         <div className="flex items-center justify-between text-sm">
                                             <span className="text-blue-700 font-medium">⏱️ Thời gian còn lại</span>
                                             <span className="font-mono text-lg font-bold text-blue-600" data-testid="countdown-timer">
@@ -284,10 +284,10 @@ export function PaymentWaitingDialog({
                                         <p className="text-xs text-blue-600 text-right">
                                             Kiểm tra: {attempts}/180 lần
                                         </p>
-                                    </div>
+                                    </div> */}
 
-                                    {/* Info Messages */}
-                                    <div className="space-y-2 bg-blue-100 p-3 rounded-lg border border-blue-300">
+                    {/* Info Messages */}
+                    {/* <div className="space-y-2 bg-blue-100 p-3 rounded-lg border border-blue-300">
                                         <p className="text-sm font-semibold text-blue-800">📋 Vui lòng thanh toán trước khi hết hạn:</p>
                                         <div className="space-y-1">
                                             <div className="flex gap-2 text-sm text-blue-700">
@@ -307,7 +307,7 @@ export function PaymentWaitingDialog({
                                 </>
                             )}
                         </CardContent>
-                    </Card>
+                    </Card> */}
 
                     {/* Force Close Button */}
                     <Button
