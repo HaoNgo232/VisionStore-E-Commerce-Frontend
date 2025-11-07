@@ -30,7 +30,7 @@ export function CommandMenu() {
             try {
                 setRecentSearches(JSON.parse(saved))
             } catch (e) {
-                console.error("Failed to parse recent searches")
+                // Ignore parsing errors
             }
         }
     }, [])
@@ -136,7 +136,7 @@ export function CommandMenu() {
                             <CommandItem
                                 key={product.id}
                                 value={`${product.name} ${brand || ''}`}
-                                onSelect={() => runCommand(() => router.push(`/products/${product.slug}`), product.name)}
+                                onSelect={() => runCommand(() => router.push(`/products/slug/${product.slug}`), product.name)}
                             >
                                 <div className="flex items-center gap-2 w-full">
                                     <img

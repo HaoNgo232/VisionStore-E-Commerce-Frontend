@@ -20,11 +20,12 @@ import { useCartStore } from "@/stores/cart.store"
 import { formatPrice } from "@/features/products/utils"
 
 interface ProductDetailContentProps {
-    productId: string
+    productId?: string
+    productSlug?: string
 }
 
-export function ProductDetailContent({ productId }: ProductDetailContentProps) {
-    const { product, loading, error } = useProductDetail(productId)
+export function ProductDetailContent({ productId, productSlug }: ProductDetailContentProps) {
+    const { product, loading, error } = useProductDetail({ id: productId, slug: productSlug })
     const [selectedImage, setSelectedImage] = useState(0)
     const [quantity, setQuantity] = useState(1)
     const [isAdding, setIsAdding] = useState(false)
@@ -45,7 +46,7 @@ export function ProductDetailContent({ productId }: ProductDetailContentProps) {
 
     const price = formatPrice(product.priceInt)
     const inStock = product.stock > 0
-    const attributes = (product.attributes as Record<string, any>) || {}
+    const attributes = (product.attributes as Record<string, string | number | boolean | null>) || {}
 
     const handleAddToCart = async () => {
         setIsAdding(true)
@@ -138,25 +139,25 @@ export function ProductDetailContent({ productId }: ProductDetailContentProps) {
                             {attributes.brand && (
                                 <div>
                                     <span className="text-sm font-medium">Hãng:</span>
-                                    <p className="text-sm text-muted-foreground">{attributes.brand}</p>
+                                    <p className="text-sm text-muted-foreground">{String(attributes.brand)}</p>
                                 </div>
                             )}
                             {attributes.frameType && (
                                 <div>
                                     <span className="text-sm font-medium">Loại khung:</span>
-                                    <p className="text-sm text-muted-foreground">{attributes.frameType}</p>
+                                    <p className="text-sm text-muted-foreground">{String(attributes.frameType)}</p>
                                 </div>
                             )}
                             {attributes.material && (
                                 <div>
                                     <span className="text-sm font-medium">Chất liệu:</span>
-                                    <p className="text-sm text-muted-foreground">{attributes.material}</p>
+                                    <p className="text-sm text-muted-foreground">{String(attributes.material)}</p>
                                 </div>
                             )}
                             {attributes.color && (
                                 <div>
                                     <span className="text-sm font-medium">Màu sắc:</span>
-                                    <p className="text-sm text-muted-foreground">{attributes.color}</p>
+                                    <p className="text-sm text-muted-foreground">{String(attributes.color)}</p>
                                 </div>
                             )}
                         </div>

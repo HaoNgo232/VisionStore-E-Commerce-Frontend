@@ -50,7 +50,6 @@ export const productsApi = {
     return apiPost<Product>("/products", data);
   },
 
-  // TODO: cần triển khai hàm này cho search component
   async getBySlug(slug: string): Promise<Product> {
     return apiGet<Product>(`/products/slug/${slug}`);
   },

@@ -3,7 +3,7 @@
 import { use } from "react"
 import { ProductDetailContent } from "@/features/products/components/product-detail-content"
 
-export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = use(params)
-  return <ProductDetailContent productId={resolvedParams.id} />
+  return <ProductDetailContent productSlug={resolvedParams.slug} />
 }
