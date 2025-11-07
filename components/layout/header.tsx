@@ -51,7 +51,7 @@ export function Header() {
       logout()
       router.push("/home")
       toast.success("Đã đăng xuất")
-    } catch (error) {
+    } catch {
       toast.error("Lỗi khi đăng xuất")
     }
   }
@@ -71,27 +71,21 @@ export function Header() {
         <NavigationMenu className="hidden md:flex">
           <NavigationMenuList>
             <NavigationMenuItem>
-              <Link href="/" passHref>
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  Home
-                </NavigationMenuLink>
-              </Link>
+              <NavigationMenuLink href="/" className={navigationMenuTriggerStyle()}>
+                Home
+              </NavigationMenuLink>
             </NavigationMenuItem>
 
             <NavigationMenuItem>
-              <Link href="/products" passHref>
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  Products
-                </NavigationMenuLink>
-              </Link>
+              <NavigationMenuLink href="/products" className={navigationMenuTriggerStyle()}>
+                Products
+              </NavigationMenuLink>
             </NavigationMenuItem>
 
             <NavigationMenuItem>
-              <Link href="/contact" passHref>
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  Contact
-                </NavigationMenuLink>
-              </Link>
+              <NavigationMenuLink href="/contact" className={navigationMenuTriggerStyle()}>
+                Contact
+              </NavigationMenuLink>
             </NavigationMenuItem>
           </NavigationMenuList>
         </NavigationMenu>
