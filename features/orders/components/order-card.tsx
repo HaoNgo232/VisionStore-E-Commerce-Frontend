@@ -50,11 +50,15 @@ export function OrderCard({ order }: OrderCardProps) {
         {/* Order Items */}
         <div className="space-y-3">
           {order.items.map((item) => (
-            <div key={item.productId} className="flex gap-3">
-              <div className="h-16 w-16 rounded-lg bg-muted" />
+            <div key={item.id} className="flex gap-3">
+              <img
+                src={item.imageUrls?.[0] || "/placeholder.svg"}
+                alt={item.productName}
+                className="h-16 w-16 rounded-lg object-cover"
+              />
               <div className="flex-1">
-                <p className="font-medium text-sm">Product ID: {item.productId}</p>
-                <p className="text-sm text-muted-foreground">Quantity: {item.quantity}</p>
+                <p className="font-medium text-sm">{item.productName}</p>
+                <p className="text-sm text-muted-foreground">Số lượng: {item.quantity}</p>
               </div>
               <p className="font-semibold text-sm">{formatPrice(item.priceInt * item.quantity)}</p>
             </div>

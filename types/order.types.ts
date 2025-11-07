@@ -20,6 +20,8 @@ export interface OrderItem {
   id: string;
   orderId: string;
   productId: string;
+  productName: string; // Product name snapshot at order time
+  imageUrls: string[]; // Product image URLs snapshot
   quantity: number;
   priceInt: number; // Price at time of purchase (VND)
   createdAt: string; // JSON serialized from Date

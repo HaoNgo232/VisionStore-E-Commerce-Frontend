@@ -196,17 +196,17 @@ export default function OrderDetailPage() {
                                 </CardHeader>
                                 <CardContent>
                                     <div className="space-y-4">
-                                        {order.items.map((item: Order["items"][number] & { product?: { name?: string; imageUrls?: string[] } }) => (
+                                        {order.items.map((item) => (
                                             <div key={item.id} className="flex gap-4 pb-4 border-b last:border-0">
-                                                {item.product?.imageUrls?.[0] && (
+                                                {item.imageUrls?.[0] && (
                                                     <img
-                                                        src={item.product.imageUrls[0]}
-                                                        alt={item.product?.name || "Sản phẩm"}
+                                                        src={item.imageUrls[0]}
+                                                        alt={item.productName || "Sản phẩm"}
                                                         className="h-20 w-20 rounded object-cover"
                                                     />
                                                 )}
                                                 <div className="flex-1">
-                                                    <p className="font-medium">{item.product?.name || "Sản phẩm"}</p>
+                                                    <p className="font-medium">{item.productName || "Sản phẩm"}</p>
                                                     <p className="text-sm text-muted-foreground">
                                                         Số lượng: {item.quantity}
                                                     </p>
