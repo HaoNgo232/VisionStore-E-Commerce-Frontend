@@ -1,0 +1,134 @@
+---
+alwaysApply: true
+applyTo: "**/*.ts,**/*.tsx,**/types/**/*.ts"
+---
+
+# Type Safety Rules
+
+## **TUYỆT ĐỐI KHÔNG DÙNG `any`**
+
+### **Alternatives cho `any`**
+
+```typescript
+// ❌ WRONG - Never do this
+function processData(data: any): any {
+  return data.someProperty
+}
+
+// ✅ CORRECT - Use proper typing
+interface DataInput {
+  someProperty: string
+  otherProperty: number
+}
+
+function processData(data: DataInput): ProcessedData {
+  return {
+    processedValue: data.someProperty.toUpperCase()
+  }
+}
+
+// ✅ CORRECT - Use unknown for truly unknown data
+function handleUnknownData(data: unknown): string {
+  if (typeof data === 'string') {
+    return data
+  }
+  if (typeof data === 'object' && data !== null && 'toString' in data) {
+    return String(data)
+  }
+  return 'Unknown data'
+}
+```
+
+## **Backend Type Synchronization**
+
+- Tham khảo backend types tại: `@shared/types/` và `@shared/dto/`
+- Khi phát hiện type mismatch giữa FE/BE, báo cáo ngay với 3 options:
+  - **Option A**: Cập nhật FE types theo BE + adapter
+  - **Option B**: Đề xuất BE thay đổi + version hóa nếu breaking
+  - **Option C**: Tạo transformation layer chấp nhận cả 2 format
+
+### **Zod Schema Pattern**
+
+```typescript
+// Backend reference: @shared/types/product.types.ts
+// Zod schema for runtime validation
+export const ProductSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().min(1),
+  priceInt: z.number().int().positive(),
+  categoryId: z.string().uuid(),
+  imageUrls: z.array(z.string().url()).default([]),
+  isActive: z.boolean().default(true),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+})
+
+// Type inference from schema
+export type Product = z.infer<typeof ProductSchema>
+```
+
+## **Type Guards & Validation**
+
+```typescript
+// Type guard functions
+export function isProduct(obj: unknown): obj is Product {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'id' in obj &&
+    'name' in obj &&
+    typeof (obj as Record<string, unknown>).id === 'string' &&
+    typeof (obj as Record<string, unknown>).name === 'string'
+  )
+}
+
+// API response validation
+export function validateApiResponse<T>(
+  data: unknown, 
+  schema: z.ZodSchema<T>
+): T {
+  try {
+    return schema.parse(data)
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      throw new Error(`API validation failed: ${error.message}`)
+    }
+    throw error
+  }
+}
+```
+
+## **Error Handling Types**
+
+```typescript
+// Result pattern for error handling
+type Result<T, E = Error> = 
+  | { success: true; data: T; error: null }
+  | { success: false; data: null; error: E }
+
+// API Error types
+interface ApiError {
+  statusCode: number
+  message: string
+  details?: unknown
+}
+```
+
+## **Component Props Type Safety**
+
+```typescript
+// ✅ Comprehensive prop types
+interface ProductCardProps {
+  product: Product
+  variant?: 'default' | 'compact' | 'featured'
+  onAddToCart?: (productId: string, quantity: number) => Promise<void>
+  onFavorite?: (productId: string, isFavorite: boolean) => void
+  className?: string
+}
+
+export const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(
+  ({ product, variant = 'default', onAddToCart, className, ...props }, ref) => {
+    // Type-safe implementation
+  }
+)
+```

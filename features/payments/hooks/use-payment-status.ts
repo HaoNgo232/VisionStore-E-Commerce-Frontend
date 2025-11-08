@@ -1,7 +1,8 @@
 import { useEffect, useState, useCallback } from "react";
 import { paymentsApi } from "@/features/payments/services/payments.service";
 import { getErrorMessage } from "@/lib/api-client";
-import type { Payment, PaymentStatus } from "@/types";
+import { PaymentStatus } from "@/types";
+import type { Payment } from "@/types";
 
 interface UsePaymentStatusOptions {
   orderId: string;
@@ -56,7 +57,7 @@ export function usePaymentStatus(
   const [error, setError] = useState<string | null>(null);
   const [isPolling, setIsPolling] = useState(false);
 
-  const isPaid = payment?.status === "PAID";
+  const isPaid = payment?.status === PaymentStatus.PAID;
 
   const checkPaymentStatus = useCallback(async () => {
     try {
@@ -67,14 +68,14 @@ export function usePaymentStatus(
       setPayment(fetchedPayment);
 
       // Stop polling if payment is paid
-      if (fetchedPayment.status === "PAID") {
+      if (fetchedPayment.status === PaymentStatus.PAID) {
         setIsPolling(false);
         return true; // Payment completed
       }
 
       return false; // Still waiting
     } catch (err) {
-      console.error("Error checking payment status:", err);
+      // console.error("Error checking payment status:", err);
       setError(getErrorMessage(err));
       return false;
     } finally {
@@ -118,7 +119,7 @@ export function usePaymentStatus(
   // Auto-start polling if requested
   useEffect(() => {
     if (autoStart && !isPolling) {
-      startPolling();
+      void startPolling();
     }
   }, [autoStart, isPolling, startPolling]);
 
@@ -128,7 +129,7 @@ export function usePaymentStatus(
 
   return {
     payment,
-    status: payment?.status || null,
+    status: payment?.status ?? null,
     loading: loading || isPolling,
     error,
     isPaid,

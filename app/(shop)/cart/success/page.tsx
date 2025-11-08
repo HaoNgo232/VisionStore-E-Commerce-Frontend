@@ -19,7 +19,8 @@ import { ordersApi } from "@/features/orders/services/orders.service"
 import { useCartStore } from "@/stores/cart.store"
 import { formatPrice } from "@/features/products/utils"
 import { toast } from "sonner"
-import type { Order, PaymentMethod } from "@/types"
+import type { Order } from "@/types"
+import { PaymentMethod } from "@/types"
 import { OrderStatusBadge } from "@/features/orders/components/order-status-badge"
 import { PaymentStatusBadge } from "@/features/payments/components/payment-status-badge"
 
@@ -30,14 +31,14 @@ export default function SuccessPage(): JSX.Element {
 
   const orderId = searchParams.get("orderId")
   const paymentMethodParam = searchParams.get("paymentMethod")
-  const paymentMethod: PaymentMethod = (paymentMethodParam === "COD" || paymentMethodParam === "SEPAY") ? paymentMethodParam : "COD"
+  const paymentMethod: PaymentMethod = (paymentMethodParam === PaymentMethod.COD || paymentMethodParam === PaymentMethod.SEPAY) ? paymentMethodParam as PaymentMethod : PaymentMethod.COD
 
   const [order, setOrder] = useState<Order | null>(null)
   const [loading, setLoading] = useState(true)
 
   // Redirect non-COD payments away from this page
   useEffect(() => {
-    if (paymentMethod !== "COD") {
+    if (paymentMethod !== PaymentMethod.COD) {
       void router.push("/profile#orders");
     }
   }, [paymentMethod, router])
@@ -137,7 +138,7 @@ export default function SuccessPage(): JSX.Element {
 
               <div className="lg:col-span-2 space-y-6">
                 {/* COD Confirmation */}
-                {paymentMethod === "COD" && (
+                {paymentMethod === PaymentMethod.COD && (
                   <Card className="border-green-200 bg-green-50">
                     <CardHeader>
                       <CardTitle className="text-green-700">Thanh toán khi nhận hàng</CardTitle>

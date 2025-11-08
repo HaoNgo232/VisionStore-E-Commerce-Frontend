@@ -27,10 +27,10 @@ export default function ContactPage(): JSX.Element {
     },
   })
 
-  const onSubmit = async (values: ContactFormValues) => {
+  const onSubmit = async (_values: ContactFormValues): Promise<void> => {
     try {
       // TODO: Replace with actual API call when backend is ready
-      console.log("[v0] Contact form submission:", values)
+      // console.log("[v0] Contact form submission:", values)
 
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000))

@@ -4,6 +4,7 @@
  */
 
 import { z } from "zod";
+import { cuidSchema } from "./common.types";
 
 export enum PaymentMethod {
   COD = "COD",
@@ -35,16 +36,31 @@ export interface Payment {
 /**
  * Zod schema for Payment
  */
-export const PaymentSchema = z.object({
-  id: z.string().uuid(),
-  orderId: z.string().uuid(),
-  method: PaymentMethodSchema,
-  amountInt: z.number().int().nonnegative(),
-  status: PaymentStatusSchema,
-  payload: z.record(z.unknown()).nullable().optional(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
-});
+export const PaymentSchema = z
+  .object({
+    id: cuidSchema(), // Backend uses CUID, not UUID
+    orderId: cuidSchema(), // Backend uses CUID, not UUID
+    method: PaymentMethodSchema,
+    amountInt: z.number().int().nonnegative(),
+    status: PaymentStatusSchema,
+    payload: z.preprocess((val) => {
+      // Handle null, undefined, or empty object
+      if (val === null || val === undefined) return null;
+      if (typeof val === "object" && val !== null) return val;
+      return null;
+    }, z.record(z.unknown()).nullable().optional()),
+    createdAt: z.preprocess((val) => {
+      if (val instanceof Date) return val.toISOString();
+      if (typeof val === "string") return val;
+      return String(val);
+    }, z.string()),
+    updatedAt: z.preprocess((val) => {
+      if (val instanceof Date) return val.toISOString();
+      if (typeof val === "string") return val;
+      return String(val);
+    }, z.string()),
+  })
+  .passthrough(); // Allow additional fields from backend
 
 export interface PaymentProcessRequest {
   orderId: string;
@@ -64,7 +80,7 @@ export interface PaymentProcessResponse {
  * Zod schema for PaymentProcessResponse
  */
 export const PaymentProcessResponseSchema = z.object({
-  paymentId: z.string().uuid(),
+  paymentId: cuidSchema(), // Backend uses CUID, not UUID
   status: PaymentStatusSchema,
   paymentUrl: z.string().url().optional(),
   qrCode: z.string().optional(),

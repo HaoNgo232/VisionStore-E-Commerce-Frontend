@@ -88,7 +88,7 @@ export default function OrderDetailPage(): JSX.Element {
                 <div className="container py-12">
                     <div className="text-center">
                         <p className="text-muted-foreground mb-4">{error ?? "Không tìm thấy đơn hàng"}</p>
-                        <Button onClick={() => router.back()}>Quay lại</Button>
+                        <Button onClick={() => void router.back()}>Quay lại</Button>
                     </div>
                 </div>
             </ProtectedRoute>
@@ -301,7 +301,7 @@ export default function OrderDetailPage(): JSX.Element {
                             <Button variant="outline" onClick={() => router.back()}>
                                 Quay lại
                             </Button>
-                            <Button onClick={() => router.push("/profile#orders")}>
+                            <Button onClick={() => void router.push("/profile#orders")}>
                                 Xem tất cả đơn hàng
                             </Button>
                         </div>

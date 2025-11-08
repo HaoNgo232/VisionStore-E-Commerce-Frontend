@@ -110,7 +110,7 @@ export default function CheckoutContent() {
                 items: cart.items.map((item) => ({
                     productId: item.productId,
                     quantity: item.quantity,
-                    priceInt: item.product?.priceInt || 0,
+                    priceInt: item.product?.priceInt ?? 0,
                 })),
             })
 
@@ -118,13 +118,13 @@ export default function CheckoutContent() {
             if (selectedPayment === PaymentMethod.COD) {
                 // COD flow: Show success toast and redirect to success page
                 toast.success("Đặt hàng thành công!")
-                router.push(`/cart/success?orderId=${order.id}&paymentMethod=${selectedPayment}`)
+                void router.push(`/cart/success?orderId=${order.id}&paymentMethod=${selectedPayment}`)
             } else if (selectedPayment === PaymentMethod.SEPAY) {
                 // SePay flow: Process payment to get QR, then open waiting dialog (no toast yet)
                 setCreatedOrderId(order.id)
                 const payment = await paymentsApi.process(order.id, PaymentMethod.SEPAY, cart.totalInt)
                 setPaymentId(payment.paymentId)
-                setQrCodeUrl(payment.qrCode || "")
+                setQrCodeUrl(payment.qrCode ?? "")
                 setWaitingDialogOpen(true)
             }
         } catch (err) {
@@ -153,7 +153,7 @@ export default function CheckoutContent() {
         }
 
         // Redirect immediately to order details page (like COD flow)
-        router.push(`/orders/${payment.orderId}`)
+        void router.push(`/orders/${payment.orderId}`)
     }
 
     const handlePaymentTimeout = () => {
@@ -263,7 +263,7 @@ export default function CheckoutContent() {
                                     <div key={item.id} className="flex items-center justify-between pb-3 border-b last:border-0">
                                         <div className="flex items-center gap-3">
                                             <img
-                                                src={item.product?.imageUrls[0] || "/placeholder.svg"}
+                                                src={item.product?.imageUrls[0] ?? "/placeholder.svg"}
                                                 alt={item.product?.name}
                                                 className="h-12 w-12 rounded object-cover"
                                             />
@@ -273,7 +273,7 @@ export default function CheckoutContent() {
                                             </div>
                                         </div>
                                         <p className="font-semibold">
-                                            {formatPrice((item.product?.priceInt || 0) * item.quantity)}
+                                            {formatPrice((item.product?.priceInt ?? 0) * item.quantity)}
                                         </p>
                                     </div>
                                 ))}
@@ -329,7 +329,7 @@ export default function CheckoutContent() {
                     status: PaymentStatus.UNPAID,
                     qrCode: qrCodeUrl,
                 }}
-                amountInt={cart?.totalInt || 0}
+                amountInt={cart?.totalInt ?? 0}
                 onSuccess={handlePaymentSuccess}
                 onTimeout={handlePaymentTimeout}
                 onError={handlePaymentError}

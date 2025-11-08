@@ -18,9 +18,9 @@ export function useRedirectAfterLogin() {
     if (isAuthenticated) {
       const returnUrl = searchParams.get("returnUrl");
       if (returnUrl) {
-        router.push(decodeURIComponent(returnUrl));
+        void router.push(decodeURIComponent(returnUrl));
       } else {
-        router.push("/");
+        void router.push("/");
       }
     }
   }, [isAuthenticated, router, searchParams]);

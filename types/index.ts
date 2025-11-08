@@ -16,6 +16,7 @@ export {
   createApiError,
   ApiErrorSchema,
   createPaginatedResponseSchema,
+  cuidSchema,
 } from "./common.types";
 
 // Auth Types
@@ -90,9 +91,14 @@ export type {
   SyncCartRequest,
   AddToCartRequest,
   UpdateCartItemRequest,
+  CartWithProductsResponse,
 } from "./cart.types";
 
-export { CartSchema, CartItemSchema } from "./cart.types";
+export {
+  CartSchema,
+  CartItemSchema,
+  CartWithProductsResponseSchema,
+} from "./cart.types";
 
 // Order Types
 export type {

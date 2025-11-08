@@ -17,9 +17,12 @@ import type {
 } from "@/types";
 import { ProductSchema } from "@/types/product.types";
 import { createPaginatedResponseSchema } from "@/types/common.types";
+import { z } from "zod";
 
-// Create paginated products schema
-const PaginatedProductsSchema = createPaginatedResponseSchema(ProductSchema);
+// Create paginated products schema with type assertion for exactOptionalPropertyTypes compatibility
+const PaginatedProductsSchema = createPaginatedResponseSchema(
+  ProductSchema,
+) as z.ZodType<PaginatedResponse<Product>>;
 
 export interface GetProductsParams {
   page?: number;
@@ -62,19 +65,25 @@ export const productsApi = {
   },
 
   async getById(productId: string): Promise<Product> {
-    return apiGetValidated<Product>(`/products/${productId}`, ProductSchema);
+    return apiGetValidated<Product>(
+      `/products/${productId}`,
+      ProductSchema as z.ZodType<Product>,
+    );
   },
 
   async create(data: CreateProductRequest): Promise<Product> {
     return apiPostValidated<Product, CreateProductRequest>(
       "/products",
-      ProductSchema,
+      ProductSchema as z.ZodType<Product>,
       data,
     );
   },
 
   async getBySlug(slug: string): Promise<Product> {
-    return apiGetValidated<Product>(`/products/slug/${slug}`, ProductSchema);
+    return apiGetValidated<Product>(
+      `/products/slug/${slug}`,
+      ProductSchema as z.ZodType<Product>,
+    );
   },
 
   async update(
@@ -83,7 +92,7 @@ export const productsApi = {
   ): Promise<Product> {
     return apiPatchValidated<Product, UpdateProductRequest>(
       `/products/${productId}`,
-      ProductSchema,
+      ProductSchema as z.ZodType<Product>,
       data,
     );
   },

@@ -254,3 +254,15 @@ export async function apiPatchValidated<TResponse, TRequest = unknown>(
   const response = await apiPatch<unknown, TRequest>(endpoint, data, config);
   return validateResponse(response, schema, `PATCH ${endpoint}`);
 }
+
+/**
+ * Validated DELETE request - validates response with Zod schema
+ */
+export async function apiDeleteValidated<T>(
+  endpoint: string,
+  schema: z.ZodSchema<T>,
+  config?: AxiosRequestConfig,
+): Promise<T> {
+  const response = await apiDelete<unknown>(endpoint, config);
+  return validateResponse(response, schema, `DELETE ${endpoint}`);
+}

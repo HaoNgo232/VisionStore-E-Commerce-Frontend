@@ -10,11 +10,11 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertCircle, Clock, Copy, RotateCw, Loader2 } from "lucide-react";
+import { AlertCircle, Clock, Copy, Loader2, RotateCw } from "lucide-react";
 import { toast } from "sonner";
 import { usePaymentPolling } from "../hooks/use-payment-polling";
 import { formatPrice } from "@/features/products/utils";
-import type { PaymentProcessResponse } from "@/types";
+import type { PaymentProcessResponse, Payment } from "@/types";
 
 interface PaymentWaitingDialogProps {
     open: boolean;
@@ -22,7 +22,7 @@ interface PaymentWaitingDialogProps {
     orderId: string;
     payment: PaymentProcessResponse;
     amountInt: number;
-    onSuccess?: (payment: any) => void;
+    onSuccess?: (payment: Payment) => void;
     onTimeout?: () => void;
     onError?: (error: string) => void;
 }
@@ -40,7 +40,7 @@ export function PaymentWaitingDialog({
     const [timeRemaining, setTimeRemaining] = useState(900); // 15 minutes in seconds
     const [isRetrying, setIsRetrying] = useState(false);
 
-    const { isPolling, attempts, error, stopPolling } = usePaymentPolling({
+    const { isPolling, attempts: _attempts, error, stopPolling } = usePaymentPolling({
         orderId,
         onSuccess,
         onTimeout,
@@ -50,7 +50,7 @@ export function PaymentWaitingDialog({
 
     const amountVND = formatPrice(amountInt);
     const maxTimeout = 900; // 15 minutes in seconds
-    const progressPercent = ((maxTimeout - timeRemaining) / maxTimeout) * 100;
+    const _progressPercent = ((maxTimeout - timeRemaining) / maxTimeout) * 100;
 
     // Update countdown timer - only when dialog is open AND polling
     useEffect(() => {
@@ -85,19 +85,19 @@ export function PaymentWaitingDialog({
         }
     }, [open]);
 
-    const handleCopyReference = () => {
+    const handleCopyReference = (): void => {
         const reference = `DH${orderId}`;
-        navigator.clipboard.writeText(reference);
+        void navigator.clipboard.writeText(reference);
         toast.success("Đã sao chép mã đơn hàng");
     };
 
-    const handleCopyAccountInfo = () => {
+    const _handleCopyAccountInfo = (): void => {
         const accountInfo = `Ngân hàng: Vietcombank\nSố tài khoản: 1234567890\nTên tài khoản: CONG TY TNHH E-COMMERCE\nNội dung: DH${orderId}`;
-        navigator.clipboard.writeText(accountInfo);
+        void navigator.clipboard.writeText(accountInfo);
         toast.success("Đã sao chép thông tin tài khoản");
     };
 
-    const handleRetry = () => {
+    const handleRetry = (): void => {
         setIsRetrying(true);
         setTimeRemaining(900); // Reset to 15 minutes
         stopPolling();
@@ -116,7 +116,7 @@ export function PaymentWaitingDialog({
         onOpenChange(newOpen);
     };
 
-    const handleForceClose = () => {
+    const handleForceClose = (): void => {
         // User can force close even during polling
         stopPolling();
         onOpenChange(false);

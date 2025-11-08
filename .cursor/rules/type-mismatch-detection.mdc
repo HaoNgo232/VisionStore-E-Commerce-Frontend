@@ -1,0 +1,116 @@
+---
+alwaysApply: true
+---
+
+# Type Mismatch Detection & Resolution
+
+## **Khi phát hiện sai lệch type giữa Frontend và Backend**
+
+### **Bước 1: Báo cáo**
+
+```
+PHÁT HIỆN: [Mô tả ngắn gọn sai lệch]
+
+VỊ TRÍ: [File/component/API endpoint]
+
+NGUY CƠ: [Runtime error, UI bug, data corruption, etc.]
+```
+
+### **Bước 2: Đề xuất 3 phương án**
+
+- **Option A - FE Adaptation**: Cập nhật FE types + adapter (nhanh, ít risk BE)
+- **Option B - BE Standardization**: Chuẩn hóa BE response + versioning
+- **Option C - Dual Support**: Decoder chấp nhận cả 2 format + migration plan
+
+### **Bước 3: Implementation Plan**
+
+- Files cần thay đổi
+- Types cần thêm/sửa
+- Tests cần cập nhật
+- Timeline và owner
+
+## **Template Báo cáo Type Mismatch**
+
+Khi phát hiện sai lệch, sử dụng template sau:
+
+```markdown
+## TYPE MISMATCH DETECTED
+
+**Location**: `features/orders/components/order-item.tsx`
+
+**Issue**: `order.items[].product` shape inconsistency
+
+- Page A uses: `item.imageUrls[0]`, `item.productName`
+- Page B uses: `item.product?.images`, `item.product?.name`
+
+**Risk**: Runtime errors, inconsistent UI display
+
+## RESOLUTION OPTIONS
+
+### Option A: Standardize Frontend Types + Adapter
+
+**Action**: Create canonical `OrderItem` type + transformation functions
+
+**Pros**: Quick fix, minimal BE impact, type-safe
+
+**Cons**: Additional adapter layer
+
+**Timeline**: 1-2 days
+
+**Files**: `types/order.types.ts`, `services/orders.adapter.ts`
+
+### Option B: Backend API Standardization
+
+**Action**: Request BE to return consistent `OrderItem` structure
+
+**Pros**: Single source of truth, cleaner FE code
+
+**Cons**: Requires BE team coordination, potential breaking change
+
+**Timeline**: 1-2 weeks (if versioning needed)
+
+**Files**: Backend API response format
+
+### Option C: Dual Format Support + Migration
+
+**Action**: Zod union schema accepting both formats → canonical type
+
+**Pros**: No blocking dependencies, gradual migration
+
+**Cons**: Technical debt, cleanup needed later
+
+**Timeline**: 3-5 days + future cleanup
+
+**Files**: `schemas/order.schema.ts`, migration plan
+
+## RECOMMENDATION: Option A
+
+Create adapter layer for immediate fix, then coordinate with BE team for Option B long-term.
+```
+
+## **Backend Type Synchronization - 4 Phương án**
+
+### **Phương án 1: Code Generation (Khuyến nghị)**
+
+- **Mô tả**: Tự động tạo TypeScript types từ OpenAPI/Swagger spec
+- **Ưu điểm**: Độ chính xác cao, tự động cập nhật, giảm lỗi con người
+- **Nhược điểm**: Setup phức tạp, cần backend cung cấp schema
+- **Tools**: `openapi-typescript`, `graphql-codegen`
+
+### **Phương án 2: Shared Types trong Monorepo**
+
+- **Mô tả**: Chia sẻ DTOs/types trực tiếp giữa FE/BE
+- **Ưu điểm**: Single source of truth, compile-time error detection
+- **Nhược điểm**: Yêu cầu monorepo structure
+
+### **Phương án 3: Runtime Validation với Manual Mapping**
+
+- **Mô tả**: Định nghĩa types thủ công + Zod validation
+- **Ưu điểm**: Linh hoạt, bảo vệ runtime, infer types từ schema
+- **Nhược điểm**: Dễ lỗi, không phát hiện compile-time mismatch
+
+### **Phương án 4: Contract Testing**
+
+- **Mô tả**: Automated tests để verify API contracts
+- **Ưu điểm**: Early detection trong CI/CD, đảm bảo compatibility
+- **Nhược điểm**: Phức tạp, cần investment cao cho testing

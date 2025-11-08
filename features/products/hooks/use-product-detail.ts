@@ -11,8 +11,8 @@ import { productsApi } from "@/features/products/services/products.service";
 import type { Product } from "@/types";
 
 interface UseProductDetailParams {
-  id?: string;
-  slug?: string;
+  id?: string | undefined;
+  slug?: string | undefined;
 }
 
 export function useProductDetail({ id, slug }: UseProductDetailParams): {

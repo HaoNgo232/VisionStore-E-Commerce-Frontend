@@ -5,6 +5,7 @@
  */
 
 import { z } from "zod";
+import { cuidSchema } from "./common.types";
 
 export enum OrderStatus {
   PENDING = "PENDING",
@@ -40,14 +41,25 @@ export interface OrderItem {
  * Zod schema for OrderItem
  */
 export const OrderItemSchema = z.object({
-  id: z.string().uuid(),
-  orderId: z.string().uuid(),
-  productId: z.string().uuid(),
+  id: cuidSchema(), // Backend uses CUID, not UUID
+  orderId: cuidSchema(), // Backend uses CUID, not UUID
+  productId: cuidSchema(), // Backend uses CUID, not UUID
   productName: z.string().min(1),
-  imageUrls: z.array(z.string().url()),
+  imageUrls: z.preprocess(
+    (val) => {
+      if (val === null || val === undefined) return [];
+      if (Array.isArray(val)) return val;
+      return [];
+    },
+    z.array(z.string()).default([]), // Accept any string array, not strict URL validation
+  ),
   quantity: z.number().int().positive(),
   priceInt: z.number().int().nonnegative(),
-  createdAt: z.string().datetime(),
+  createdAt: z.preprocess((val) => {
+    if (val instanceof Date) return val.toISOString();
+    if (typeof val === "string") return val;
+    return String(val);
+  }, z.string()),
 });
 
 export interface Order {
@@ -66,15 +78,26 @@ export interface Order {
  * Zod schema for Order
  */
 export const OrderSchema = z.object({
-  id: z.string().uuid(),
-  userId: z.string().uuid(),
-  addressId: z.string().uuid().nullable(),
+  id: cuidSchema(), // Backend uses CUID, not UUID
+  userId: cuidSchema(), // Backend uses CUID, not UUID
+  addressId: z.preprocess((val) => {
+    if (val === null || val === undefined || val === "") return null;
+    return String(val);
+  }, cuidSchema().nullable()), // Backend uses CUID, not UUID
   status: OrderStatusSchema,
   paymentStatus: PaymentStatusSchema,
   totalInt: z.number().int().nonnegative(),
   items: z.array(OrderItemSchema),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.preprocess((val) => {
+    if (val instanceof Date) return val.toISOString();
+    if (typeof val === "string") return val;
+    return String(val);
+  }, z.string()),
+  updatedAt: z.preprocess((val) => {
+    if (val instanceof Date) return val.toISOString();
+    if (typeof val === "string") return val;
+    return String(val);
+  }, z.string()),
 });
 
 export interface CreateOrderRequest {

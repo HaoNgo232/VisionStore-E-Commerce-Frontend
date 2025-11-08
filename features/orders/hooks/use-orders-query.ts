@@ -33,8 +33,8 @@ export function useCreateOrder() {
   return useMutation({
     mutationFn: (data: CreateOrderRequest) => ordersApi.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.orders.lists() });
-      queryClient.invalidateQueries({ queryKey: queryKeys.cart.current() });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.orders.lists() });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.cart.current() });
     },
   });
 }
@@ -51,10 +51,10 @@ export function useUpdateOrderStatus() {
       data: UpdateOrderStatusRequest;
     }) => ordersApi.updateStatus(orderId, data),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
+      void queryClient.invalidateQueries({
         queryKey: queryKeys.orders.detail(variables.orderId),
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.orders.lists() });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.orders.lists() });
     },
   });
 }
@@ -65,10 +65,10 @@ export function useCancelOrder() {
   return useMutation({
     mutationFn: (orderId: string) => ordersApi.cancel(orderId),
     onSuccess: (_, orderId) => {
-      queryClient.invalidateQueries({
+      void queryClient.invalidateQueries({
         queryKey: queryKeys.orders.detail(orderId),
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.orders.lists() });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.orders.lists() });
     },
   });
 }

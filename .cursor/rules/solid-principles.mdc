@@ -1,0 +1,141 @@
+---
+alwaysApply: true
+---
+
+# SOLID Principles Rules
+
+## **Single Responsibility Principle**
+
+- Mỗi component/hook chỉ có 1 trách nhiệm
+- Tách logic phức tạp thành custom hooks
+- Tách UI components thành các components nhỏ hơn
+
+```typescript
+// ✅ GOOD - Single responsibility
+function ProductCard({ product }: { product: Product }) {
+  return <div>{product.name}</div>
+}
+
+function ProductActions({ productId }: { productId: string }) {
+  const handleAddToCart = () => { /* ... */ }
+  return <button onClick={handleAddToCart}>Add to Cart</button>
+}
+
+// ❌ BAD - Multiple responsibilities
+function ProductCard({ product }: { product: Product }) {
+  const handleAddToCart = () => { /* ... */ }
+  const handleFavorite = () => { /* ... */ }
+  const handleShare = () => { /* ... */ }
+  // Too many responsibilities
+}
+```
+
+## **Open/Closed Principle**
+
+- Mở rộng qua composition, không modify existing code
+- Sử dụng props để customize behavior
+- Sử dụng render props hoặc children patterns
+
+```typescript
+// ✅ GOOD - Open for extension via props
+interface ButtonProps {
+  variant?: 'primary' | 'secondary'
+  size?: 'sm' | 'md' | 'lg'
+  children: React.ReactNode
+}
+
+export function Button({ variant = 'primary', size = 'md', children }: ButtonProps) {
+  return <button className={cn(variant, size)}>{children}</button>
+}
+
+// Extend via composition, not modification
+function IconButton({ icon, ...props }: ButtonProps & { icon: React.ReactNode }) {
+  return <Button {...props}><span>{icon}</span> {props.children}</Button>
+}
+```
+
+## **Liskov Substitution Principle**
+
+- Interface/type substitution phải nhất quán
+- Components với cùng interface phải có thể thay thế nhau
+
+```typescript
+// ✅ GOOD - Consistent interface
+interface FormField {
+  value: string
+  onChange: (value: string) => void
+  error?: string
+}
+
+function TextInput({ value, onChange, error }: FormField) {
+  return <input value={value} onChange={(e) => onChange(e.target.value)} />
+}
+
+function TextArea({ value, onChange, error }: FormField) {
+  return <textarea value={value} onChange={(e) => onChange(e.target.value)} />
+}
+
+// Both can be used interchangeably
+```
+
+## **Interface Segregation Principle**
+
+- Tạo interfaces nhỏ, chuyên biệt
+- Không force components implement methods không cần thiết
+
+```typescript
+// ✅ GOOD - Segregated interfaces
+interface Readable {
+  read(): string
+}
+
+interface Writable {
+  write(data: string): void
+}
+
+interface Deletable {
+  delete(): void
+}
+
+// Components only implement what they need
+class ReadOnlyComponent implements Readable {
+  read() { return 'data' }
+}
+
+class EditableComponent implements Readable, Writable {
+  read() { return 'data' }
+  write(data: string) { /* ... */ }
+}
+```
+
+## **Dependency Inversion Principle**
+
+- Depend on abstractions, không phải implementations
+- Sử dụng dependency injection
+- Tạo interfaces cho services
+
+```typescript
+// ✅ GOOD - Depend on abstraction
+interface ProductRepository {
+  getById(id: string): Promise<Product>
+  getAll(): Promise<Product[]>
+}
+
+function useProduct(repository: ProductRepository, id: string) {
+  return useQuery({
+    queryKey: ['product', id],
+    queryFn: () => repository.getById(id),
+  })
+}
+
+// Can inject different implementations
+const apiRepository: ProductRepository = {
+  getById: (id) => productsApi.getProductById(id),
+  getAll: () => productsApi.getProducts({}),
+}
+
+const mockRepository: ProductRepository = {
+  getById: (id) => Promise.resolve(mockProduct),
+  getAll: () => Promise.resolve([mockProduct]),
+}
+```

@@ -48,7 +48,7 @@ export function AddressCard({ address, onEdit, onDelete, isDeleting }: AddressCa
             <Button
               variant="outline"
               size="sm"
-              onClick={() => onDelete(address.id)}
+              onClick={() => void onDelete(address.id)}
               disabled={isDeleting}
             >
               <Trash2 className="mr-1 h-3 w-3" />

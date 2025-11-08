@@ -26,7 +26,7 @@ export function RegisterForm() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent): Promise<void> => {
         e.preventDefault();
         setError(null);
 
@@ -51,10 +51,10 @@ export function RegisterForm() {
                 fullName,
                 email,
                 password,
-                phone: phone || undefined,
+                phone: phone ?? undefined,
             });
             toast.success("Đăng ký thành công! Vui lòng đăng nhập.");
-            router.push("/auth/login");
+            void router.push("/auth/login");
         } catch (err) {
             const message = getErrorMessage(err);
             setError(message);

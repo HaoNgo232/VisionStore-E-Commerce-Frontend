@@ -33,7 +33,7 @@ export function useAddToCart() {
   return useMutation({
     mutationFn: (data: AddToCartRequest) => cartApi.addItem(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.cart.current() });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.cart.current() });
       toast.success("Đã thêm vào giỏ hàng");
     },
     onError: (error) => {
@@ -59,7 +59,7 @@ export function useUpdateCartItem() {
       data: UpdateCartItemRequest;
     }) => cartApi.updateItem(itemId, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.cart.current() });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.cart.current() });
       toast.success("Đã cập nhật giỏ hàng");
     },
     onError: (error) => {
@@ -82,7 +82,7 @@ export function useRemoveCartItem() {
     mutationFn: ({ itemId, productId }: { itemId: string; productId: string }) =>
       cartApi.removeItem(itemId, productId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.cart.current() });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.cart.current() });
       toast.success("Đã xoá khỏi giỏ hàng");
     },
     onError: (error) => {
@@ -102,7 +102,7 @@ export function useClearCart() {
   return useMutation({
     mutationFn: () => cartApi.clearCart(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.cart.current() });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.cart.current() });
       toast.success("Đã xoá giỏ hàng");
     },
     onError: (error) => {
@@ -118,7 +118,7 @@ export function useClearCart() {
  */
 export function useCartItemCount() {
   const { data: cart } = useCart();
-  return cart?.items.reduce((sum, item) => sum + item.quantity, 0) || 0;
+  return cart?.items.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
 }
 
 /**
@@ -126,6 +126,6 @@ export function useCartItemCount() {
  */
 export function useCartTotal() {
   const { data: cart } = useCart();
-  return cart?.totalInt || 0;
+  return cart?.totalInt ?? 0;
 }
 

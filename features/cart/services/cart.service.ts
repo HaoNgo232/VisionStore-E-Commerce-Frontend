@@ -7,6 +7,7 @@ import {
   apiGetValidated,
   apiPostValidated,
   apiPatchValidated,
+  apiDeleteValidated,
   apiDelete,
 } from "@/lib/api-client";
 import { useAuthStore } from "@/stores/auth.store";
@@ -14,12 +15,24 @@ import type {
   Cart,
   AddToCartRequest,
   UpdateCartItemRequest,
+  CartWithProductsResponse,
 } from "@/types";
-import { CartSchema } from "@/types";
+import { CartSchema, CartWithProductsResponseSchema } from "@/types";
+import type { z } from "zod";
 
 export const cartApi = {
   async getCart(): Promise<Cart> {
-    return apiGetValidated<Cart>("/cart", CartSchema);
+    const response = await apiGetValidated<CartWithProductsResponse>(
+      "/cart",
+      CartWithProductsResponseSchema as z.ZodType<CartWithProductsResponse>,
+    );
+    // Unwrap response - backend returns { cart, items, totalInt }
+    // but we need to merge items into cart for consistency
+    return {
+      ...response.cart,
+      items: response.items,
+      totalInt: response.totalInt,
+    };
   },
 
   async addItem(data: AddToCartRequest): Promise<Cart> {
@@ -27,32 +40,49 @@ export const cartApi = {
     if (!userId) {
       throw new Error("User not authenticated");
     }
-    return apiPostValidated<Cart, AddToCartRequest & { userId: string }>(
+    const response = await apiPostValidated<
+      CartWithProductsResponse,
+      AddToCartRequest & { userId: string }
+    >(
       "/cart/items",
-      CartSchema,
+      CartWithProductsResponseSchema as z.ZodType<CartWithProductsResponse>,
       {
         userId,
         ...data,
       },
     );
+    // Unwrap response - backend returns { cart, items, totalInt }
+    // but we need to merge items into cart for consistency
+    return {
+      ...response.cart,
+      items: response.items,
+      totalInt: response.totalInt,
+    };
   },
 
-  async updateItem(
-    itemId: string,
-    data: UpdateCartItemRequest,
-  ): Promise<Cart> {
+  async updateItem(itemId: string, data: UpdateCartItemRequest): Promise<Cart> {
     const userId = useAuthStore.getState().getUserId();
     if (!userId) {
       throw new Error("User not authenticated");
     }
-    return apiPatchValidated<Cart, UpdateCartItemRequest & { userId: string }>(
+    const response = await apiPatchValidated<
+      CartWithProductsResponse,
+      UpdateCartItemRequest & { userId: string }
+    >(
       "/cart/items",
-      CartSchema,
+      CartWithProductsResponseSchema as z.ZodType<CartWithProductsResponse>,
       {
         userId,
         ...data,
       },
     );
+    // Unwrap response - backend returns { cart, items, totalInt }
+    // but we need to merge items into cart for consistency
+    return {
+      ...response.cart,
+      items: response.items,
+      totalInt: response.totalInt,
+    };
   },
 
   async removeItem(itemId: string, productId: string): Promise<Cart> {
@@ -60,12 +90,20 @@ export const cartApi = {
     if (!userId) {
       throw new Error("User not authenticated");
     }
-    // Note: DELETE with body might need special handling
-    // Using POST to /cart/items/remove or similar endpoint might be better
-    // For now, using DELETE with data in config
-    return apiDelete<Cart>("/cart/items", {
-      data: { userId, productId },
-    });
+    const response = await apiDeleteValidated<CartWithProductsResponse>(
+      "/cart/items",
+      CartWithProductsResponseSchema as z.ZodType<CartWithProductsResponse>,
+      {
+        data: { userId, productId },
+      },
+    );
+    // Unwrap response - backend returns { cart, items, totalInt }
+    // but we need to merge items into cart for consistency
+    return {
+      ...response.cart,
+      items: response.items,
+      totalInt: response.totalInt,
+    };
   },
 
   async clearCart(): Promise<void> {

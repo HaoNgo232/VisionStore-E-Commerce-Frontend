@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import type React from "react"
+import type { JSX } from "react"
 import type { Metadata } from "next"
 
 import { Analytics } from "@vercel/analytics/next"

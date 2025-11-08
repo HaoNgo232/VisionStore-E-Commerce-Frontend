@@ -2,13 +2,14 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { paymentsApi } from "../services/payments.service";
 import { getErrorMessage } from "@/lib/api-client";
 import { PaymentStatus } from "@/types";
+import type { Payment } from "@/types";
 
 interface UsePaymentPollingOptions {
   orderId: string;
-  onSuccess?: (payment: any) => void;
-  onTimeout?: () => void;
-  onError?: (error: string) => void;
-  enabled?: boolean;
+  onSuccess?: ((payment: Payment) => void) | undefined;
+  onTimeout?: (() => void) | undefined;
+  onError?: ((error: string) => void) | undefined;
+  enabled?: boolean | undefined;
 }
 
 interface UsePaymentPollingReturn {
@@ -102,13 +103,13 @@ export function usePaymentPolling({
         }
 
         // Make API call with built-in retry logic
-        checkPaymentStatus();
+        void checkPaymentStatus();
         return newAttempts;
       });
     };
 
     // Check immediately first
-    poll();
+    void poll();
 
     // Then start interval
     intervalRef.current = setInterval(poll, POLLING_INTERVAL);

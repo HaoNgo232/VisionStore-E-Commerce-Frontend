@@ -64,7 +64,7 @@ export function calculateOrderSummary(orders: Order[]): OrderSummary {
   const averageOrderValue = totalOrders > 0 ? totalSpent / totalOrders : 0;
 
   const ordersByStatus = orders.reduce((acc, order) => {
-    acc[order.status] = (acc[order.status] || 0) + 1;
+    acc[order.status] = (acc[order.status] ?? 0) + 1;
     return acc;
   }, {} as Record<Order["status"], number>);
 

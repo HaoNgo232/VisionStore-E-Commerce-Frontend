@@ -6,6 +6,13 @@
 import { z } from "zod";
 
 /**
+ * Helper schema for CUID (Collision-resistant Unique Identifier)
+ * Backend uses CUID format (e.g., "cmhozukjp000z...") instead of UUID
+ * All models in backend use @default(cuid()) in Prisma schema
+ */
+export const cuidSchema = () => z.string().min(10); // CUIDs are typically 25+ chars, but we'll be lenient
+
+/**
  * Standard API error response from backend
  */
 export interface ApiError {
@@ -49,8 +56,8 @@ export function createPaginatedResponseSchema<T extends z.ZodTypeAny>(
   return z.object({
     products: z.array(itemSchema),
     total: z.number().int().nonnegative(),
-    page: z.number().int().positive(),
-    pageSize: z.number().int().positive(),
+    page: z.number().int().nonnegative(), // Backend should always return page number
+    pageSize: z.number().int().nonnegative(), // Backend should always return pageSize
     totalPages: z.number().int().nonnegative(),
   });
 }

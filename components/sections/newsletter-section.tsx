@@ -11,10 +11,10 @@ export function NewsletterSection(): JSX.Element {
   const [email, setEmail] = useState("")
   const [subscribed, setSubscribed] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent): void => {
     e.preventDefault()
     // TODO: Implement newsletter subscription
-    console.log("[v0] Newsletter subscription:", email)
+    // console.log("[v0] Newsletter subscription:", email)
     setSubscribed(true)
     setEmail("")
   }

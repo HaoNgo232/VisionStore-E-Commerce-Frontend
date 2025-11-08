@@ -14,18 +14,18 @@ import type {
   CreateAddressRequest,
   UpdateAddressRequest,
 } from "@/types";
-import { AddressSchema, z } from "@/types";
+import { AddressSchema } from "@/types";
+import { z } from "zod";
+
+const AddressArraySchema: z.ZodType<Address[]> = z.array(AddressSchema);
 
 export const addressesApi = {
   async getAll(): Promise<Address[]> {
-    return apiGetValidated<Address[]>("/addresses", z.array(AddressSchema));
+    return apiGetValidated<Address[]>("/addresses", AddressArraySchema);
   },
 
   async getById(addressId: string): Promise<Address> {
-    return apiGetValidated<Address>(
-      `/addresses/${addressId}`,
-      AddressSchema,
-    );
+    return apiGetValidated<Address>(`/addresses/${addressId}`, AddressSchema);
   },
 
   async create(data: CreateAddressRequest): Promise<Address> {

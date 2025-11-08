@@ -30,7 +30,7 @@ export function useCart() {
   useEffect(() => {
     // Only fetch cart if user is authenticated and component is mounted
     if (mounted && isAuthenticated) {
-      fetchCart();
+      void fetchCart();
     }
   }, [mounted, isAuthenticated, fetchCart]);
 

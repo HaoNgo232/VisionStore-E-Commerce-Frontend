@@ -27,18 +27,66 @@ export function validateResponse<T>(
 ): T {
   try {
     return schema.parse(data);
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof z.ZodError) {
-      console.error(`[Validation Error] ${context ?? "Response"}:`, {
-        errors: error.errors,
-        data,
-      });
+      // Log validation errors in development for debugging
+      if (process.env.NODE_ENV === "development") {
+        // Group errors by path to see patterns
+        const errorsByPath = error.errors.reduce((acc, e) => {
+          const path = e.path.join(".");
+          if (!acc[path]) {
+            acc[path] = [];
+          }
+          acc[path].push({
+            message: e.message,
+            code: e.code,
+          });
+          return acc;
+        }, {} as Record<string, Array<{ message: string; code: string }>>);
+
+        // Get actual values for failed paths
+        const getNestedValue = (
+          obj: unknown,
+          path: (string | number)[],
+        ): unknown => {
+          let current: unknown = obj;
+          for (const key of path) {
+            if (current === null || current === undefined) return undefined;
+            if (typeof current === "object" && key in current) {
+              current = (current as Record<string | number, unknown>)[key];
+            } else {
+              return undefined;
+            }
+          }
+          return current;
+        };
+
+        console.error(`[Validation Error] ${context ?? "Response"}:`, {
+          totalErrors: error.errors.length,
+          errorsByPath,
+          allErrors: error.errors.map((e) => {
+            const pathStr = e.path.join(".");
+            const receivedValue = getNestedValue(data, e.path);
+            return {
+              path: pathStr,
+              message: e.message,
+              code: e.code,
+              received: receivedValue,
+              receivedType: typeof receivedValue,
+            };
+          }),
+          sampleData:
+            typeof data === "object" && data !== null
+              ? JSON.stringify(data, null, 2).substring(0, 3000)
+              : String(data).substring(0, 200),
+        });
+      }
       throw new ValidationError(
         `Invalid ${context ?? "response"} format from backend`,
         error,
       );
     }
-    throw error;
+    throw error instanceof Error ? error : new Error(String(error));
   }
 }
 
@@ -55,4 +103,3 @@ export function safeValidateResponse<T>(
   }
   return { success: false, error: result.error };
 }
-

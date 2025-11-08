@@ -15,19 +15,24 @@ import type {
   CreateCategoryRequest,
   UpdateCategoryRequest,
 } from "@/types";
-import { CategorySchema, z } from "@/types";
+import { CategorySchema } from "@/types";
+import { z } from "zod";
 
 // CategoryTree schema - recursive
 const CategoryTreeSchema: z.ZodType<CategoryTree> = CategorySchema.extend({
-  children: z.lazy(() => z.array(CategoryTreeSchema).optional()),
+  children: z.lazy(() => z.array(CategoryTreeSchema)),
 });
+
+const CategoryArraySchema: z.ZodType<Category[]> = z.array(CategorySchema);
+const CategoryTreeArraySchema: z.ZodType<CategoryTree[]> =
+  z.array(CategoryTreeSchema);
 
 export const categoriesApi = {
   /**
    * Fetch all categories
    */
   async getAll(): Promise<Category[]> {
-    return apiGetValidated<Category[]>("/categories", z.array(CategorySchema));
+    return apiGetValidated<Category[]>("/categories", CategoryArraySchema);
   },
 
   /**
@@ -36,7 +41,7 @@ export const categoriesApi = {
   async getTree(): Promise<CategoryTree[]> {
     return apiGetValidated<CategoryTree[]>(
       "/categories/tree",
-      z.array(CategoryTreeSchema),
+      CategoryTreeArraySchema,
     );
   },
 

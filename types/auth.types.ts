@@ -5,6 +5,7 @@
  */
 
 import { z } from "zod";
+import { cuidSchema } from "./common.types";
 
 export enum UserRole {
   ADMIN = "ADMIN",
@@ -34,14 +35,22 @@ export interface User {
  * Zod schema for User
  */
 export const UserSchema = z.object({
-  id: z.string().uuid(),
+  id: cuidSchema(), // Backend uses CUID, not UUID
   email: z.string().email(),
   fullName: z.string().min(1),
   phone: z.string().nullable(),
   role: UserRoleSchema,
   isActive: z.boolean(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.preprocess((val) => {
+    if (val instanceof Date) return val.toISOString();
+    if (typeof val === "string") return val;
+    return String(val);
+  }, z.string()),
+  updatedAt: z.preprocess((val) => {
+    if (val instanceof Date) return val.toISOString();
+    if (typeof val === "string") return val;
+    return String(val);
+  }, z.string()),
 });
 
 /**
@@ -116,7 +125,7 @@ export interface VerifyTokenResponse {
  */
 export const VerifyTokenResponseSchema = z.object({
   valid: z.boolean(),
-  userId: z.string().uuid().optional(),
+  userId: cuidSchema().optional(), // Backend uses CUID, not UUID
   email: z.string().email().optional(),
   role: z.string().optional(),
 }) as z.ZodType<VerifyTokenResponse>;

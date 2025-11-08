@@ -1,0 +1,89 @@
+---
+alwaysApply: true
+---
+
+# Frontend Next.js - Type Safety & Clean Code Instructions
+
+## **Tổng quan**
+
+File này là file tổng hợp chính. Các rules chi tiết được tổ chức trong các file riêng:
+
+- `type-safety.mdc` - Rules về type safety và không dùng `any`
+- `api-integration.mdc` - Rules về API integration với type safety
+- `nextjs-best-practices.mdc` - Rules về Next.js best practices
+- `solid-principles.mdc` - Rules về SOLID principles
+- `type-mismatch-detection.mdc` - Rules về phát hiện và xử lý type mismatch
+
+## **Core Principles**
+
+### **1. Type Safety 100% - TUYỆT ĐỐI KHÔNG DÙNG `any`**
+
+- Mọi biến, function, component props phải có type definitions rõ ràng
+- Sử dụng `unknown` thay vì `any` khi cần xử lý dữ liệu không rõ type
+- Luôn validate types từ API responses bằng Zod hoặc type guards
+- Sử dụng strict TypeScript config với `noImplicitAny`, `strictNullChecks`
+
+### **2. Backend Type Synchronization**
+
+- Tham khảo backend types tại: `@shared/types/` và `@shared/dto/`
+- Khi phát hiện type mismatch giữa FE/BE, báo cáo ngay với 3 options:
+  - **Option A**: Cập nhật FE types theo BE + adapter
+  - **Option B**: Đề xuất BE thay đổi + version hóa nếu breaking
+  - **Option C**: Tạo transformation layer chấp nhận cả 2 format
+
+### **3. SOLID Principles**
+
+- **Single Responsibility**: Mỗi component/hook chỉ có 1 trách nhiệm
+- **Open/Closed**: Mở rộng qua composition, không modify existing code
+- **Liskov Substitution**: Interface/type substitution phải nhất quán
+- **Interface Segregation**: Tạo interfaces nhỏ, chuyên biệt
+- **Dependency Inversion**: Depend on abstractions, không phải implementations
+
+### **4. Next.js Best Practices**
+
+- Ưu tiên Server Components, chỉ dùng Client Components khi cần
+- Dynamic route params: `{ params }: { params: { slug: string } }` (không Promise)
+- Proper error boundaries và loading states
+- Type-safe API routes và data fetching
+
+## **Validation Checklist**
+
+**Pre-commit Checklist:**
+
+- [ ] Không có `any` types trong code
+- [ ] Tất cả API responses được validate bằng Zod/type guards
+- [ ] Component props có complete interface definitions
+- [ ] Error handling được implement với proper types
+- [ ] Form schemas defined với validation rules
+- [ ] Tests cover type scenarios và edge cases
+- [ ] ESLint + TypeScript rules pass
+- [ ] Performance optimizations applied (memo, useMemo, useCallback)
+- [ ] Accessibility attributes included
+- [ ] Documentation updated cho type changes
+
+**Type Safety Enforcement:**
+
+```json
+// tsconfig.json
+{
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true
+  }
+}
+
+// .eslintrc.js
+{
+  "rules": {
+    "@typescript-eslint/no-explicit-any": "error",
+    "@typescript-eslint/no-unsafe-assignment": "error",
+    "@typescript-eslint/no-unsafe-call": "error",
+    "@typescript-eslint/no-unsafe-member-access": "error"
+  }
+}
+```
+
+Bằng cách tuân thủ những hướng dẫn này, bạn sẽ có một codebase Next.js type-safe 100%, clean, maintainable và đồng bộ hoàn toàn với backend API.

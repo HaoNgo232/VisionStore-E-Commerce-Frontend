@@ -22,13 +22,13 @@ export function CartPageContent() {
     } = useCart()
 
     // Debug
-    console.log("[CartPageContent] Render:", {
-        mounted,
-        isAuthenticated,
-        loading,
-        error,
-        cartItems: cart?.items?.length,
-    })
+    // console.log("[CartPageContent] Render:", {
+    //     mounted,
+    //     isAuthenticated,
+    //     loading,
+    //     error,
+    //     cartItems: cart?.items?.length,
+    // })
 
     // Prevent hydration mismatch - render skeleton on server
     if (!mounted) {
@@ -49,12 +49,12 @@ export function CartPageContent() {
     }
 
     if (loading) {
-        console.log("[CartPageContent] Loading skeleton")
+        // console.log("[CartPageContent] Loading skeleton")
         return <CartSkeleton />
     }
 
     if (error) {
-        console.log("[CartPageContent] Error:", error)
+        // console.log("[CartPageContent] Error:", error)
         return (
             <div className="container py-16 text-center">
                 <h1 className="text-2xl font-bold">Lỗi tải giỏ hàng</h1>
@@ -67,7 +67,7 @@ export function CartPageContent() {
     }
 
     if (!cart?.items || cart.items.length === 0) {
-        console.log("[CartPageContent] Empty cart")
+        // console.log("[CartPageContent] Empty cart")
         return (
             <div className="container py-16">
                 <div className="max-w-md mx-auto text-center space-y-6">
@@ -94,8 +94,8 @@ export function CartPageContent() {
     const itemCount = getItemCount()
     const total = getTotal()
 
-    const handleCheckout = () => {
-        router.push("/cart/checkout")
+    const handleCheckout = (): void => {
+        void router.push("/cart/checkout")
     }
 
     return (

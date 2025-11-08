@@ -5,6 +5,7 @@
  */
 
 import { z } from "zod";
+import { cuidSchema } from "./common.types";
 
 export interface ARSnapshot {
   id: string;
@@ -19,12 +20,19 @@ export interface ARSnapshot {
  * Zod schema for ARSnapshot
  */
 export const ARSnapshotSchema = z.object({
-  id: z.string().uuid(),
-  userId: z.string().uuid().nullable(),
-  productId: z.string().uuid(),
+  id: cuidSchema(), // Backend uses CUID, not UUID
+  userId: z.preprocess((val) => {
+    if (val === null || val === undefined || val === "") return null;
+    return String(val);
+  }, cuidSchema().nullable()), // Backend uses CUID, not UUID
+  productId: cuidSchema(), // Backend uses CUID, not UUID
   imageUrl: z.string().url(),
   metadata: z.record(z.unknown()).nullable().optional(),
-  createdAt: z.string().datetime(),
+  createdAt: z.preprocess((val) => {
+    if (val instanceof Date) return val.toISOString();
+    if (typeof val === "string") return val;
+    return String(val);
+  }, z.string()),
 });
 
 export interface ARSnapshotResponse {

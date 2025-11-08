@@ -23,7 +23,7 @@ export function LoginForm() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent): Promise<void> => {
         e.preventDefault();
 
         // Prevent double submission
@@ -51,7 +51,7 @@ export function LoginForm() {
             setLoading(true);
             await authService.login({ email, password });
             toast.success("Đăng nhập thành công!");
-            router.push("/home");
+            void router.push("/home");
         } catch (err) {
             const message = getErrorMessage(err);
             // User-friendly error messages

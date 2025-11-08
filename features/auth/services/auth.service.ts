@@ -5,7 +5,6 @@
 
 import {
   apiPostValidated,
-  apiGetValidated,
   getErrorMessage,
 } from "@/lib/api-client";
 import { useAuthStore } from "@/stores/auth.store";

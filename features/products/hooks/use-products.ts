@@ -39,8 +39,8 @@ export function useProducts(params?: UseProductsParams): {
 
         const data = await productsApi.getAll(params);
 
-        setProducts(data?.products || []);
-        setTotal(data?.total || 0);
+        setProducts(data?.products ?? []);
+        setTotal(data?.total ?? 0);
       } catch (err) {
         setError(getErrorMessage(err));
         setProducts([]);

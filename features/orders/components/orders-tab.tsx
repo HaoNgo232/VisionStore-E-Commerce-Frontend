@@ -101,7 +101,7 @@ export function OrdersTab() {
                                     <TableCell>
                                         {new Date(order.createdAt).toLocaleDateString("vi-VN")}
                                     </TableCell>
-                                    <TableCell className="text-center">{order.items?.length || 0}</TableCell>
+                                    <TableCell className="text-center">{order.items?.length ?? 0}</TableCell>
                                     <TableCell className="text-right font-semibold">
                                         {formatPrice(order.totalInt)}
                                     </TableCell>
@@ -117,7 +117,7 @@ export function OrdersTab() {
                                         <Button
                                             variant="ghost"
                                             size="sm"
-                                            onClick={() => router.push(`/orders/${order.id}`)}
+                                            onClick={() => void router.push(`/orders/${order.id}`)}
                                             className="gap-1"
                                         >
                                             Chi tiết

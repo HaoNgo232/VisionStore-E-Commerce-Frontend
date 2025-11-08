@@ -1,0 +1,114 @@
+---
+alwaysApply: true
+applyTo: "**/app/**/*.tsx,**/components/**/*.tsx"
+---
+
+# Next.js Best Practices Rules
+
+## **Server vs Client Components**
+
+- Ưu tiên Server Components, chỉ dùng Client Components khi cần
+- Chỉ thêm `'use client'` khi:
+  - Sử dụng hooks (useState, useEffect, etc.)
+  - Sử dụng browser APIs (window, document, etc.)
+  - Xử lý events (onClick, onChange, etc.)
+  - Sử dụng context providers
+
+## **Dynamic Route Params**
+
+```typescript
+// ✅ CORRECT - Next.js 13+ App Router
+export default function ProductPage({ 
+  params 
+}: { 
+  params: { slug: string } 
+}) {
+  // params is NOT a Promise in App Router
+  return <div>Product: {params.slug}</div>
+}
+
+// ❌ WRONG - Don't use Promise for params in App Router
+export default async function ProductPage({ 
+  params 
+}: { 
+  params: Promise<{ slug: string }> 
+}) {
+  // This is Pages Router pattern, not App Router
+}
+```
+
+## **Error Boundaries & Loading States**
+
+- Luôn implement error boundaries cho routes
+- Sử dụng `error.tsx` và `loading.tsx` trong App Router
+- Proper error handling với type-safe error types
+
+## **Type-Safe Data Fetching**
+
+```typescript
+// ✅ Type-safe server component data fetching
+async function getProduct(id: string): Promise<Product> {
+  const response = await fetch(`/api/products/${id}`)
+  if (!response.ok) {
+    throw new Error('Failed to fetch product')
+  }
+  const data = await response.json()
+  return ProductSchema.parse(data) // Validate with Zod
+}
+
+export default async function ProductPage({ 
+  params 
+}: { 
+  params: { id: string } 
+}) {
+  const product = await getProduct(params.id)
+  return <ProductDetail product={product} />
+}
+```
+
+## **Form Handling với Zod**
+
+```typescript
+// Schema-first approach
+const productFormSchema = z.object({
+  name: z.string().min(1, 'Product name required'),
+  priceInt: z.number().int().positive('Price must be positive'),
+  categoryId: z.string().uuid('Invalid category'),
+  imageUrls: z.array(z.string().url()).default([]),
+})
+
+type ProductFormData = z.infer<typeof productFormSchema>
+
+export function ProductForm({ 
+  onSubmit 
+}: { 
+  onSubmit: (data: ProductFormData) => Promise<void> 
+}) {
+  const form = useForm<ProductFormData>({
+    resolver: zodResolver(productFormSchema),
+    defaultValues: {
+      name: '',
+      priceInt: 0,
+      categoryId: '',
+      imageUrls: [],
+    },
+  })
+
+  const handleSubmit = async (data: ProductFormData) => {
+    try {
+      await onSubmit(data)
+      form.reset()
+    } catch (error) {
+      // Error handled by parent
+    }
+  }
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)}>
+        {/* Type-safe form fields */}
+      </form>
+    </Form>
+  )
+}
+```

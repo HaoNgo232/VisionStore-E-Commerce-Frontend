@@ -31,7 +31,7 @@ export function useLogin() {
     mutationFn: (credentials: LoginRequest) => authService.login(credentials),
     onSuccess: () => {
       // Invalidate and refetch current user
-      queryClient.invalidateQueries({
+      void queryClient.invalidateQueries({
         queryKey: queryKeys.auth.currentUser(),
       });
     },
@@ -47,7 +47,7 @@ export function useRegister() {
   return useMutation({
     mutationFn: (data: RegisterRequest) => authService.register(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({
+      void queryClient.invalidateQueries({
         queryKey: queryKeys.auth.currentUser(),
       });
     },
@@ -80,4 +80,3 @@ export function useVerifyToken() {
     mutationFn: () => authService.verifyToken(),
   });
 }
-

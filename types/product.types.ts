@@ -5,33 +5,35 @@
 
 import { z } from "zod";
 import type { Category } from "./category.types";
+import { CategorySchema } from "./category.types";
+import { cuidSchema } from "./common.types";
 
 export interface ProductAttributes {
-  // Core attributes
-  brand: string;
-  frameShape: string;
-  frameMaterial: string;
-  color: string;
+  // Core attributes - optional to handle incomplete data from backend
+  brand?: string | undefined;
+  frameShape?: string | undefined;
+  frameMaterial?: string | undefined;
+  color?: string | undefined;
 
-  // Optional attributes
-  lensMaterial?: string;
-  uvProtection?: string;
-  gender?: "Nam" | "Nữ" | "Unisex";
-  age?: string;
-  style?: string;
-  weight?: string;
-  type?: string;
-  strength?: string;
+  // Optional attributes - explicit undefined for exactOptionalPropertyTypes
+  lensMaterial?: string | undefined;
+  uvProtection?: string | undefined;
+  gender?: "Nam" | "Nữ" | "Unisex" | undefined;
+  age?: string | undefined;
+  style?: string | undefined;
+  weight?: string | undefined;
+  type?: string | undefined;
+  strength?: string | undefined;
 
   // Boolean features
-  polarized?: boolean;
-  prizm?: boolean;
-  blueLight?: boolean;
-  photochromic?: boolean;
-  mirrored?: boolean;
-  foldable?: boolean;
-  multifocal?: boolean;
-  eco?: boolean;
+  polarized?: boolean | undefined;
+  prizm?: boolean | undefined;
+  blueLight?: boolean | undefined;
+  photochromic?: boolean | undefined;
+  mirrored?: boolean | undefined;
+  foldable?: boolean | undefined;
+  multifocal?: boolean | undefined;
+  eco?: boolean | undefined;
 
   // Allow future expansion
   [key: string]: unknown;
@@ -39,14 +41,15 @@ export interface ProductAttributes {
 
 /**
  * Zod schema for ProductAttributes
+ * Note: Core fields are optional to handle cases where backend may not provide all attributes
  */
 export const ProductAttributesSchema = z
   .object({
-    // Required core fields
-    brand: z.string().min(1),
-    frameShape: z.string().min(1),
-    frameMaterial: z.string().min(1),
-    color: z.string().min(1),
+    // Core fields - optional to handle incomplete data from backend
+    brand: z.string().min(1).optional(),
+    frameShape: z.string().min(1).optional(),
+    frameMaterial: z.string().min(1).optional(),
+    color: z.string().min(1).optional(),
 
     // Optional fields
     lensMaterial: z.string().optional(),
@@ -84,28 +87,55 @@ export interface Product {
   model3dUrl: string | null;
   createdAt: string;
   updatedAt: string;
-  category?: Category | null; // Optional populated category
+  category?: Category | null | undefined; // Optional populated category - explicit undefined for exactOptionalPropertyTypes
 }
 
 /**
  * Zod schema for Product
  */
-export const ProductSchema = z.object({
-  id: z.string().uuid(),
-  sku: z.string().min(1),
-  name: z.string().min(1),
-  slug: z.string().min(1),
-  priceInt: z.number().int().nonnegative(),
-  stock: z.number().int().nonnegative(),
-  description: z.string().nullable(),
-  imageUrls: z.array(z.string().url()),
-  categoryId: z.string().uuid().nullable(),
-  attributes: ProductAttributesSchema.nullable(),
-  model3dUrl: z.string().url().nullable(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
-  // Note: category is optional populated field, skip in schema
-});
+export const ProductSchema = z
+  .object({
+    id: cuidSchema(), // Backend uses CUID, not UUID
+    sku: z.string().min(1),
+    name: z.string().min(1),
+    slug: z.string().min(1),
+    priceInt: z.number().int().nonnegative(),
+    stock: z.number().int().nonnegative(),
+    description: z.string().nullable(),
+    imageUrls: z.preprocess((val) => {
+      // Handle null, undefined, or empty values
+      if (val === null || val === undefined) return [];
+      if (Array.isArray(val)) return val;
+      return [];
+    }, z.array(z.string()).default([])),
+    categoryId: z.preprocess((val) => {
+      // Handle null, undefined, or empty string
+      if (val === null || val === undefined || val === "") return null;
+      return String(val);
+    }, cuidSchema().nullable()),
+    attributes: z.preprocess((val) => {
+      // Handle null, undefined, or empty object
+      if (val === null || val === undefined) return null;
+      if (typeof val === "object" && val !== null) return val;
+      return null;
+    }, ProductAttributesSchema.nullable()),
+    model3dUrl: z.string().nullable(), // Accept any string or null, not strict URL validation
+    createdAt: z.preprocess((val) => {
+      // Convert Date to ISO string if needed
+      if (val instanceof Date) return val.toISOString();
+      if (typeof val === "string") return val;
+      return String(val);
+    }, z.string()),
+    updatedAt: z.preprocess((val) => {
+      // Convert Date to ISO string if needed
+      if (val instanceof Date) return val.toISOString();
+      if (typeof val === "string") return val;
+      return String(val);
+    }, z.string()),
+    // Optional populated category field - use lazy to avoid circular dependency issues
+    category: CategorySchema.nullable().optional(),
+  })
+  .passthrough(); // Allow additional fields from backend (e.g., Prisma metadata)
 
 /**
  * Product filter criteria
@@ -180,12 +210,20 @@ export interface ProductReview {
  * Zod schema for ProductReview
  */
 export const ProductReviewSchema = z.object({
-  id: z.string().uuid(),
-  productId: z.string().uuid(),
-  userId: z.string().uuid(),
+  id: cuidSchema(), // Backend uses CUID, not UUID
+  productId: cuidSchema(), // Backend uses CUID, not UUID
+  userId: cuidSchema(), // Backend uses CUID, not UUID
   rating: z.number().int().min(1).max(5),
   comment: z.string().min(1),
   helpful: z.number().int().nonnegative(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.preprocess((val) => {
+    if (val instanceof Date) return val.toISOString();
+    if (typeof val === "string") return val;
+    return String(val);
+  }, z.string()),
+  updatedAt: z.preprocess((val) => {
+    if (val instanceof Date) return val.toISOString();
+    if (typeof val === "string") return val;
+    return String(val);
+  }, z.string()),
 });

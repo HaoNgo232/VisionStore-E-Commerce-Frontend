@@ -24,8 +24,11 @@ interface ProductDetailContentProps {
     productSlug?: string
 }
 
-export function ProductDetailContent({ productId, productSlug }: ProductDetailContentProps): JSX.Element {
-    const { product, loading, error } = useProductDetail({ id: productId, slug: productSlug })
+export function ProductDetailContent({ productId, productSlug }: ProductDetailContentProps) {
+    const { product, loading, error } = useProductDetail({
+        ...(productId ? { id: productId } : {}),
+        ...(productSlug ? { slug: productSlug } : {})
+    })
     const [selectedImage, setSelectedImage] = useState(0)
     const [quantity, setQuantity] = useState(1)
     const [isAdding, setIsAdding] = useState(false)
@@ -46,7 +49,7 @@ export function ProductDetailContent({ productId, productSlug }: ProductDetailCo
 
     const price = formatPrice(product.priceInt)
     const inStock = product.stock > 0
-    const attributes = product.attributes || null
+    const attributes = product.attributes ?? null
 
     const handleAddToCart = async () => {
         setIsAdding(true)
@@ -73,7 +76,7 @@ export function ProductDetailContent({ productId, productSlug }: ProductDetailCo
                             <BreadcrumbSeparator />
                             <BreadcrumbItem>
                                 <BreadcrumbLink href={`/products?categoryId=${product.categoryId}`}>
-                                    {product.category?.name || "Danh mục"}
+                                    {product.category?.name ?? "Danh mục"}
                                 </BreadcrumbLink>
                             </BreadcrumbItem>
                         </>
@@ -90,7 +93,7 @@ export function ProductDetailContent({ productId, productSlug }: ProductDetailCo
                 <div className="space-y-4">
                     <div className="relative aspect-square overflow-hidden rounded-lg bg-muted">
                         <img
-                            src={product.imageUrls[selectedImage] || "/placeholder.svg"}
+                            src={product.imageUrls[selectedImage] ?? "/placeholder.svg"}
                             alt={product.name}
                             className="h-full w-full object-cover"
                         />
@@ -105,7 +108,7 @@ export function ProductDetailContent({ productId, productSlug }: ProductDetailCo
                                         }`}
                                 >
                                     <img
-                                        src={image || "/placeholder.svg"}
+                                        src={image ?? "/placeholder.svg"}
                                         alt={`${product.name} ${index + 1}`}
                                         className="h-full w-full object-cover"
                                     />
@@ -194,7 +197,7 @@ export function ProductDetailContent({ productId, productSlug }: ProductDetailCo
                             size="lg"
                             className="w-full"
                             disabled={!inStock || isAdding}
-                            onClick={handleAddToCart}
+                            onClick={() => void handleAddToCart()}
                         >
                             <ShoppingCart className="mr-2 h-5 w-5" />
                             {inStock ? "Thêm vào giỏ hàng" : "Hết hàng"}

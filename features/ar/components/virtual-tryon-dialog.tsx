@@ -34,7 +34,7 @@ export function VirtualTryOnDialog({ open, onOpenChange, product, onSwitchProduc
 
   useEffect(() => {
     if (open && !capturedImage) {
-      startWebcam()
+      void startWebcam()
     }
 
     return () => {
@@ -95,9 +95,9 @@ export function VirtualTryOnDialog({ open, onOpenChange, product, onSwitchProduc
     }
   }
 
-  const retakePhoto = () => {
+  const retakePhoto = (): void => {
     setCapturedImage(null)
-    startWebcam()
+    void startWebcam()
   }
 
   const downloadPhoto = () => {

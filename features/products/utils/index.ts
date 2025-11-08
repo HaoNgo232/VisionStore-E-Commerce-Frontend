@@ -31,7 +31,7 @@ export function hasValidAttributes(
  * @param price Price value in VND
  * @param currency Currency code
  */
-export function formatPrice(price: number, currency: string = "VND"): string {
+export function formatPrice(price: number, currency = "VND"): string {
   return new Intl.NumberFormat("vi-VN", {
     style: "currency",
     currency,
@@ -55,10 +55,8 @@ export function groupByCategory(
 ): Record<string, Product[]> {
   return products.reduce((acc, product) => {
     const categoryId = product.categoryId ?? "uncategorized";
-    if (!acc[categoryId]) {
-      acc[categoryId] = [];
-    }
-    acc[categoryId].push(product);
+    acc[categoryId] ??= [];
+    acc[categoryId]?.push(product);
     return acc;
   }, {} as Record<string, Product[]>);
 }

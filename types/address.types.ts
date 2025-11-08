@@ -4,6 +4,7 @@
  */
 
 import { z } from "zod";
+import { cuidSchema } from "./common.types";
 
 export interface Address {
   id: string;
@@ -22,8 +23,8 @@ export interface Address {
  * Zod schema for Address
  */
 export const AddressSchema = z.object({
-  id: z.string().uuid(),
-  userId: z.string().uuid(),
+  id: cuidSchema(), // Backend uses CUID, not UUID
+  userId: cuidSchema(), // Backend uses CUID, not UUID
   fullName: z.string().min(1),
   phone: z.string().min(10),
   street: z.string().min(1),
@@ -31,7 +32,11 @@ export const AddressSchema = z.object({
   district: z.string().min(1),
   city: z.string().min(1),
   isDefault: z.boolean(),
-  createdAt: z.string().datetime(),
+  createdAt: z.preprocess((val) => {
+    if (val instanceof Date) return val.toISOString();
+    if (typeof val === "string") return val;
+    return String(val);
+  }, z.string()),
 });
 
 /**

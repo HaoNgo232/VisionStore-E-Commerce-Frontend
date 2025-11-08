@@ -4,14 +4,17 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import type { Order } from "@/types"
 import { OrderStatus } from "@/types"
-import { Package, Truck, CheckCircle, XCircle, Clock } from "lucide-react"
+import { Package, Truck, CheckCircle, XCircle, Clock, type LucideIcon } from "lucide-react"
 import { formatPrice } from "@/features/products/utils"
+import type { VariantProps } from "class-variance-authority"
 
 interface OrderCardProps {
   order: Order
 }
 
-const statusConfig: Record<OrderStatus, { label: string; icon: any; variant: any }> = {
+type BadgeVariant = VariantProps<typeof Badge>["variant"]
+
+const statusConfig: Record<OrderStatus, { label: string; icon: LucideIcon; variant: BadgeVariant }> = {
   [OrderStatus.PENDING]: { label: "Pending", icon: Clock, variant: "secondary" as const },
   [OrderStatus.PROCESSING]: { label: "Processing", icon: Package, variant: "default" as const },
   [OrderStatus.SHIPPED]: { label: "Shipped", icon: Truck, variant: "default" as const },
@@ -52,7 +55,7 @@ export function OrderCard({ order }: OrderCardProps) {
           {order.items.map((item) => (
             <div key={item.id} className="flex gap-3">
               <img
-                src={item.imageUrls?.[0] || "/placeholder.svg"}
+                src={item.imageUrls?.[0] ?? "/placeholder.svg"}
                 alt={item.productName}
                 className="h-16 w-16 rounded-lg object-cover"
               />

@@ -35,7 +35,7 @@ export function ProductCard({ product }: ProductCardProps) {
       <Link href={`/products/${product.slug}`}>
         <div className="relative aspect-square overflow-hidden bg-muted">
           <img
-            src={product.imageUrls[0] || "/placeholder.svg"}
+            src={product.imageUrls[0] ?? "/placeholder.svg"}
             alt={product.name}
             className="h-full w-full object-cover transition-transform group-hover:scale-105"
           />
@@ -67,7 +67,7 @@ export function ProductCard({ product }: ProductCardProps) {
           size="icon"
           variant="outline"
           disabled={!inStock || isAdding}
-          onClick={handleAddToCart}
+          onClick={() => void handleAddToCart()}
         >
           <ShoppingCart className="h-4 w-4" />
           <span className="sr-only">Thêm vào giỏ hàng</span>

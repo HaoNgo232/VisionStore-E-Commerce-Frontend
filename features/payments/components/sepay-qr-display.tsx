@@ -61,18 +61,18 @@ export function SepayQRDisplay({
         return () => clearInterval(interval)
     }, [isPaid, error])
 
-    const handleCopyReference = () => {
+    const handleCopyReference = (): void => {
         const reference = `DH${orderId}`
-        navigator.clipboard.writeText(reference)
+        void navigator.clipboard.writeText(reference)
         toast.success("Đã sao chép mã đơn hàng")
     }
 
-    const handleRetry = () => {
+    const handleRetry = (): void => {
         setIsRetrying(true)
         setTimeRemaining(900) // Reset to 15 minutes
         stopPolling()
         setTimeout(() => {
-            startPolling()
+            void startPolling()
             setIsRetrying(false)
         }, 500)
     }
@@ -119,7 +119,8 @@ export function SepayQRDisplay({
                                     alt="SePay QR Code"
                                     className="h-48 w-48"
                                     onError={(e) => {
-                                        console.error("Failed to load QR code:", e)
+                                        // console.error("Failed to load QR code:", e)
+                                        // Handle error silently or show toast
                                     }}
                                 />
                             </div>

@@ -2,6 +2,7 @@ import typescriptEslint from "typescript-eslint";
 import js from "@eslint/js";
 import reactHooks from "eslint-plugin-react-hooks";
 import nextPlugin from "@next/eslint-plugin-next";
+import pluginQuery from "@tanstack/eslint-plugin-query";
 
 export default [
   // Base ESLint recommended rules
@@ -10,6 +11,7 @@ export default [
   // TypeScript ESLint strict rules - tốt cho luận văn
   ...typescriptEslint.configs.recommendedTypeChecked,
   ...typescriptEslint.configs.stylisticTypeChecked,
+  ...pluginQuery.configs["flat/recommended"],
 
   {
     ignores: ["jest.setup.js", "**/*.config.js", "**/*.config.mjs"],

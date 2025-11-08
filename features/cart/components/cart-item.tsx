@@ -20,14 +20,14 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
 
   // Safety check: ensure product data exists
   if (!product?.id || typeof product.priceInt !== 'number') {
-    console.error('Invalid cart item data:', item);
+    // console.error('Invalid cart item data:', item);
     return null;
   }
 
   const price = product.priceInt
   const totalPrice = price * quantity
 
-  const handleUpdateQuantity = async (newQuantity: number) => {
+  const handleUpdateQuantity = async (newQuantity: number): Promise<void> => {
     if (newQuantity <= 0) {
       await handleRemove()
       return
@@ -40,7 +40,7 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
     }
   }
 
-  const handleRemove = async () => {
+  const handleRemove = async (): Promise<void> => {
     setUpdating(true)
     try {
       await onRemove(item.id)
@@ -53,7 +53,7 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
     <div className="flex gap-4 py-4 px-5" data-testid="cart-item">
       <Link href={`/products/${product.slug ?? product.id}`} className="shrink-0">
         <img
-          src={product.imageUrls[0] || "/placeholder.svg"}
+          src={product.imageUrls[0] ?? "/placeholder.svg"}
           alt={product.name}
           className="h-24 w-24 rounded-lg object-cover"
         />
@@ -69,7 +69,7 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
           <Button
             variant="ghost"
             size="icon"
-            onClick={handleRemove}
+            onClick={() => void handleRemove()}
             disabled={updating}
           >
             <X className="h-4 w-4" />
@@ -83,7 +83,7 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
               variant="ghost"
               size="icon"
               className="h-8 w-8"
-              onClick={() => handleUpdateQuantity(quantity - 1)}
+              onClick={() => void handleUpdateQuantity(quantity - 1)}
               disabled={updating}
             >
               <Minus className="h-3 w-3" />
@@ -93,7 +93,7 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
               variant="ghost"
               size="icon"
               className="h-8 w-8"
-              onClick={() => handleUpdateQuantity(quantity + 1)}
+              onClick={() => void handleUpdateQuantity(quantity + 1)}
               disabled={updating}
             >
               <Plus className="h-3 w-3" />

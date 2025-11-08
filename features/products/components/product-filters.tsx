@@ -35,7 +35,7 @@ const frameTypes = [
 ]
 
 export function ProductFilters({ filters, onFiltersChange, onClearFilters }: ProductFiltersProps): JSX.Element {
-  const [minPrice, maxPrice] = filters.priceRange || [0, 200]
+  const [minPrice, maxPrice] = filters.priceRange ?? [0, 200]
 
   return (
     <div className="space-y-4">
@@ -54,7 +54,7 @@ export function ProductFilters({ filters, onFiltersChange, onClearFilters }: Pro
           </AccordionTrigger>
           <AccordionContent>
             <RadioGroup
-              value={filters.categoryId || ""}
+              value={filters.categoryId ?? ""}
               onValueChange={(value) => onFiltersChange({ categoryId: value })}
               className="space-y-3"
             >

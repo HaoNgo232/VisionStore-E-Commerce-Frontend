@@ -46,7 +46,7 @@ export function PaymentSuccessDialog({
             try {
                 const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTUIHm7A7+OZTA==');
                 audio.volume = 0.3;
-                audio.play().catch(() => { }); // Ignore if blocked by browser
+                void audio.play().catch(() => { }); // Ignore if blocked by browser
             } catch {
                 // Ignore audio errors
             }
@@ -74,13 +74,13 @@ export function PaymentSuccessDialog({
         return () => clearInterval(interval);
     }, [open, autoRedirect, countdown, onViewOrder, order.id, onClose]);
 
-    const handleViewOrder = () => {
+    const handleViewOrder = (): void => {
         onViewOrder(order.id);
-        if (onClose) {onClose();}
+        onClose?.();
     };
 
-    const handleClose = () => {
-        if (onClose) {onClose();}
+    const handleClose = (): void => {
+        onClose?.();
     };
 
     // Prevent closing dialog during countdown
