@@ -54,8 +54,8 @@ export function ProductFilters({ filters, onFiltersChange, onClearFilters }: Pro
           </AccordionTrigger>
           <AccordionContent>
             <RadioGroup
-              value={filters.categoryId ?? ""}
-              onValueChange={(value) => onFiltersChange({ categoryId: value })}
+              value={filters.categorySlug ?? ""}
+              onValueChange={(value) => onFiltersChange({ categorySlug: value })}
               className="space-y-3"
             >
               <div className="flex items-center space-x-2">

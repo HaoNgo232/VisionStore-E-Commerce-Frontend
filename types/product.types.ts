@@ -141,7 +141,7 @@ export const ProductSchema = z
  * Product filter criteria
  */
 export interface ProductFilters {
-  categoryId?: string;
+  categorySlug?: string;
   priceRange?: [number, number]; // [min, max] in VND
   search?: string;
   sortBy?: ProductSortBy;

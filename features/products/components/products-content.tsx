@@ -18,7 +18,7 @@ export function ProductsContent(): JSX.Element {
     // Sync search from URL params
     useEffect(() => {
         const urlSearch = searchParams.get("search")
-        const urlCategory = searchParams.get("categoryId")
+        const urlCategory = searchParams.get("categorySlug")
 
         if (urlSearch) {
             setSearch(urlSearch)

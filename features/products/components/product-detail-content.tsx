@@ -71,11 +71,11 @@ export function ProductDetailContent({ productId, productSlug }: ProductDetailCo
                     <BreadcrumbItem>
                         <BreadcrumbLink href="/products">Sản phẩm</BreadcrumbLink>
                     </BreadcrumbItem>
-                    {product.categoryId && (
+                    {product.category?.slug && (
                         <>
                             <BreadcrumbSeparator />
                             <BreadcrumbItem>
-                                <BreadcrumbLink href={`/products?categoryId=${product.categoryId}`}>
+                                <BreadcrumbLink href={`/products?categorySlug=${product.category.slug}`}>
                                     {product.category?.name ?? "Danh mục"}
                                 </BreadcrumbLink>
                             </BreadcrumbItem>
