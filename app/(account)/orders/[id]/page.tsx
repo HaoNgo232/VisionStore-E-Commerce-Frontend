@@ -35,7 +35,7 @@ export default function OrderDetailPage(): JSX.Element {
     useEffect(() => {
         const fetchOrder = async () => {
             if (!orderId) {
-                setError("Order ID not found")
+                setError("Không tìm thấy mã đơn hàng")
                 setLoading(false)
                 return
             }

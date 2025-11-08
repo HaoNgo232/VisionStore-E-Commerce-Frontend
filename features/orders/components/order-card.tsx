@@ -15,11 +15,11 @@ interface OrderCardProps {
 type BadgeVariant = VariantProps<typeof Badge>["variant"]
 
 const statusConfig: Record<OrderStatus, { label: string; icon: LucideIcon; variant: BadgeVariant }> = {
-  [OrderStatus.PENDING]: { label: "Pending", icon: Clock, variant: "secondary" as const },
-  [OrderStatus.PROCESSING]: { label: "Processing", icon: Package, variant: "default" as const },
-  [OrderStatus.SHIPPED]: { label: "Shipped", icon: Truck, variant: "default" as const },
-  [OrderStatus.DELIVERED]: { label: "Delivered", icon: CheckCircle, variant: "default" as const },
-  [OrderStatus.CANCELLED]: { label: "Cancelled", icon: XCircle, variant: "destructive" as const },
+  [OrderStatus.PENDING]: { label: "Chờ xử lý", icon: Clock, variant: "secondary" as const },
+  [OrderStatus.PROCESSING]: { label: "Đang xử lý", icon: Package, variant: "default" as const },
+  [OrderStatus.SHIPPED]: { label: "Đang giao", icon: Truck, variant: "default" as const },
+  [OrderStatus.DELIVERED]: { label: "Đã giao", icon: CheckCircle, variant: "default" as const },
+  [OrderStatus.CANCELLED]: { label: "Đã hủy", icon: XCircle, variant: "destructive" as const },
 }
 
 export function OrderCard({ order }: OrderCardProps) {
@@ -31,10 +31,10 @@ export function OrderCard({ order }: OrderCardProps) {
       <CardHeader>
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="font-semibold">Order {order.id}</p>
+            <p className="font-semibold">Đơn hàng {order.id}</p>
             <p className="text-sm text-muted-foreground">
-              Placed on{" "}
-              {new Date(order.createdAt).toLocaleDateString("en-US", {
+              Đặt vào{" "}
+              {new Date(order.createdAt).toLocaleDateString("vi-VN", {
                 year: "numeric",
                 month: "long",
                 day: "numeric",
@@ -73,16 +73,16 @@ export function OrderCard({ order }: OrderCardProps) {
         {/* Order Summary */}
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-muted-foreground">Total Amount</p>
+            <p className="text-sm text-muted-foreground">Tổng tiền</p>
             <p className="text-lg font-bold">{formatPrice(order.totalInt)}</p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm">
-              View Details
+              Xem chi tiết
             </Button>
             {order.status === OrderStatus.SHIPPED && (
               <Button variant="outline" size="sm">
-                Track Order
+                Theo dõi đơn hàng
               </Button>
             )}
           </div>
@@ -90,13 +90,13 @@ export function OrderCard({ order }: OrderCardProps) {
 
         {/* Shipping Address */}
         <div className="rounded-lg bg-muted p-3 text-sm">
-          <p className="font-medium mb-1">Order Information</p>
+          <p className="font-medium mb-1">Thông tin đơn hàng</p>
           <p className="text-muted-foreground">
-            Order Status: {statusConfig[order.status].label}
+            Trạng thái đơn: {statusConfig[order.status].label}
             <br />
-            Payment Status: {order.paymentStatus}
+            Trạng thái thanh toán: {order.paymentStatus}
             <br />
-            Address ID: {order.addressId}
+            Mã địa chỉ: {order.addressId}
           </p>
         </div>
       </CardContent>

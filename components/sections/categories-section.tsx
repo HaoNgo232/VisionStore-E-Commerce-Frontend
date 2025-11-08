@@ -4,31 +4,31 @@ import { Glasses, Sun, Zap, Baby } from "lucide-react"
 
 const categories = [
   {
-    name: "Eyeglasses",
+    name: "Kính cận",
     href: "/products?category=eyeglasses",
     icon: Glasses,
-    description: "Classic frames for everyday wear",
+    description: "Gọng kính cổ điển cho mọi ngày",
     image: "/category-eyeglasses.jpg",
   },
   {
-    name: "Sunglasses",
+    name: "Kính râm",
     href: "/products?category=sunglasses",
     icon: Sun,
-    description: "UV protection with style",
+    description: "Bảo vệ tia UV với phong cách",
     image: "/category-sunglasses.jpg",
   },
   {
-    name: "Sports",
+    name: "Thể thao",
     href: "/products?category=sports",
     icon: Zap,
-    description: "Performance eyewear for athletes",
+    description: "Kính thể thao cho vận động viên",
     image: "/category-sports.jpg",
   },
   {
-    name: "Kids",
+    name: "Trẻ em",
     href: "/products?category=kids",
     icon: Baby,
-    description: "Durable frames for children",
+    description: "Gọng kính bền cho trẻ em",
     image: "/category-kids.jpg",
   },
 ]
@@ -38,8 +38,8 @@ export function CategoriesSection(): JSX.Element {
     <section className="py-16 md:py-24 bg-muted/40">
       <div className="container">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-balance">Shop by Category</h2>
-          <p className="mt-4 text-muted-foreground text-pretty">Find the perfect eyewear for your lifestyle</p>
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-balance">Mua sắm theo danh mục</h2>
+          <p className="mt-4 text-muted-foreground text-pretty">Tìm kính mắt hoàn hảo cho phong cách sống của bạn</p>
         </div>
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">

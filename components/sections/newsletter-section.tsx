@@ -24,27 +24,27 @@ export function NewsletterSection(): JSX.Element {
       <div className="container">
         <div className="mx-auto max-w-2xl text-center">
           <Mail className="mx-auto h-12 w-12 mb-4" />
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-balance">Stay Updated</h2>
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-balance">Cập nhật tin tức</h2>
           <p className="mt-4 text-lg text-primary-foreground/80 text-pretty">
-            Subscribe to our newsletter for exclusive offers and new arrivals
+            Đăng ký nhận bản tin để nhận ưu đãi độc quyền và sản phẩm mới
           </p>
 
           {subscribed ? (
             <div className="mt-8 p-4 rounded-lg bg-primary-foreground/10">
-              <p className="text-lg font-medium">Thank you for subscribing!</p>
+              <p className="text-lg font-medium">Cảm ơn bạn đã đăng ký!</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Input
                 type="email"
-                placeholder="Enter your email"
+                placeholder="Nhập email của bạn"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 className="flex-1 bg-primary-foreground text-foreground"
               />
               <Button type="submit" variant="secondary" size="lg">
-                Subscribe
+                Đăng ký
               </Button>
             </form>
           )}

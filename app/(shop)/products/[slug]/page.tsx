@@ -4,7 +4,7 @@ import { Suspense } from "react";
 export default async function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }): Promise<JSX.Element> {
   const { slug } = await params;
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div>Đang tải...</div>}>
       <ProductDetailContent productSlug={slug} />
     </Suspense>
   );

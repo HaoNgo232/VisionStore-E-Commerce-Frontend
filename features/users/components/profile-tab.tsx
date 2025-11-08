@@ -7,8 +7,8 @@ export function ProfileTab(): JSX.Element {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Profile Information</CardTitle>
-                <CardDescription>Manage your account details</CardDescription>
+                <CardTitle>Thông tin hồ sơ</CardTitle>
+                <CardDescription>Quản lý thông tin tài khoản của bạn</CardDescription>
             </CardHeader>
             <CardContent>
                 <div className="space-y-4">
@@ -24,7 +24,7 @@ export function ProfileTab(): JSX.Element {
 
                     <div className="rounded-lg bg-muted p-4 text-sm text-muted-foreground">
                         <p>
-                            Profile management features will be available once authentication is integrated with the backend.
+                            Tính năng quản lý hồ sơ sẽ có sẵn sau khi tích hợp xác thực với backend.
                         </p>
                     </div>
                 </div>

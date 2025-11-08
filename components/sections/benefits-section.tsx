@@ -3,23 +3,23 @@ import { Truck, Shield, Headphones, RefreshCw } from "lucide-react"
 const benefits = [
   {
     icon: Truck,
-    title: "Free Shipping",
-    description: "On orders over $50",
+    title: "Miễn phí vận chuyển",
+    description: "Cho đơn hàng trên 1.000.000đ",
   },
   {
     icon: Shield,
-    title: "Secure Payment",
-    description: "100% secure transactions",
+    title: "Thanh toán an toàn",
+    description: "Giao dịch 100% bảo mật",
   },
   {
     icon: Headphones,
-    title: "24/7 Support",
-    description: "Dedicated customer service",
+    title: "Hỗ trợ 24/7",
+    description: "Dịch vụ khách hàng chuyên nghiệp",
   },
   {
     icon: RefreshCw,
-    title: "Easy Returns",
-    description: "30-day return policy",
+    title: "Đổi trả dễ dàng",
+    description: "Chính sách đổi trả 30 ngày",
   },
 ]
 

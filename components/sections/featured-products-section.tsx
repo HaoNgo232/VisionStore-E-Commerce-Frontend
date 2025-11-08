@@ -35,8 +35,8 @@ export function FeaturedProductsSection(): JSX.Element {
       <section className="py-16 md:py-24">
         <div className="container">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Featured Products</h2>
-            <p className="mt-4 text-muted-foreground">Discover our most popular eyewear</p>
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Sản phẩm nổi bật</h2>
+            <p className="mt-4 text-muted-foreground">Khám phá những mẫu kính mắt phổ biến nhất của chúng tôi</p>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {Array.from({ length: 4 }).map((_, i) => (
@@ -52,8 +52,8 @@ export function FeaturedProductsSection(): JSX.Element {
     <section className="py-16 md:py-24">
       <div className="container">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-balance">Featured Products</h2>
-          <p className="mt-4 text-muted-foreground text-pretty">Discover our most popular eyewear</p>
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-balance">Sản phẩm nổi bật</h2>
+          <p className="mt-4 text-muted-foreground text-pretty">Khám phá những mẫu kính mắt phổ biến nhất của chúng tôi</p>
         </div>
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -90,7 +90,7 @@ export function FeaturedProductsSection(): JSX.Element {
                     </div>
                     <Button size="icon" variant="outline">
                       <ShoppingCart className="h-4 w-4" />
-                      <span className="sr-only">Add to cart</span>
+                      <span className="sr-only">Thêm vào giỏ hàng</span>
                     </Button>
                   </CardFooter>
                 </Card>
@@ -105,7 +105,7 @@ export function FeaturedProductsSection(): JSX.Element {
 
         <div className="mt-12 text-center">
           <Button size="lg" variant="outline" asChild>
-            <Link href="/products">View All Products</Link>
+            <Link href="/products">Xem tất cả sản phẩm</Link>
           </Button>
         </div>
       </div>

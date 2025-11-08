@@ -20,15 +20,15 @@ export default function ProfilePage(): JSX.Element {
           <TabsList className="grid w-full max-w-md grid-cols-3">
             <TabsTrigger value="orders">
               <Package className="mr-2 h-4 w-4" />
-              Orders
+              Đơn hàng
             </TabsTrigger>
             <TabsTrigger value="addresses">
               <MapPin className="mr-2 h-4 w-4" />
-              Addresses
+              Địa chỉ
             </TabsTrigger>
             <TabsTrigger value="profile">
               <User className="mr-2 h-4 w-4" />
-              Profile
+              Hồ sơ
             </TabsTrigger>
           </TabsList>
 

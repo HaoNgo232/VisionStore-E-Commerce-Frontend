@@ -63,7 +63,7 @@ export function VirtualTryOnDialog({ open, onOpenChange, product, onSwitchProduc
       }
     } catch (error) {
       console.error("[v0] Failed to access webcam:", error)
-      toast.error("Unable to access webcam. Please check your permissions.")
+      toast.error("Không thể truy cập webcam. Vui lòng kiểm tra quyền truy cập của bạn.")
     } finally {
       setIsLoading(false)
     }
@@ -124,8 +124,8 @@ export function VirtualTryOnDialog({ open, onOpenChange, product, onSwitchProduc
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
         <DialogHeader>
-          <DialogTitle>Virtual Try-On</DialogTitle>
-          <DialogDescription>See how {product.name} looks on you</DialogDescription>
+          <DialogTitle>Thử kính ảo</DialogTitle>
+          <DialogDescription>Xem {product.name} trông như thế nào trên bạn</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -148,7 +148,7 @@ export function VirtualTryOnDialog({ open, onOpenChange, product, onSwitchProduc
               <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-10">
                 <div className="text-center">
                   <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground">Starting camera...</p>
+                  <p className="text-sm text-muted-foreground">Đang khởi động camera...</p>
                 </div>
               </div>
             )}
@@ -172,7 +172,7 @@ export function VirtualTryOnDialog({ open, onOpenChange, product, onSwitchProduc
                 <div className="relative">
                   <div className="w-64 h-48 border-2 border-dashed border-white/50 rounded-lg" />
                   <p className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-white text-sm bg-black/50 px-3 py-1 rounded-full whitespace-nowrap">
-                    Position your face in the frame
+                    Đặt khuôn mặt của bạn trong khung
                   </p>
                 </div>
               </div>
@@ -181,7 +181,7 @@ export function VirtualTryOnDialog({ open, onOpenChange, product, onSwitchProduc
             {/* Product Overlay Placeholder */}
             {isWebcamActive && !capturedImage && (
               <div className="absolute top-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-xs">
-                AR overlay will be implemented here
+                Lớp phủ AR sẽ được triển khai ở đây
               </div>
             )}
           </div>
@@ -195,26 +195,26 @@ export function VirtualTryOnDialog({ open, onOpenChange, product, onSwitchProduc
               <>
                 <Button variant="outline" onClick={retakePhoto}>
                   <Camera className="mr-2 h-4 w-4" />
-                  Retake Photo
+                  Chụp lại
                 </Button>
                 <Button onClick={downloadPhoto}>
                   <Download className="mr-2 h-4 w-4" />
-                  Download
+                  Tải xuống
                 </Button>
               </>
             ) : (
               <>
                 <Button variant="outline" size="icon" onClick={switchCamera} disabled={isLoading}>
                   <SwitchCamera className="h-4 w-4" />
-                  <span className="sr-only">Switch camera</span>
+                  <span className="sr-only">Chuyển camera</span>
                 </Button>
                 <Button size="lg" onClick={capturePhoto} disabled={!isWebcamActive || isLoading}>
                   <Camera className="mr-2 h-5 w-5" />
-                  Capture Photo
+                  Chụp ảnh
                 </Button>
                 {onSwitchProduct && (
                   <Button variant="outline" onClick={onSwitchProduct}>
-                    Try Another Product
+                    Thử sản phẩm khác
                   </Button>
                 )}
               </>
@@ -224,9 +224,8 @@ export function VirtualTryOnDialog({ open, onOpenChange, product, onSwitchProduc
           {/* Info Banner */}
           <div className="rounded-lg bg-blue-50 dark:bg-blue-950 p-4 text-sm">
             <p className="text-blue-900 dark:text-blue-100">
-              <strong>Note:</strong> This is a UI preview. The actual AR face detection and glasses overlay will be
-              implemented using a suitable AR library (e.g., MediaPipe, TensorFlow.js) when integrated with your chosen
-              technology.
+              <strong>Lưu ý:</strong> Đây là bản xem trước giao diện. Tính năng nhận diện khuôn mặt AR và lớp phủ kính thực tế sẽ được
+              triển khai bằng thư viện AR phù hợp (ví dụ: MediaPipe, TensorFlow.js) khi tích hợp với công nghệ bạn chọn.
             </p>
           </div>
         </div>
@@ -234,7 +233,7 @@ export function VirtualTryOnDialog({ open, onOpenChange, product, onSwitchProduc
         <DialogFooter>
           <Button variant="outline" onClick={handleClose}>
             <X className="mr-2 h-4 w-4" />
-            Close
+            Đóng
           </Button>
         </DialogFooter>
       </DialogContent>

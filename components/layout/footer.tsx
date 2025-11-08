@@ -4,22 +4,22 @@ import { siteConfig } from "@/config/site"
 
 const footerLinks = {
   shop: [
-    { name: "All Products", href: "/products" },
-    { name: "Sunglasses", href: "/products?category=sunglasses" },
-    { name: "Eyeglasses", href: "/products?category=eyeglasses" },
-    { name: "Sports", href: "/products?category=sports" },
+    { name: "Tất cả sản phẩm", href: "/products" },
+    { name: "Kính râm", href: "/products?category=sunglasses" },
+    { name: "Kính cận", href: "/products?category=eyeglasses" },
+    { name: "Thể thao", href: "/products?category=sports" },
   ],
   support: [
-    { name: "Contact Us", href: "/contact" },
-    { name: "Shipping Info", href: "/shipping" },
-    { name: "Returns", href: "/returns" },
-    { name: "FAQ", href: "/faq" },
+    { name: "Liên hệ", href: "/contact" },
+    { name: "Thông tin vận chuyển", href: "/shipping" },
+    { name: "Đổi trả", href: "/returns" },
+    { name: "Câu hỏi thường gặp", href: "/faq" },
   ],
   company: [
-    { name: "About Us", href: "/about" },
-    { name: "Careers", href: "/careers" },
-    { name: "Privacy Policy", href: "/privacy" },
-    { name: "Terms of Service", href: "/terms" },
+    { name: "Về chúng tôi", href: "/about" },
+    { name: "Tuyển dụng", href: "/careers" },
+    { name: "Chính sách bảo mật", href: "/privacy" },
+    { name: "Điều khoản dịch vụ", href: "/terms" },
   ],
 }
 
@@ -64,7 +64,7 @@ export function Footer(): JSX.Element {
 
           {/* Shop Links */}
           <div>
-            <h3 className="mb-4 text-sm font-semibold">Shop</h3>
+            <h3 className="mb-4 text-sm font-semibold">Cửa hàng</h3>
             <ul className="space-y-3">
               {footerLinks.shop.map((link) => (
                 <li key={link.name}>
@@ -81,7 +81,7 @@ export function Footer(): JSX.Element {
 
           {/* Support Links */}
           <div>
-            <h3 className="mb-4 text-sm font-semibold">Support</h3>
+            <h3 className="mb-4 text-sm font-semibold">Hỗ trợ</h3>
             <ul className="space-y-3">
               {footerLinks.support.map((link) => (
                 <li key={link.name}>
@@ -98,7 +98,7 @@ export function Footer(): JSX.Element {
 
           {/* Company Links */}
           <div>
-            <h3 className="mb-4 text-sm font-semibold">Company</h3>
+            <h3 className="mb-4 text-sm font-semibold">Công ty</h3>
             <ul className="space-y-3">
               {footerLinks.company.map((link) => (
                 <li key={link.name}>
@@ -118,17 +118,17 @@ export function Footer(): JSX.Element {
         <div className="mt-12 border-t pt-8">
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
             <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} {siteConfig.name}. All rights reserved.
+              © {new Date().getFullYear()} {siteConfig.name}. Bảo lưu mọi quyền.
             </p>
             <div className="flex gap-4 text-sm text-muted-foreground">
               <Link href="/privacy" className="hover:text-foreground">
-                Privacy
+                Bảo mật
               </Link>
               <Link href="/terms" className="hover:text-foreground">
-                Terms
+                Điều khoản
               </Link>
               <Link href="/cookies" className="hover:text-foreground">
-                Cookies
+                Cookie
               </Link>
             </div>
           </div>

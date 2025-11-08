@@ -16,10 +16,10 @@ interface ProductFiltersProps {
 }
 
 const categories = [
-  { value: "sunglasses", label: "Sunglasses" },
-  { value: "eyeglasses", label: "Eyeglasses" },
-  { value: "sports", label: "Sports" },
-  { value: "kids", label: "Kids" },
+  { value: "sunglasses", label: "Kính râm" },
+  { value: "eyeglasses", label: "Kính cận" },
+  { value: "sports", label: "Thể thao" },
+  { value: "kids", label: "Trẻ em" },
 ]
 
 const brands = ["VisionPro", "UrbanEye", "RetroVision", "ActiveVision", "ChicVision", "JuniorVision"]
@@ -40,9 +40,9 @@ export function ProductFilters({ filters, onFiltersChange, onClearFilters }: Pro
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Filters</h3>
+        <h3 className="text-lg font-semibold">Bộ lọc</h3>
         <Button variant="ghost" size="sm" onClick={onClearFilters}>
-          Clear All
+          Xóa tất cả
         </Button>
       </div>
 
@@ -50,7 +50,7 @@ export function ProductFilters({ filters, onFiltersChange, onClearFilters }: Pro
         {/* Category */}
         <AccordionItem value="category">
           <AccordionTrigger className="text-base font-semibold hover:no-underline">
-            Category
+            Danh mục
           </AccordionTrigger>
           <AccordionContent>
             <RadioGroup
@@ -61,7 +61,7 @@ export function ProductFilters({ filters, onFiltersChange, onClearFilters }: Pro
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="" id="all" />
                 <Label htmlFor="all" className="font-normal cursor-pointer">
-                  All Categories
+                  Tất cả danh mục
                 </Label>
               </div>
               {categories.map((category) => (
@@ -79,7 +79,7 @@ export function ProductFilters({ filters, onFiltersChange, onClearFilters }: Pro
         {/* Price Range */}
         <AccordionItem value="price">
           <AccordionTrigger className="text-base font-semibold hover:no-underline">
-            Price Range
+            Khoảng giá
           </AccordionTrigger>
           <AccordionContent>
             <div className="pt-2 space-y-4">
@@ -101,7 +101,7 @@ export function ProductFilters({ filters, onFiltersChange, onClearFilters }: Pro
         {/* Brand */}
         <AccordionItem value="brand">
           <AccordionTrigger className="text-base font-semibold hover:no-underline">
-            Brand
+            Thương hiệu
           </AccordionTrigger>
           <AccordionContent>
             <div className="space-y-3">
@@ -112,7 +112,7 @@ export function ProductFilters({ filters, onFiltersChange, onClearFilters }: Pro
                     disabled
                   />
                   <Label htmlFor={brand} className="font-normal cursor-pointer text-muted-foreground">
-                    {brand} (Coming soon)
+                    {brand} (Sắp ra mắt)
                   </Label>
                 </div>
               ))}
@@ -123,7 +123,7 @@ export function ProductFilters({ filters, onFiltersChange, onClearFilters }: Pro
         {/* Frame Type */}
         <AccordionItem value="frame">
           <AccordionTrigger className="text-base font-semibold hover:no-underline">
-            Frame Type
+            Loại gọng kính
           </AccordionTrigger>
           <AccordionContent>
             <div className="space-y-3">
@@ -134,7 +134,7 @@ export function ProductFilters({ filters, onFiltersChange, onClearFilters }: Pro
                     disabled
                   />
                   <Label htmlFor={type.value} className="font-normal cursor-pointer text-muted-foreground">
-                    {type.label} (Coming soon)
+                    {type.label} (Sắp ra mắt)
                   </Label>
                 </div>
               ))}
@@ -145,7 +145,7 @@ export function ProductFilters({ filters, onFiltersChange, onClearFilters }: Pro
         {/* In Stock */}
         <AccordionItem value="stock">
           <AccordionTrigger className="text-base font-semibold hover:no-underline">
-            Availability
+            Tình trạng
           </AccordionTrigger>
           <AccordionContent>
             <div className="flex items-center space-x-2">
@@ -154,7 +154,7 @@ export function ProductFilters({ filters, onFiltersChange, onClearFilters }: Pro
                 disabled
               />
               <Label htmlFor="inStock" className="font-normal cursor-pointer text-muted-foreground">
-                In Stock Only (Coming soon)
+                Chỉ còn hàng (Sắp ra mắt)
               </Label>
             </div>
           </AccordionContent>

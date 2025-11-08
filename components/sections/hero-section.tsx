@@ -10,40 +10,39 @@ export function HeroSection(): JSX.Element {
           {/* Content */}
           <div className="flex flex-col gap-6">
             <div className="inline-flex items-center rounded-full border px-3 py-1 text-sm w-fit">
-              <span className="text-muted-foreground">New Collection 2024</span>
+              <span className="text-muted-foreground">Bộ sưu tập mới 2024</span>
             </div>
             <h1 className="text-4xl font-bold tracking-tight text-balance sm:text-5xl md:text-6xl lg:text-7xl">
-              See the World in Style
+              Nhìn thế giới theo phong cách của bạn
             </h1>
             <p className="text-lg text-muted-foreground leading-relaxed text-pretty max-w-[600px]">
-              Discover premium eyewear designed for modern lifestyle. From classic aviators to contemporary frames, find
-              your perfect pair.
+              Khám phá kính mắt cao cấp được thiết kế cho lối sống hiện đại. Từ kính phi công cổ điển đến khung gọng đương đại, tìm cặp kính hoàn hảo cho bạn.
             </p>
             <div className="flex flex-col gap-3 sm:flex-row">
               <Button size="lg" asChild>
                 <Link href="/products">
-                  Shop Now
+                  Mua ngay
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <Link href="/products?featured=true">Try Virtual Fitting</Link>
+                <Link href="/products?featured=true">Thử kính ảo</Link>
               </Button>
             </div>
             <div className="flex items-center gap-8 pt-4">
               <div>
                 <p className="text-2xl font-bold">500+</p>
-                <p className="text-sm text-muted-foreground">Products</p>
+                <p className="text-sm text-muted-foreground">Sản phẩm</p>
               </div>
               <div className="h-12 w-px bg-border" />
               <div>
                 <p className="text-2xl font-bold">50K+</p>
-                <p className="text-sm text-muted-foreground">Happy Customers</p>
+                <p className="text-sm text-muted-foreground">Khách hàng hài lòng</p>
               </div>
               <div className="h-12 w-px bg-border" />
               <div>
                 <p className="text-2xl font-bold">4.8</p>
-                <p className="text-sm text-muted-foreground">Rating</p>
+                <p className="text-sm text-muted-foreground">Đánh giá</p>
               </div>
             </div>
           </div>
@@ -53,7 +52,7 @@ export function HeroSection(): JSX.Element {
             <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10" />
             <img
               src="/hero-eyewear-collection.jpg"
-              alt="Premium eyewear collection"
+              alt="Bộ sưu tập kính mắt cao cấp"
               className="relative h-full w-full object-cover rounded-2xl"
             />
           </div>

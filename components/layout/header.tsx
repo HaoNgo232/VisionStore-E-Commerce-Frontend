@@ -29,16 +29,16 @@ import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 
 const navigation = [
-  { name: "Home", href: "/" },
-  { name: "Products", href: "/products" },
-  { name: "Contact", href: "/contact" },
+  { name: "Trang chủ", href: "/" },
+  { name: "Sản phẩm", href: "/products" },
+  { name: "Liên hệ", href: "/contact" },
 ]
 
 const categories = [
-  { name: "Eyeglasses", href: "/products?category=eyeglasses", description: "Prescription and fashion eyewear" },
-  { name: "Sunglasses", href: "/products?category=sunglasses", description: "UV protection and style" },
-  { name: "Sports", href: "/products?category=sports", description: "Performance eyewear" },
-  { name: "Kids", href: "/products?category=kids", description: "Durable eyewear for children" },
+  { name: "Kính cận", href: "/products?category=eyeglasses", description: "Kính cận và thời trang" },
+  { name: "Kính râm", href: "/products?category=sunglasses", description: "Bảo vệ tia UV và phong cách" },
+  { name: "Thể thao", href: "/products?category=sports", description: "Kính thể thao chuyên nghiệp" },
+  { name: "Trẻ em", href: "/products?category=kids", description: "Kính bền cho trẻ em" },
 ]
 
 export function Header(): JSX.Element {
@@ -79,19 +79,19 @@ export function Header(): JSX.Element {
           <NavigationMenuList>
             <NavigationMenuItem>
               <NavigationMenuLink href="/" className={navigationMenuTriggerStyle()}>
-                Home
+                Trang chủ
               </NavigationMenuLink>
             </NavigationMenuItem>
 
             <NavigationMenuItem>
               <NavigationMenuLink href="/products" className={navigationMenuTriggerStyle()}>
-                Products
+                Sản phẩm
               </NavigationMenuLink>
             </NavigationMenuItem>
 
             <NavigationMenuItem>
               <NavigationMenuLink href="/contact" className={navigationMenuTriggerStyle()}>
-                Contact
+                Liên hệ
               </NavigationMenuLink>
             </NavigationMenuItem>
           </NavigationMenuList>
@@ -113,7 +113,7 @@ export function Header(): JSX.Element {
             }}
           >
             <Search className="mr-2 h-4 w-4" />
-            <span>Search products...</span>
+            <span>Tìm kiếm sản phẩm...</span>
             <kbd className="pointer-events-none absolute right-1.5 top-1.5 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
               <span className="text-xs">⌘</span>K
             </kbd>
@@ -125,7 +125,7 @@ export function Header(): JSX.Element {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon">
                   <User className="h-5 w-5" />
-                  <span className="sr-only">Account menu</span>
+                  <span className="sr-only">Menu tài khoản</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
@@ -182,7 +182,7 @@ export function Header(): JSX.Element {
                   {itemCount}
                 </Badge>
               )}
-              <span className="sr-only">Shopping cart</span>
+              <span className="sr-only">Giỏ hàng</span>
             </Link>
           </Button>
 
@@ -191,7 +191,7 @@ export function Header(): JSX.Element {
             <SheetTrigger asChild className="md:hidden">
               <Button variant="ghost" size="icon">
                 <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle menu</span>
+                <span className="sr-only">Chuyển đổi menu</span>
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-80">
@@ -211,7 +211,7 @@ export function Header(): JSX.Element {
                     }}
                   >
                     <Search className="mr-2 h-4 w-4" />
-                    <span>Search products...</span>
+                    <span>Tìm kiếm sản phẩm...</span>
                   </Button>
 
                   {/* Main Navigation */}
@@ -230,7 +230,7 @@ export function Header(): JSX.Element {
 
                   {/* Categories */}
                   <div className="flex flex-col gap-1">
-                    <h3 className="mb-2 px-3 text-sm font-semibold text-muted-foreground">Categories</h3>
+                    <h3 className="mb-2 px-3 text-sm font-semibold text-muted-foreground">Danh mục</h3>
                     {categories.map((category) => (
                       <Link
                         key={category.name}
@@ -245,34 +245,34 @@ export function Header(): JSX.Element {
 
                   {/* Account */}
                   <div className="flex flex-col gap-1 border-t pt-4">
-                    <h3 className="mb-2 px-3 text-sm font-semibold text-muted-foreground">Account</h3>
+                    <h3 className="mb-2 px-3 text-sm font-semibold text-muted-foreground">Tài khoản</h3>
                     <Link
                       href="/profile"
                       className="flex items-center rounded-md px-3 py-2 text-base font-medium transition-colors hover:bg-accent"
                     >
                       <User className="mr-2 h-4 w-4" />
-                      Profile
+                      Hồ sơ
                     </Link>
                     <Link
                       href="/profile#orders"
                       className="flex items-center rounded-md px-3 py-2 text-base font-medium transition-colors hover:bg-accent"
                     >
                       <Package className="mr-2 h-4 w-4" />
-                      Orders
+                      Đơn hàng
                     </Link>
                     <Link
                       href="/profile#settings"
                       className="flex items-center rounded-md px-3 py-2 text-base font-medium transition-colors hover:bg-accent"
                     >
                       <Settings className="mr-2 h-4 w-4" />
-                      Settings
+                      Cài đặt
                     </Link>
                     <button
                       className="flex items-center rounded-md px-3 py-2 text-base font-medium text-destructive transition-colors hover:bg-accent"
                       onClick={() => void handleLogout()}
                     >
                       <LogOut className="mr-2 h-4 w-4" />
-                      Log out
+                      Đăng xuất
                     </button>
                   </div>
                 </div>

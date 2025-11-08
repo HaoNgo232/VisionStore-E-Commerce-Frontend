@@ -55,9 +55,9 @@ export default function ContactPage(): JSX.Element {
   return (
     <div className="container py-8">
       <div className="mb-8 text-center">
-        <h1 className="text-3xl font-bold tracking-tight text-balance">Contact Us</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-balance">Liên hệ với chúng tôi</h1>
         <p className="text-muted-foreground mt-2 text-pretty">
-          Have a question? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+          Có câu hỏi? Chúng tôi rất muốn nghe từ bạn. Gửi tin nhắn cho chúng tôi và chúng tôi sẽ phản hồi sớm nhất có thể.
         </p>
       </div>
 
@@ -66,8 +66,8 @@ export default function ContactPage(): JSX.Element {
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Get in Touch</CardTitle>
-              <CardDescription>Our team is here to help you</CardDescription>
+              <CardTitle>Liên hệ</CardTitle>
+              <CardDescription>Đội ngũ của chúng tôi luôn sẵn sàng hỗ trợ bạn</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex gap-3">
@@ -92,7 +92,7 @@ export default function ContactPage(): JSX.Element {
                   <Phone className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="font-medium">Phone</p>
+                  <p className="font-medium">Điện thoại</p>
                   <a
                     href={`tel:${siteConfig.contact.phone}`}
                     className="text-sm text-muted-foreground hover:text-primary"
@@ -109,7 +109,7 @@ export default function ContactPage(): JSX.Element {
                   <MapPin className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="font-medium">Address</p>
+                  <p className="font-medium">Địa chỉ</p>
                   <p className="text-sm text-muted-foreground">{siteConfig.contact.address}</p>
                 </div>
               </div>
@@ -121,9 +121,9 @@ export default function ContactPage(): JSX.Element {
                   <Clock className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="font-medium">Business Hours</p>
-                  <p className="text-sm text-muted-foreground">Mon - Fri: 9:00 AM - 6:00 PM</p>
-                  <p className="text-sm text-muted-foreground">Sat - Sun: 10:00 AM - 4:00 PM</p>
+                  <p className="font-medium">Giờ làm việc</p>
+                  <p className="text-sm text-muted-foreground">Thứ 2 - Thứ 6: 9:00 - 18:00</p>
+                  <p className="text-sm text-muted-foreground">Thứ 7 - Chủ nhật: 10:00 - 16:00</p>
                 </div>
               </div>
             </CardContent>
@@ -133,7 +133,7 @@ export default function ContactPage(): JSX.Element {
           <Card>
             <CardContent className="p-0">
               <div className="aspect-square w-full bg-muted rounded-lg overflow-hidden">
-                <img src="/store-location-map.jpg" alt="Store location" className="h-full w-full object-cover" />
+                <img src="/store-location-map.jpg" alt="Vị trí cửa hàng" className="h-full w-full object-cover" />
               </div>
             </CardContent>
           </Card>
@@ -143,8 +143,8 @@ export default function ContactPage(): JSX.Element {
         <div className="lg:col-span-2">
           <Card>
             <CardHeader>
-              <CardTitle>Send us a Message</CardTitle>
-              <CardDescription>Fill out the form below and we'll get back to you shortly</CardDescription>
+              <CardTitle>Gửi tin nhắn cho chúng tôi</CardTitle>
+              <CardDescription>Điền vào form bên dưới và chúng tôi sẽ phản hồi bạn sớm</CardDescription>
             </CardHeader>
             <CardContent>
               {submitted ? (
@@ -152,9 +152,9 @@ export default function ContactPage(): JSX.Element {
                   <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
                     <Send className="h-6 w-6 text-green-600 dark:text-green-400" />
                   </div>
-                  <h3 className="text-lg font-semibold mb-2">Message Sent!</h3>
+                  <h3 className="text-lg font-semibold mb-2">Đã gửi tin nhắn!</h3>
                   <p className="text-sm text-muted-foreground">
-                    Thank you for contacting us. We'll get back to you as soon as possible.
+                    Cảm ơn bạn đã liên hệ với chúng tôi. Chúng tôi sẽ phản hồi bạn sớm nhất có thể.
                   </p>
                 </div>
               ) : (
@@ -166,9 +166,9 @@ export default function ContactPage(): JSX.Element {
                         name="name"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Name *</FormLabel>
+                            <FormLabel>Tên *</FormLabel>
                             <FormControl>
-                              <Input placeholder="Your name" {...field} />
+                              <Input placeholder="Tên của bạn" {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -181,7 +181,7 @@ export default function ContactPage(): JSX.Element {
                           <FormItem>
                             <FormLabel>Email *</FormLabel>
                             <FormControl>
-                              <Input type="email" placeholder="your@email.com" {...field} />
+                              <Input type="email" placeholder="email@example.com" {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -194,9 +194,9 @@ export default function ContactPage(): JSX.Element {
                       name="subject"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Subject *</FormLabel>
+                          <FormLabel>Chủ đề *</FormLabel>
                           <FormControl>
-                            <Input placeholder="How can we help?" {...field} />
+                            <Input placeholder="Chúng tôi có thể giúp gì cho bạn?" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -208,9 +208,9 @@ export default function ContactPage(): JSX.Element {
                       name="message"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Message *</FormLabel>
+                          <FormLabel>Tin nhắn *</FormLabel>
                           <FormControl>
-                            <Textarea placeholder="Tell us more about your inquiry..." rows={6} {...field} />
+                            <Textarea placeholder="Hãy cho chúng tôi biết thêm về yêu cầu của bạn..." rows={6} {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -218,7 +218,7 @@ export default function ContactPage(): JSX.Element {
                     />
 
                     <Button type="submit" size="lg" className="w-full" disabled={form.formState.isSubmitting}>
-                      {form.formState.isSubmitting ? "Sending..." : "Send Message"}
+                      {form.formState.isSubmitting ? "Đang gửi..." : "Gửi tin nhắn"}
                     </Button>
                   </form>
                 </Form>
@@ -229,44 +229,41 @@ export default function ContactPage(): JSX.Element {
           {/* FAQ Section */}
           <Card className="mt-6">
             <CardHeader>
-              <CardTitle>Frequently Asked Questions</CardTitle>
-              <CardDescription>Quick answers to common questions</CardDescription>
+              <CardTitle>Câu hỏi thường gặp</CardTitle>
+              <CardDescription>Câu trả lời nhanh cho các câu hỏi phổ biến</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <h4 className="font-semibold mb-2">What is your return policy?</h4>
+                <h4 className="font-semibold mb-2">Chính sách đổi trả của bạn là gì?</h4>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  We offer a 30-day return policy for all products. Items must be in original condition with tags
-                  attached.
+                  Chúng tôi cung cấp chính sách đổi trả 30 ngày cho tất cả sản phẩm. Sản phẩm phải còn nguyên tình trạng ban đầu với thẻ tag còn dính.
                 </p>
               </div>
 
               <Separator />
 
               <div>
-                <h4 className="font-semibold mb-2">How long does shipping take?</h4>
+                <h4 className="font-semibold mb-2">Vận chuyển mất bao lâu?</h4>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Standard shipping takes 3-5 business days. Express shipping is available for 1-2 business days
-                  delivery.
+                  Vận chuyển tiêu chuẩn mất 3-5 ngày làm việc. Vận chuyển nhanh có sẵn với thời gian giao hàng 1-2 ngày làm việc.
                 </p>
               </div>
 
               <Separator />
 
               <div>
-                <h4 className="font-semibold mb-2">Do you offer prescription lenses?</h4>
+                <h4 className="font-semibold mb-2">Bạn có cung cấp mắt kính cận không?</h4>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Yes, we can add prescription lenses to most of our frames. Contact us for more details and pricing.
+                  Có, chúng tôi có thể lắp mắt kính cận vào hầu hết các gọng kính của chúng tôi. Liên hệ với chúng tôi để biết thêm chi tiết và giá cả.
                 </p>
               </div>
 
               <Separator />
 
               <div>
-                <h4 className="font-semibold mb-2">Can I try glasses before buying?</h4>
+                <h4 className="font-semibold mb-2">Tôi có thể thử kính trước khi mua không?</h4>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  We offer a virtual try-on feature on our product pages. You can also visit our physical store to try
-                  frames in person.
+                  Chúng tôi cung cấp tính năng thử kính ảo trên trang sản phẩm. Bạn cũng có thể đến cửa hàng vật lý của chúng tôi để thử gọng kính trực tiếp.
                 </p>
               </div>
             </CardContent>

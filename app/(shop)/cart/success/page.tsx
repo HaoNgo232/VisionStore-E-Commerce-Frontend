@@ -201,7 +201,7 @@ export default function SuccessPage(): JSX.Element {
                             {item.imageUrls?.[0] && (
                               <img
                                 src={item.imageUrls[0]}
-                                alt={item.productName ?? "Product"}
+                                alt={item.productName ?? "Sản phẩm"}
                                 className="h-16 w-16 rounded object-cover"
                               />
                             )}
