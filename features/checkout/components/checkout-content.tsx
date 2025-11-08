@@ -72,7 +72,7 @@ export default function CheckoutContent() {
         )
     }
 
-    if (!selectedAddressId && addresses.length > 0) {
+    if (!selectedAddressId && addresses.length > 0 && addresses[0]) {
         setSelectedAddressId(addresses[0].id)
     }
 
@@ -152,8 +152,8 @@ export default function CheckoutContent() {
             // Swallow non-critical cart clear errors
         }
 
-        // Redirect immediately to order details page (like COD flow)
-        void router.push(`/orders/${payment.orderId}`)
+        // Redirect to success page (consistent with COD flow)
+        void router.push(`/cart/success?orderId=${payment.orderId}&paymentMethod=${PaymentMethod.SEPAY}`)
     }
 
     const handlePaymentTimeout = () => {

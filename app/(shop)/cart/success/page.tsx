@@ -1,7 +1,7 @@
 "use client"
 
 import { useRouter, useSearchParams } from "next/navigation"
-import { useEffect, useState } from "react"
+import { JSX, useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ProtectedRoute } from "@/components/auth/protected-route"
@@ -35,13 +35,6 @@ export default function SuccessPage(): JSX.Element {
 
   const [order, setOrder] = useState<Order | null>(null)
   const [loading, setLoading] = useState(true)
-
-  // Redirect non-COD payments away from this page
-  useEffect(() => {
-    if (paymentMethod !== PaymentMethod.COD) {
-      void router.push("/profile#orders");
-    }
-  }, [paymentMethod, router])
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -137,15 +130,21 @@ export default function SuccessPage(): JSX.Element {
               </div>
 
               <div className="lg:col-span-2 space-y-6">
-                {/* COD Confirmation */}
-                {paymentMethod === PaymentMethod.COD && (
+                {/* Payment Confirmation */}
+                {(paymentMethod === PaymentMethod.COD || paymentMethod === PaymentMethod.SEPAY) && (
                   <Card className="border-green-200 bg-green-50">
                     <CardHeader>
-                      <CardTitle className="text-green-700">Thanh toán khi nhận hàng</CardTitle>
+                      <CardTitle className="text-green-700">
+                        {paymentMethod === PaymentMethod.COD
+                          ? "Thanh toán khi nhận hàng"
+                          : "Thanh toán đã hoàn tất"}
+                      </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3">
                       <p className="text-sm text-green-700">
-                        Bạn sẽ thanh toán tiền khi nhận hàng từ shipper. Vui lòng chuẩn bị đủ tiền.
+                        {paymentMethod === PaymentMethod.COD
+                          ? "Bạn sẽ thanh toán tiền khi nhận hàng từ shipper. Vui lòng chuẩn bị đủ tiền."
+                          : "Thanh toán của bạn đã được xác nhận thành công. Đơn hàng đang được xử lý."}
                       </p>
                       <div className="rounded bg-white p-3 text-sm">
                         <p className="font-semibold">
