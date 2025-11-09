@@ -48,7 +48,8 @@ apiClient.interceptors.request.use(
     }
     return config;
   },
-  (error: unknown) => Promise.reject(error instanceof Error ? error : new Error(String(error))),
+  (error: unknown) =>
+    Promise.reject(error instanceof Error ? error : new Error(String(error))),
 );
 
 /**
@@ -106,25 +107,43 @@ apiClient.interceptors.response.use(
         useAuthStore.getState().clearTokens();
 
         // Redirect to login (client-side only)
-        if (typeof window !== "undefined") {
-          window.location.href = "/login";
+        if (globalThis.window !== undefined) {
+          globalThis.window.location.href = "/login";
         }
 
-        return Promise.reject(refreshError instanceof Error ? refreshError : new Error(String(refreshError)));
+        throw refreshError instanceof Error
+          ? refreshError
+          : new Error(String(refreshError));
       }
     }
 
-    return Promise.reject(error);
+    throw error;
   },
 );
 
 /**
  * Transform axios error to user-friendly message
+ * Handles NestJS validation errors (can be string or string[])
  */
 export function getErrorMessage(error: unknown): string {
   if (axios.isAxiosError(error)) {
-    const apiError = error.response?.data as ApiError;
-    return apiError?.message || error.message || "An error occurred";
+    const responseData = error.response?.data as
+      | ApiError
+      | { message: string | string[] };
+
+    // Handle NestJS validation errors (message can be array)
+    if (responseData?.message) {
+      if (Array.isArray(responseData.message)) {
+        // Join multiple validation errors
+        return responseData.message.join(", ");
+      }
+      if (typeof responseData.message === "string") {
+        return responseData.message;
+      }
+    }
+
+    // Fallback to error message or status text
+    return error.message ?? error.response?.statusText ?? "An error occurred";
   }
   if (error instanceof Error) {
     return error.message;
@@ -138,7 +157,7 @@ export function getErrorMessage(error: unknown): string {
 export function handleApiError(error: unknown, showToast = false): string {
   const message = getErrorMessage(error);
 
-  if (showToast && typeof window !== "undefined") {
+  if (showToast && globalThis.window !== undefined) {
     // Will integrate with toast notification library later
     console.error("[API Error]", message);
   }

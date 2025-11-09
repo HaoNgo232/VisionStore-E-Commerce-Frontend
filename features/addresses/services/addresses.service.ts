@@ -8,6 +8,7 @@ import {
   apiPostValidated,
   apiPatchValidated,
   apiDelete,
+  apiPutValidated,
 } from "@/lib/api-client";
 import type {
   Address,
@@ -17,7 +18,9 @@ import type {
 import { AddressSchema } from "@/types";
 import { z } from "zod";
 
-const AddressArraySchema: z.ZodType<Address[]> = z.array(AddressSchema);
+// Type assertion needed because AddressSchema uses z.preprocess for createdAt
+// which creates ZodEffects with unknown input type, but we know it validates Address correctly
+const AddressArraySchema = z.array(AddressSchema) as z.ZodType<Address[]>;
 
 export const addressesApi = {
   async getAll(): Promise<Address[]> {
@@ -25,13 +28,16 @@ export const addressesApi = {
   },
 
   async getById(addressId: string): Promise<Address> {
-    return apiGetValidated<Address>(`/addresses/${addressId}`, AddressSchema);
+    return apiGetValidated<Address>(
+      `/addresses/${addressId}`,
+      AddressSchema as z.ZodType<Address>,
+    );
   },
 
   async create(data: CreateAddressRequest): Promise<Address> {
     return apiPostValidated<Address, CreateAddressRequest>(
       "/addresses",
-      AddressSchema,
+      AddressSchema as z.ZodType<Address>,
       data,
     );
   },
@@ -40,9 +46,9 @@ export const addressesApi = {
     addressId: string,
     data: UpdateAddressRequest,
   ): Promise<Address> {
-    return apiPatchValidated<Address, UpdateAddressRequest>(
+    return apiPutValidated<Address, UpdateAddressRequest>(
       `/addresses/${addressId}`,
-      AddressSchema,
+      AddressSchema as z.ZodType<Address>,
       data,
     );
   },
@@ -54,7 +60,7 @@ export const addressesApi = {
   async setDefault(addressId: string): Promise<Address> {
     return apiPatchValidated<Address, Record<string, never>>(
       `/addresses/${addressId}/default`,
-      AddressSchema,
+      AddressSchema as z.ZodType<Address>,
       {},
     );
   },

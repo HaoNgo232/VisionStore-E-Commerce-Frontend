@@ -204,6 +204,8 @@ export default function SuccessPage(): JSX.Element {
                               <Image
                                 src={item.imageUrls[0]}
                                 alt={item.productName ?? "Sản phẩm"}
+                                width={64}
+                                height={64}
                                 className="h-16 w-16 rounded object-cover"
                               />
                             )}

@@ -1,5 +1,6 @@
 "use client";
 
+import type { JSX } from "react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -20,7 +21,6 @@ export function RegisterForm(): JSX.Element {
     const router = useRouter();
     const [fullName, setFullName] = useState("");
     const [email, setEmail] = useState("");
-    const [phone, setPhone] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [loading, setLoading] = useState(false);
@@ -47,14 +47,15 @@ export function RegisterForm(): JSX.Element {
 
         try {
             setLoading(true);
+            // Backend RegisterDto only accepts: email, password, fullName
+            // Phone is not part of registration, will be added to profile later
             await authService.register({
                 fullName,
                 email,
                 password,
-                phone: phone ?? undefined,
             });
             toast.success("Đăng ký thành công! Vui lòng đăng nhập.");
-            void router.push("/auth/login");
+            router.push("/auth/login");
         } catch (err) {
             const message = getErrorMessage(err);
             setError(message);
@@ -98,18 +99,6 @@ export function RegisterForm(): JSX.Element {
                                 onChange={(e) => setEmail(e.target.value)}
                                 disabled={loading}
                                 required
-                            />
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="phone">Số điện thoại</Label>
-                            <Input
-                                id="phone"
-                                type="tel"
-                                placeholder="+84 9xx xxx xxx"
-                                value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
-                                disabled={loading}
                             />
                         </div>
 

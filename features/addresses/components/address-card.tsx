@@ -5,12 +5,13 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import type { Address } from "@/types"
 import { MapPin, Edit, Trash2 } from "lucide-react"
+import type { JSX } from "react"
 
 interface AddressCardProps {
-  address: Address
-  onEdit: (address: Address) => void
-  onDelete: (id: string) => Promise<void>
-  isDeleting?: boolean
+  readonly address: Address
+  readonly onEdit: (address: Address) => void
+  readonly onDelete: (id: string) => Promise<void>
+  readonly isDeleting?: boolean
 }
 
 export function AddressCard({ address, onEdit, onDelete, isDeleting }: AddressCardProps): JSX.Element {

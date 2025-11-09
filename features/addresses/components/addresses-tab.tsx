@@ -18,6 +18,7 @@ export function AddressesTab(): JSX.Element {
         create,
         update,
         remove,
+        refetch,
     } = useAddresses()
 
     const [addressDialogOpen, setAddressDialogOpen] = useState(false)
@@ -50,12 +51,16 @@ export function AddressesTab(): JSX.Element {
         } else {
             await create(data)
         }
+        // Refresh data từ server để đảm bảo hiển thị data mới nhất
+        await refetch()
     }
 
     const handleDeleteAddress = async (id: string): Promise<void> => {
         setDeletingId(id)
         try {
             await remove(id)
+            // Refresh data từ server sau khi xóa
+            await refetch()
         } finally {
             setDeletingId(null)
         }
