@@ -34,15 +34,13 @@ export function validateResponse<T>(
         // Group errors by path to see patterns
         const errorsByPath = error.errors.reduce((acc, e) => {
           const path = e.path.join(".");
-          if (!acc[path]) {
-            acc[path] = [];
-          }
+          acc[path] = acc[path] ?? [];
           acc[path].push({
             message: e.message,
             code: e.code,
           });
           return acc;
-        }, {} as Record<string, Array<{ message: string; code: string }>>);
+        }, {} as Record<string, { message: string; code: string }[]>);
 
         // Get actual values for failed paths
         const getNestedValue = (
@@ -51,7 +49,9 @@ export function validateResponse<T>(
         ): unknown => {
           let current: unknown = obj;
           for (const key of path) {
-            if (current === null || current === undefined) return undefined;
+            if (current === null || current === undefined) {
+              return undefined;
+            }
             if (typeof current === "object" && key in current) {
               current = (current as Record<string | number, unknown>)[key];
             } else {

@@ -11,7 +11,7 @@ interface FreeShippingProgressProps {
 export function FreeShippingProgress({
     currentTotal,
     freeShippingThreshold = 500000 // 500,000 VND
-}: FreeShippingProgressProps) {
+}: FreeShippingProgressProps): JSX.Element {
     const progress = Math.min((currentTotal / freeShippingThreshold) * 100, 100)
     const remaining = Math.max(freeShippingThreshold - currentTotal, 0)
     const isQualified = currentTotal >= freeShippingThreshold

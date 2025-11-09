@@ -10,13 +10,17 @@ import { getErrorMessage } from "@/lib/api-client";
 import { authService } from "@/features/auth/services/auth.service";
 import type { User } from "@/types";
 
-export function useCurrentUser() {
+export function useCurrentUser(): {
+  user: User | null;
+  loading: boolean;
+  error: string | null;
+} {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetch = async (): Promise<void> => {
       try {
         setLoading(true);
         setError(null);
@@ -30,7 +34,7 @@ export function useCurrentUser() {
       }
     };
 
-    fetch();
+    void fetch();
   }, []);
 
   return { user, loading, error };

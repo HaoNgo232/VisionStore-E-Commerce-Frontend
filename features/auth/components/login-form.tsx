@@ -15,8 +15,9 @@ import { Label } from "@/components/ui/label";
 import { authService } from "@/features/auth/services/auth.service";
 import { getErrorMessage } from "@/lib/api-client";
 import { toast } from "sonner";
+import type { JSX } from "react";
 
-export function LoginForm() {
+export function LoginForm(): JSX.Element {
     const router = useRouter();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -27,7 +28,7 @@ export function LoginForm() {
         e.preventDefault();
 
         // Prevent double submission
-        if (loading) {return;}
+        if (loading) { return; }
 
         setError(null);
 
@@ -51,15 +52,20 @@ export function LoginForm() {
             setLoading(true);
             await authService.login({ email, password });
             toast.success("Đăng nhập thành công!");
-            void router.push("/home");
+            router.push("/home");
         } catch (err) {
             const message = getErrorMessage(err);
             // User-friendly error messages
-            const friendlyMessage = message.toLowerCase().includes('unauthorized') || message.toLowerCase().includes('401')
-                ? "Email hoặc mật khẩu không chính xác"
-                : message.toLowerCase().includes('network')
-                    ? "Lỗi kết nối. Vui lòng kiểm tra internet"
-                    : message;
+            const getFriendlyMessage = (): string => {
+                if (message.toLowerCase().includes('unauthorized') || message.toLowerCase().includes('401')) {
+                    return "Email hoặc mật khẩu không chính xác"
+                }
+                if (message.toLowerCase().includes('network')) {
+                    return "Lỗi kết nối. Vui lòng kiểm tra internet"
+                }
+                return message
+            }
+            const friendlyMessage = getFriendlyMessage();
 
             setError(friendlyMessage);
             toast.error(friendlyMessage);
@@ -78,7 +84,9 @@ export function LoginForm() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                    <form onSubmit={(e) => {
+                        void handleSubmit(e)
+                    }} className="space-y-4">
                         <div className="space-y-2">
                             <Label htmlFor="email">Email</Label>
                             <Input

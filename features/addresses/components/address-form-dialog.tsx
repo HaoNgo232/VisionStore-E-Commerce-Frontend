@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import type { JSX } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
@@ -19,13 +20,13 @@ import type { Address } from "@/types"
 import { addressFormSchema, type AddressFormValues } from "@/lib/validations/forms"
 
 interface AddressFormDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  address?: Address | null
-  onSave: (values: AddressFormValues, isEdit: boolean) => Promise<void>
+  readonly open: boolean
+  readonly onOpenChange: (open: boolean) => void
+  readonly address?: Address | null
+  readonly onSave: (values: AddressFormValues, isEdit: boolean) => Promise<void>
 }
 
-export function AddressFormDialog({ open, onOpenChange, address, onSave }: AddressFormDialogProps) {
+export function AddressFormDialog({ open, onOpenChange, address, onSave }: AddressFormDialogProps): JSX.Element {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const form = useForm<AddressFormValues>({
@@ -65,7 +66,7 @@ export function AddressFormDialog({ open, onOpenChange, address, onSave }: Addre
     }
   }, [address, open, form])
 
-  const onSubmit = async (values: AddressFormValues) => {
+  const onSubmit = async (values: AddressFormValues): Promise<void> => {
     setIsSubmitting(true)
     try {
       await onSave(values, !!address)
@@ -73,6 +74,16 @@ export function AddressFormDialog({ open, onOpenChange, address, onSave }: Addre
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  const getButtonText = (): string => {
+    if (isSubmitting) {
+      return "Đang lưu..."
+    }
+    if (address) {
+      return "Cập nhật"
+    }
+    return "Thêm"
   }
 
   return (
@@ -86,7 +97,7 @@ export function AddressFormDialog({ open, onOpenChange, address, onSave }: Addre
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
+          <form onSubmit={(e) => { void form.handleSubmit(onSubmit)(e); }}>
             <div className="space-y-4 py-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <FormField
@@ -198,7 +209,7 @@ export function AddressFormDialog({ open, onOpenChange, address, onSave }: Addre
                 Hủy
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Đang lưu..." : address ? "Cập nhật" : "Thêm"}
+                {getButtonText()}
               </Button>
             </DialogFooter>
           </form>

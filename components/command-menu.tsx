@@ -1,6 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
+import Image from "next/image"
 import {
     CommandDialog,
     CommandEmpty,
@@ -14,6 +15,7 @@ import { Search, ShoppingBag, Home, Mail, User, ShoppingCart, Clock } from "luci
 import { useProducts } from "@/features/products/hooks/use-products"
 import { formatPrice } from "@/features/products/utils"
 import { useCallback, useEffect, useState } from "react"
+import type { JSX } from "react"
 
 const RECENT_SEARCHES_KEY = "recent-searches"
 
@@ -21,11 +23,18 @@ export function CommandMenu(): JSX.Element {
     const router = useRouter()
     const [open, setOpen] = useState(false)
     const [searchInput, setSearchInput] = useState("")
-    const { products, loading } = useProducts({ search: searchInput || undefined })
+    const { products, loading } = useProducts({ search: searchInput || "" })
     const [recentSearches, setRecentSearches] = useState<string[]>([])
+    const [mounted, setMounted] = useState(false)
+
+    // Ensure component is mounted before rendering Dialog to avoid hydration mismatch
+    useEffect(() => {
+        setMounted(true)
+    }, [])
 
     // Load recent searches from localStorage
     useEffect(() => {
+        if (!mounted) { return; }
         const saved = localStorage.getItem(RECENT_SEARCHES_KEY)
         if (saved) {
             try {
@@ -37,10 +46,11 @@ export function CommandMenu(): JSX.Element {
                 // Ignore parsing errors
             }
         }
-    }, [])
+    }, [mounted])
 
     useEffect(() => {
-        const down = (e: KeyboardEvent) => {
+        if (!mounted) { return; }
+        const down = (e: KeyboardEvent): void => {
             if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
                 e.preventDefault()
                 setOpen((open) => !open)
@@ -49,11 +59,11 @@ export function CommandMenu(): JSX.Element {
 
         document.addEventListener("keydown", down)
         return () => document.removeEventListener("keydown", down)
-    }, [])
+    }, [mounted])
 
     const addRecentSearch = useCallback((search: string) => {
         if (!search.trim()) {
-          return;
+            return;
         }
         setRecentSearches((prev) => {
             const updated = [search, ...prev.filter((s) => s !== search)].slice(0, 5)
@@ -71,6 +81,11 @@ export function CommandMenu(): JSX.Element {
         command()
     }, [addRecentSearch])
 
+    // Don't render Dialog until mounted to avoid hydration mismatch
+    if (!mounted) {
+        return <></>
+    }
+
     return (
         <CommandDialog open={open} onOpenChange={setOpen}>
             <CommandInput
@@ -84,9 +99,9 @@ export function CommandMenu(): JSX.Element {
                 {recentSearches.length > 0 && (
                     <>
                         <CommandGroup heading="Tìm kiếm gần đây">
-                            {recentSearches.map((search, index) => (
+                            {recentSearches.map((search) => (
                                 <CommandItem
-                                    key={index}
+                                    key={search}
                                     onSelect={() => runCommand(
                                         () => router.push(`/products?search=${encodeURIComponent(search)}`),
                                         search
@@ -157,9 +172,11 @@ export function CommandMenu(): JSX.Element {
                                 )}
                             >
                                 <div className="flex items-center gap-2 w-full">
-                                    <img
+                                    <Image
                                         src={product.imageUrls?.[0] ?? "/placeholder.svg"}
                                         alt={product.name}
+                                        width={32}
+                                        height={32}
                                         className="h-8 w-8 rounded object-cover"
                                     />
                                     <div className="flex-1 overflow-hidden">

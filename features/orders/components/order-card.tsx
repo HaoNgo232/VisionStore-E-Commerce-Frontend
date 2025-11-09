@@ -4,12 +4,14 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import type { Order } from "@/types"
 import { OrderStatus } from "@/types"
+import type { JSX } from "react"
+import Image from "next/image"
 import { Package, Truck, CheckCircle, XCircle, Clock, type LucideIcon } from "lucide-react"
 import { formatPrice } from "@/features/products/utils"
 import type { VariantProps } from "class-variance-authority"
 
 interface OrderCardProps {
-  order: Order
+  readonly order: Order
 }
 
 type BadgeVariant = VariantProps<typeof Badge>["variant"]
@@ -22,7 +24,7 @@ const statusConfig: Record<OrderStatus, { label: string; icon: LucideIcon; varia
   [OrderStatus.CANCELLED]: { label: "Đã hủy", icon: XCircle, variant: "destructive" as const },
 }
 
-export function OrderCard({ order }: OrderCardProps) {
+export function OrderCard({ order }: OrderCardProps): JSX.Element {
   const status = statusConfig[order.status]
   const StatusIcon = status.icon
 
@@ -54,9 +56,11 @@ export function OrderCard({ order }: OrderCardProps) {
         <div className="space-y-3">
           {order.items.map((item) => (
             <div key={item.id} className="flex gap-3">
-              <img
+              <Image
                 src={item.imageUrls?.[0] ?? "/placeholder.svg"}
                 alt={item.productName}
+                width={64}
+                height={64}
                 className="h-16 w-16 rounded-lg object-cover"
               />
               <div className="flex-1">

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import type { JSX } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -10,21 +12,21 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertCircle, Clock, Copy, Loader2, RotateCw } from "lucide-react";
+import { AlertCircle, Clock, Copy, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { usePaymentPolling } from "../hooks/use-payment-polling";
 import { formatPrice } from "@/features/products/utils";
 import type { PaymentProcessResponse, Payment } from "@/types";
 
 interface PaymentWaitingDialogProps {
-    open: boolean;
-    onOpenChange: (open: boolean) => void;
-    orderId: string;
-    payment: PaymentProcessResponse;
-    amountInt: number;
-    onSuccess?: (payment: Payment) => void;
-    onTimeout?: () => void;
-    onError?: (error: string) => void;
+    readonly open: boolean;
+    readonly onOpenChange: (open: boolean) => void;
+    readonly orderId: string;
+    readonly payment: PaymentProcessResponse;
+    readonly amountInt: number;
+    readonly onSuccess?: (payment: Payment) => void;
+    readonly onTimeout?: () => void;
+    readonly onError?: (error: string) => void;
 }
 
 export function PaymentWaitingDialog({
@@ -36,9 +38,9 @@ export function PaymentWaitingDialog({
     onSuccess,
     onTimeout,
     onError,
-}: PaymentWaitingDialogProps) {
+}: PaymentWaitingDialogProps): JSX.Element {
     const [timeRemaining, setTimeRemaining] = useState(900); // 15 minutes in seconds
-    const [isRetrying, setIsRetrying] = useState(false);
+    const [_isRetrying, setIsRetrying] = useState(false);
 
     const { isPolling, attempts: _attempts, error, stopPolling } = usePaymentPolling({
         orderId,
@@ -97,7 +99,7 @@ export function PaymentWaitingDialog({
         toast.success("Đã sao chép thông tin tài khoản");
     };
 
-    const handleRetry = (): void => {
+    const _handleRetry = (): void => {
         setIsRetrying(true);
         setTimeRemaining(900); // Reset to 15 minutes
         stopPolling();
@@ -108,7 +110,7 @@ export function PaymentWaitingDialog({
     };
 
     // Prevent backdrop click from closing dialog when polling
-    const handleOpenChange = (newOpen: boolean) => {
+    const handleOpenChange = (newOpen: boolean): void => {
         if (!newOpen && isPolling) {
             // Block backdrop click during polling
             return;
@@ -151,13 +153,15 @@ export function PaymentWaitingDialog({
                             {payment.qrCode && (
                                 <div className="flex justify-center">
                                     <div className="rounded-lg border border-gray-200 p-4 bg-white">
-                                        <img
+                                        <Image
                                             src={payment.qrCode}
                                             alt="SePay QR Code"
+                                            width={192}
+                                            height={192}
                                             className="h-48 w-48"
                                             data-testid="qr-code"
-                                            onError={(e) => {
-                                                console.error("Failed to load QR code:", e);
+                                            onError={() => {
+                                                // Handle error silently or show toast
                                             }}
                                         />
                                     </div>
@@ -226,88 +230,6 @@ export function PaymentWaitingDialog({
                         </CardContent>
                     </Card>
 
-                    {/* Status Card */}
-                    {/* <Card className={error ? "border-red-200 bg-red-50" : "border-blue-200 bg-blue-50"}>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                {isPolling && <Loader2 className="h-5 w-5 animate-spin text-blue-500" />}
-                                {error && <AlertCircle className="h-5 w-5 text-red-600" />}
-                                {!isPolling && !error && <Clock className="h-5 w-5 text-blue-500" />}
-                                <span className={error ? "text-red-700" : "text-blue-700"}>
-                                    {isPolling
-                                        ? "Chờ thanh toán..."
-                                        : error
-                                            ? "Hết hạn thanh toán"
-                                            : "Đang chờ thanh toán"}
-                                </span>
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            {error ? (
-                                <>
-                                    <div className="flex gap-2 text-sm text-red-700 bg-red-100 p-3 rounded border border-red-300">
-                                        <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
-                                        <div>
-                                            <p className="font-semibold">⏰ Hết hạn thanh toán</p>
-                                            <p className="text-xs mt-1">{error}</p>
-                                        </div>
-                                    </div>
-                                    <p className="text-sm text-red-700">
-                                        Bạn đã không hoàn thành thanh toán trong thời gian cho phép. Vui lòng thử lại hoặc kiểm tra trạng thái đơn hàng.
-                                    </p>
-                                    <Button
-                                        onClick={handleRetry}
-                                        disabled={isRetrying}
-                                        variant="outline"
-                                        className="w-full"
-                                    >
-                                        <RotateCw className="h-4 w-4 mr-2" />
-                                        {isRetrying ? "Đang khôi phục..." : "Kiểm tra lại"}
-                                    </Button>
-                                </>
-                            ) : (
-                                <> */}
-                    {/* Progress Indicator */}
-                    {/* <div className="space-y-2">
-                                        <div className="flex items-center justify-between text-sm">
-                                            <span className="text-blue-700 font-medium">⏱️ Thời gian còn lại</span>
-                                            <span className="font-mono text-lg font-bold text-blue-600" data-testid="countdown-timer">
-                                                {Math.floor(timeRemaining / 60)}:{String(timeRemaining % 60).padStart(2, "0")}
-                                            </span>
-                                        </div>
-                                        <div className="w-full bg-blue-200 rounded-full h-2 overflow-hidden">
-                                            <div
-                                                className="h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-300"
-                                                style={{ width: `${progressPercent}%` }}
-                                            />
-                                        </div>
-                                        <p className="text-xs text-blue-600 text-right">
-                                            Kiểm tra: {attempts}/180 lần
-                                        </p>
-                                    </div> */}
-
-                    {/* Info Messages */}
-                    {/* <div className="space-y-2 bg-blue-100 p-3 rounded-lg border border-blue-300">
-                                        <p className="text-sm font-semibold text-blue-800">📋 Vui lòng thanh toán trước khi hết hạn:</p>
-                                        <div className="space-y-1">
-                                            <div className="flex gap-2 text-sm text-blue-700">
-                                                <span className="text-lg leading-none">✓</span>
-                                                <span>Mở app ngân hàng và quét mã QR ở trên</span>
-                                            </div>
-                                            <div className="flex gap-2 text-sm text-blue-700">
-                                                <span className="text-lg leading-none">✓</span>
-                                                <span>Hệ thống tự động cập nhật khi nhận thanh toán</span>
-                                            </div>
-                                            <div className="flex gap-2 text-sm text-blue-700">
-                                                <span className="text-lg leading-none">✓</span>
-                                                <span>Không đóng dialog trong khi chờ thanh toán</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </>
-                            )}
-                        </CardContent>
-                    </Card> */}
 
                     {/* Force Close Button */}
                     <Button

@@ -19,7 +19,7 @@ const statusConfig = {
     },
 } as const;
 
-export function PaymentStatusBadge({ status, className }: PaymentStatusBadgeProps) {
+export function PaymentStatusBadge({ status, className }: PaymentStatusBadgeProps): JSX.Element {
     const config = statusConfig[status];
 
     return (

@@ -1,6 +1,8 @@
 "use client"
 
 import { useState } from "react"
+import type { JSX } from "react"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useCart } from "@/features/cart/hooks/use-cart"
 import { useAddresses } from "@/features/addresses/hooks/use-addresses"
@@ -18,7 +20,7 @@ import { PaymentWaitingDialog } from "@/features/payments/components/payment-wai
 import { formatPrice } from "@/features/products/utils"
 // PaymentSuccessDialog not used anymore - direct redirect instead
 
-export default function CheckoutContent() {
+export default function CheckoutContent(): JSX.Element {
     const router = useRouter()
     const { isAuthenticated } = useAuth()
     const { cart, loading: cartLoading, clearCart } = useCart()
@@ -76,7 +78,7 @@ export default function CheckoutContent() {
         setSelectedAddressId(addresses[0].id)
     }
 
-    const handleCheckout = async () => {
+    const handleCheckout = async (): Promise<void> => {
         // Validate address
         if (!selectedAddressId) {
             toast.error("Vui lòng chọn địa chỉ giao hàng")
@@ -136,7 +138,7 @@ export default function CheckoutContent() {
     }
 
     // Dialog handlers for payment flow separation
-    const handlePaymentSuccess = async (payment: Payment) => {
+    const handlePaymentSuccess = async (payment: Payment): Promise<void> => {
         setWaitingDialogOpen(false)
 
         // Show success toast immediately when payment detected
@@ -153,15 +155,15 @@ export default function CheckoutContent() {
         }
 
         // Redirect to success page (consistent with COD flow)
-        void router.push(`/cart/success?orderId=${payment.orderId}&paymentMethod=${PaymentMethod.SEPAY}`)
+        router.push(`/cart/success?orderId=${payment.orderId}&paymentMethod=${PaymentMethod.SEPAY}`)
     }
 
-    const handlePaymentTimeout = () => {
+    const handlePaymentTimeout = (): void => {
         setWaitingDialogOpen(false)
         toast.error("Thanh toán hết thời gian. Vui lòng thử lại.")
     }
 
-    const handlePaymentError = (error: string) => {
+    const handlePaymentError = (error: string): void => {
         setWaitingDialogOpen(false)
         toast.error(error)
     }
@@ -262,9 +264,11 @@ export default function CheckoutContent() {
                                 {cart?.items.map((item) => (
                                     <div key={item.id} className="flex items-center justify-between pb-3 border-b last:border-0">
                                         <div className="flex items-center gap-3">
-                                            <img
+                                            <Image
                                                 src={item.product?.imageUrls[0] ?? "/placeholder.svg"}
-                                                alt={item.product?.name}
+                                                alt={item.product?.name ?? "Sản phẩm"}
+                                                width={48}
+                                                height={48}
                                                 className="h-12 w-12 rounded object-cover"
                                             />
                                             <div>
@@ -305,7 +309,7 @@ export default function CheckoutContent() {
                             <Button
                                 className="w-full mt-6"
                                 size="lg"
-                                onClick={handleCheckout}
+                                onClick={() => { void handleCheckout(); }}
                                 disabled={isSubmitting || !selectedAddressId}
                             >
                                 {isSubmitting ? "Đang xử lý..." : "Đặt hàng"}
@@ -330,9 +334,9 @@ export default function CheckoutContent() {
                     qrCode: qrCodeUrl,
                 }}
                 amountInt={cart?.totalInt ?? 0}
-                onSuccess={handlePaymentSuccess}
-                onTimeout={handlePaymentTimeout}
-                onError={handlePaymentError}
+                onSuccess={(payment) => { void handlePaymentSuccess(payment); }}
+                onTimeout={() => { handlePaymentTimeout(); }}
+                onError={(error) => { handlePaymentError(error); }}
             />
         </div>
     )

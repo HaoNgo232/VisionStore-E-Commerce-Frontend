@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { paymentsApi } from "../services/payments.service";
 import { getErrorMessage } from "@/lib/api-client";
-import { PaymentStatus } from "@/types";
+import { PaymentStatus } from "@/types/payment.types";
 import type { Payment } from "@/types";
 
 interface UsePaymentPollingOptions {
@@ -46,7 +46,9 @@ export function usePaymentPolling({
   }, []);
 
   const checkPaymentStatus = useCallback(async (): Promise<void> => {
-    if (!isMountedRef.current) {return;}
+    if (!isMountedRef.current) {
+      return;
+    }
 
     // Try up to MAX_RETRIES + 1 times (initial + retries)
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
@@ -56,6 +58,7 @@ export function usePaymentPolling({
         // Success - reset error and check status
         setError(null);
 
+        // Type-safe enum comparison - compare string values
         if (payment.status === PaymentStatus.PAID) {
           stopPolling();
           onSuccess?.(payment);
@@ -82,37 +85,47 @@ export function usePaymentPolling({
   }, [orderId, onSuccess, onError, stopPolling]);
 
   const startPolling = useCallback(() => {
-    if (!enabled || !orderId) {return;}
+    if (!enabled || !orderId) {
+      return;
+    }
 
     setIsPolling(true);
     setAttempts(0);
     setError(null);
 
-    const poll = async () => {
-      if (!isMountedRef.current) {return;}
+    const poll = async (): Promise<void> => {
+      if (!isMountedRef.current) {
+        return;
+      }
 
       // Increment attempts for each polling cycle
+      let shouldContinue = true;
       setAttempts((prev) => {
         const newAttempts = prev + 1;
 
         // Check if max attempts reached
         if (newAttempts >= MAX_ATTEMPTS) {
+          shouldContinue = false;
           stopPolling();
           onTimeout?.();
-          return newAttempts;
         }
 
-        // Make API call with built-in retry logic
-        void checkPaymentStatus();
         return newAttempts;
       });
+
+      // Only check payment status if we haven't reached max attempts
+      if (shouldContinue) {
+        await checkPaymentStatus();
+      }
     };
 
     // Check immediately first
     void poll();
 
-    // Then start interval
-    intervalRef.current = setInterval(poll, POLLING_INTERVAL);
+    // Then start interval - wrap async function to avoid promise return
+    intervalRef.current = setInterval(() => {
+      void poll();
+    }, POLLING_INTERVAL);
   }, [enabled, orderId, checkPaymentStatus, stopPolling, onTimeout]);
 
   // Start polling when enabled/orderId changes

@@ -5,7 +5,12 @@
  */
 
 import { z } from "zod";
-import { cuidSchema } from "./common.types";
+import {
+  cuidSchema,
+  preprocessImageUrls,
+  preprocessDateString,
+  preprocessNullableCuid,
+} from "./common.types";
 
 /**
  * Zod schema for CartItem product snapshot
@@ -16,12 +21,7 @@ const CartItemProductSchema = z
     name: z.string(),
     priceInt: z.number().int().nonnegative(),
     imageUrls: z.preprocess(
-      (val) => {
-        // Handle null, undefined, or empty values
-        if (val === null || val === undefined) return [];
-        if (Array.isArray(val)) return val;
-        return [];
-      },
+      preprocessImageUrls,
       z.array(z.string()).default([]), // Accept any string array, not strict URL validation
     ),
     slug: z.string().optional(),
@@ -39,23 +39,17 @@ const CartItemResponseSchema = z
     productId: cuidSchema(), // Backend uses CUID, not UUID
     quantity: z.preprocess((val) => {
       // Handle edge cases - ensure positive integer
-      if (typeof val === "number") return Math.max(1, Math.floor(val));
+      if (typeof val === "number") {
+        return Math.max(1, Math.floor(val));
+      }
       if (typeof val === "string") {
-        const num = parseInt(val, 10);
-        return isNaN(num) ? 1 : Math.max(1, num);
+        const num = Number.parseInt(val, 10);
+        return Number.isNaN(num) ? 1 : Math.max(1, num);
       }
       return 1;
     }, z.number().int().positive()),
-    createdAt: z.preprocess((val) => {
-      if (val instanceof Date) return val.toISOString();
-      if (typeof val === "string") return val;
-      return String(val);
-    }, z.string()),
-    updatedAt: z.preprocess((val) => {
-      if (val instanceof Date) return val.toISOString();
-      if (typeof val === "string") return val;
-      return String(val);
-    }, z.string()),
+    createdAt: z.preprocess(preprocessDateString, z.string()),
+    updatedAt: z.preprocess(preprocessDateString, z.string()),
   })
   .passthrough(); // Allow additional fields from backend
 
@@ -86,29 +80,25 @@ export const CartItemSchema = z
     productId: cuidSchema(), // Backend uses CUID, not UUID
     quantity: z.preprocess((val) => {
       // Handle edge cases - ensure positive integer
-      if (typeof val === "number") return Math.max(1, Math.floor(val));
+      if (typeof val === "number") {
+        return Math.max(1, Math.floor(val));
+      }
       if (typeof val === "string") {
-        const num = parseInt(val, 10);
-        return isNaN(num) ? 1 : Math.max(1, num);
+        const num = Number.parseInt(val, 10);
+        return Number.isNaN(num) ? 1 : Math.max(1, num);
       }
       return 1;
     }, z.number().int().positive()),
-    createdAt: z.preprocess((val) => {
-      // Convert Date to ISO string if needed
-      if (val instanceof Date) return val.toISOString();
-      if (typeof val === "string") return val;
-      return String(val);
-    }, z.string()),
-    updatedAt: z.preprocess((val) => {
-      // Convert Date to ISO string if needed
-      if (val instanceof Date) return val.toISOString();
-      if (typeof val === "string") return val;
-      return String(val);
-    }, z.string()),
+    createdAt: z.preprocess(preprocessDateString, z.string()),
+    updatedAt: z.preprocess(preprocessDateString, z.string()),
     product: z.preprocess((val) => {
       // Handle null, undefined, or empty object
-      if (val === null || val === undefined) return null;
-      if (typeof val === "object" && val !== null) return val;
+      if (val === null || val === undefined) {
+        return null;
+      }
+      if (typeof val === "object" && val !== null) {
+        return val;
+      }
       return null;
     }, CartItemProductSchema.nullable()), // Product can be null in backend response
   })
@@ -146,38 +136,30 @@ const CartResponseSchema = z
   .object({
     id: cuidSchema(), // Backend uses CUID, not UUID
     sessionId: z.string().min(1),
-    userId: z.preprocess((val) => {
-      // Handle null, undefined, or empty string
-      if (val === null || val === undefined || val === "") return null;
-      return String(val);
-    }, cuidSchema().nullable()), // Backend uses CUID, not UUID
+    userId: z.preprocess(preprocessNullableCuid, cuidSchema().nullable()), // Backend uses CUID, not UUID
     items: z.preprocess((val) => {
       // Handle null, undefined, or ensure array
-      if (val === null || val === undefined) return [];
-      if (Array.isArray(val)) return val;
+      if (val === null || val === undefined) {
+        return [];
+      }
+      if (Array.isArray(val)) {
+        return val as unknown[];
+      }
       return [];
     }, z.array(CartItemResponseSchema).default([])), // Basic items without product
     totalInt: z.preprocess((val) => {
       // Handle null, undefined, or ensure number
-      if (typeof val === "number") return val;
+      if (typeof val === "number") {
+        return val;
+      }
       if (typeof val === "string") {
-        const num = parseInt(val, 10);
-        return isNaN(num) ? 0 : num;
+        const num = Number.parseInt(val, 10);
+        return Number.isNaN(num) ? 0 : num;
       }
       return 0;
     }, z.number().int().nonnegative()), // Total amount in VND
-    createdAt: z.preprocess((val) => {
-      // Convert Date to ISO string if needed
-      if (val instanceof Date) return val.toISOString();
-      if (typeof val === "string") return val;
-      return String(val);
-    }, z.string()),
-    updatedAt: z.preprocess((val) => {
-      // Convert Date to ISO string if needed
-      if (val instanceof Date) return val.toISOString();
-      if (typeof val === "string") return val;
-      return String(val);
-    }, z.string()),
+    createdAt: z.preprocess(preprocessDateString, z.string()),
+    updatedAt: z.preprocess(preprocessDateString, z.string()),
   })
   .passthrough(); // Allow additional fields from backend
 
@@ -188,25 +170,11 @@ const CartResponseSchema = z
 export const CartSchema = z.object({
   id: cuidSchema(), // Backend uses CUID, not UUID
   sessionId: z.string().min(1),
-  userId: z.preprocess((val) => {
-    // Handle null, undefined, or empty string
-    if (val === null || val === undefined || val === "") return null;
-    return String(val);
-  }, cuidSchema().nullable()), // Backend uses CUID, not UUID
+  userId: z.preprocess(preprocessNullableCuid, cuidSchema().nullable()), // Backend uses CUID, not UUID
   items: z.array(CartItemSchema), // Items with product field
   totalInt: z.number().int().nonnegative(),
-  createdAt: z.preprocess((val) => {
-    // Convert Date to ISO string if needed
-    if (val instanceof Date) return val.toISOString();
-    if (typeof val === "string") return val;
-    return String(val);
-  }, z.string()),
-  updatedAt: z.preprocess((val) => {
-    // Convert Date to ISO string if needed
-    if (val instanceof Date) return val.toISOString();
-    if (typeof val === "string") return val;
-    return String(val);
-  }, z.string()),
+  createdAt: z.preprocess(preprocessDateString, z.string()),
+  updatedAt: z.preprocess(preprocessDateString, z.string()),
 });
 
 /**
@@ -254,8 +222,12 @@ export const CartWithProductsResponseSchema = z
     cart: CartResponseSchema, // CartResponse has basic items without product
     items: z.preprocess((val) => {
       // Handle null, undefined, or ensure array
-      if (val === null || val === undefined) return [];
-      if (Array.isArray(val)) return val;
+      if (val === null || val === undefined) {
+        return [];
+      }
+      if (Array.isArray(val)) {
+        return val as unknown[];
+      }
       return [];
     }, z.array(CartItemSchema).default([])), // Items with product field
     totalInt: z.number().int().nonnegative(),

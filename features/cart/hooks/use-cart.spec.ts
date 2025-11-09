@@ -30,28 +30,32 @@ describe("useCart", () => {
     const mockGetItemCount = jest.fn().mockReturnValue(0);
     const mockGetTotal = jest.fn().mockReturnValue(0);
 
-    (useCartStore as unknown as jest.Mock).mockImplementation((selector) => {
-      const state = {
-        cart: mockCart,
-        loading: false,
-        error: null,
-        fetchCart: mockFetchCart,
-        addItem: mockAddItem,
-        updateItem: mockUpdateItem,
-        removeItem: mockRemoveItem,
-        clearCart: mockClearCart,
-        getItemCount: mockGetItemCount,
-        getTotal: mockGetTotal,
-      };
-      return selector(state);
-    });
+    (useCartStore as unknown as jest.Mock).mockImplementation(
+      (selector: (state: unknown) => unknown) => {
+        const state = {
+          cart: mockCart,
+          loading: false,
+          error: null,
+          fetchCart: mockFetchCart,
+          addItem: mockAddItem,
+          updateItem: mockUpdateItem,
+          removeItem: mockRemoveItem,
+          clearCart: mockClearCart,
+          getItemCount: mockGetItemCount,
+          getTotal: mockGetTotal,
+        };
+        return selector(state);
+      },
+    );
 
-    (useAuthStore as unknown as jest.Mock).mockImplementation((selector) => {
-      const state = {
-        isAuthenticated: () => true,
-      };
-      return selector(state);
-    });
+    (useAuthStore as unknown as jest.Mock).mockImplementation(
+      (selector: (state: unknown) => unknown) => {
+        const state = {
+          isAuthenticated: () => true,
+        };
+        return selector(state);
+      },
+    );
 
     const { result } = renderHook(() => useCart());
 
@@ -69,28 +73,32 @@ describe("useCart", () => {
   it("calls fetchCart when mounted and authenticated", async () => {
     const mockFetchCart = jest.fn();
 
-    (useCartStore as unknown as jest.Mock).mockImplementation((selector) => {
-      const state = {
-        cart: mockCart,
-        loading: false,
-        error: null,
-        fetchCart: mockFetchCart,
-        addItem: jest.fn(),
-        updateItem: jest.fn(),
-        removeItem: jest.fn(),
-        clearCart: jest.fn(),
-        getItemCount: jest.fn(),
-        getTotal: jest.fn(),
-      };
-      return selector(state);
-    });
+    (useCartStore as unknown as jest.Mock).mockImplementation(
+      (selector: (state: unknown) => unknown) => {
+        const state = {
+          cart: mockCart,
+          loading: false,
+          error: null,
+          fetchCart: mockFetchCart,
+          addItem: jest.fn(),
+          updateItem: jest.fn(),
+          removeItem: jest.fn(),
+          clearCart: jest.fn(),
+          getItemCount: jest.fn(),
+          getTotal: jest.fn(),
+        };
+        return selector(state);
+      },
+    );
 
-    (useAuthStore as unknown as jest.Mock).mockImplementation((selector) => {
-      const state = {
-        isAuthenticated: () => true,
-      };
-      return selector(state);
-    });
+    (useAuthStore as unknown as jest.Mock).mockImplementation(
+      (selector: (state: unknown) => unknown) => {
+        const state = {
+          isAuthenticated: () => true,
+        };
+        return selector(state);
+      },
+    );
 
     renderHook(() => useCart());
 
@@ -102,28 +110,32 @@ describe("useCart", () => {
   it("does not call fetchCart when not authenticated", async () => {
     const mockFetchCart = jest.fn();
 
-    (useCartStore as unknown as jest.Mock).mockImplementation((selector) => {
-      const state = {
-        cart: mockCart,
-        loading: false,
-        error: null,
-        fetchCart: mockFetchCart,
-        addItem: jest.fn(),
-        updateItem: jest.fn(),
-        removeItem: jest.fn(),
-        clearCart: jest.fn(),
-        getItemCount: jest.fn(),
-        getTotal: jest.fn(),
-      };
-      return selector(state);
-    });
+    (useCartStore as unknown as jest.Mock).mockImplementation(
+      (selector: (state: unknown) => unknown) => {
+        const state = {
+          cart: mockCart,
+          loading: false,
+          error: null,
+          fetchCart: mockFetchCart,
+          addItem: jest.fn(),
+          updateItem: jest.fn(),
+          removeItem: jest.fn(),
+          clearCart: jest.fn(),
+          getItemCount: jest.fn(),
+          getTotal: jest.fn(),
+        };
+        return selector(state);
+      },
+    );
 
-    (useAuthStore as unknown as jest.Mock).mockImplementation((selector) => {
-      const state = {
-        isAuthenticated: () => false,
-      };
-      return selector(state);
-    });
+    (useAuthStore as unknown as jest.Mock).mockImplementation(
+      (selector: (state: unknown) => unknown) => {
+        const state = {
+          isAuthenticated: () => false,
+        };
+        return selector(state);
+      },
+    );
 
     renderHook(() => useCart());
 
@@ -133,28 +145,32 @@ describe("useCart", () => {
   });
 
   it("returns mounted state", async () => {
-    (useCartStore as unknown as jest.Mock).mockImplementation((selector) => {
-      const state = {
-        cart: mockCart,
-        loading: false,
-        error: null,
-        fetchCart: jest.fn(),
-        addItem: jest.fn(),
-        updateItem: jest.fn(),
-        removeItem: jest.fn(),
-        clearCart: jest.fn(),
-        getItemCount: jest.fn(),
-        getTotal: jest.fn(),
-      };
-      return selector(state);
-    });
+    (useCartStore as unknown as jest.Mock).mockImplementation(
+      (selector: (state: unknown) => unknown) => {
+        const state = {
+          cart: mockCart,
+          loading: false,
+          error: null,
+          fetchCart: jest.fn(),
+          addItem: jest.fn(),
+          updateItem: jest.fn(),
+          removeItem: jest.fn(),
+          clearCart: jest.fn(),
+          getItemCount: jest.fn(),
+          getTotal: jest.fn(),
+        };
+        return selector(state);
+      },
+    );
 
-    (useAuthStore as unknown as jest.Mock).mockImplementation((selector) => {
-      const state = {
-        isAuthenticated: () => false,
-      };
-      return selector(state);
-    });
+    (useAuthStore as unknown as jest.Mock).mockImplementation(
+      (selector: (state: unknown) => unknown) => {
+        const state = {
+          isAuthenticated: () => false,
+        };
+        return selector(state);
+      },
+    );
 
     const { result } = renderHook(() => useCart());
 

@@ -1,6 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import type { JSX } from "react"
+import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
@@ -15,7 +17,7 @@ export function FeaturedProductsSection(): JSX.Element {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const fetchFeaturedProducts = async () => {
+    const fetchFeaturedProducts = async (): Promise<void> => {
       try {
         const response = await productsApi.getAll({ pageSize: 4 });
         setProducts(response.products);
@@ -65,10 +67,11 @@ export function FeaturedProductsSection(): JSX.Element {
                 <Card key={product.id} className="group overflow-hidden transition-shadow hover:shadow-lg">
                   <Link href={`/products/${product.slug}`}>
                     <div className="relative aspect-square overflow-hidden bg-muted">
-                      <img
+                      <Image
                         src={product.imageUrls[0] ?? "/placeholder.svg"}
                         alt={product.name}
-                        className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                        fill
+                        className="object-cover transition-transform group-hover:scale-105"
                       />
                     </div>
                   </Link>

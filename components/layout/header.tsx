@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useEffect, JSX } from "react"
+import { useState, useEffect } from "react"
+import type { JSX } from "react"
 import Link from "next/link"
 import { ShoppingCart, Menu, Search, User, LogOut, Settings, Package } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -56,7 +57,7 @@ export function Header(): JSX.Element {
     try {
       authService.logout();
       logout();
-      void router.push("/home");
+      router.push("/home");
       toast.success("Đã đăng xuất");
     } catch {
       toast.error("Lỗi khi đăng xuất");
@@ -152,7 +153,7 @@ export function Header(): JSX.Element {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   className="text-destructive focus:text-destructive cursor-pointer"
-                  onClick={() => void handleLogout()}
+                  onClick={() => handleLogout()}
                 >
                   <LogOut className="mr-2 h-4 w-4" />
                   Đăng xuất
@@ -269,7 +270,7 @@ export function Header(): JSX.Element {
                     </Link>
                     <button
                       className="flex items-center rounded-md px-3 py-2 text-base font-medium text-destructive transition-colors hover:bg-accent"
-                      onClick={() => void handleLogout()}
+                      onClick={() => handleLogout()}
                     >
                       <LogOut className="mr-2 h-4 w-4" />
                       Đăng xuất

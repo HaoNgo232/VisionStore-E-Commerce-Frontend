@@ -1,4 +1,6 @@
 import Link from "next/link"
+import Image from "next/image"
+import type { JSX } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Glasses, Sun, Zap, Baby } from "lucide-react"
 
@@ -49,10 +51,11 @@ export function CategoriesSection(): JSX.Element {
               <Link key={category.name} href={category.href}>
                 <Card className="group overflow-hidden transition-all hover:shadow-lg hover:border-primary">
                   <div className="relative aspect-square overflow-hidden bg-muted">
-                    <img
+                    <Image
                       src={category.image || "/placeholder.svg"}
                       alt={category.name}
-                      className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                      fill
+                      className="object-cover transition-transform group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                     <div className="absolute bottom-0 left-0 right-0 p-6 text-white">

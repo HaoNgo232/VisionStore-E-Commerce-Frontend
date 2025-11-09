@@ -2,6 +2,8 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
+import type { JSX } from "react"
+import Image from "next/image"
 import {
   Dialog,
   DialogContent,
@@ -17,13 +19,13 @@ import type { Product } from "@/types"
 import { toast } from "sonner"
 
 interface VirtualTryOnDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  product: Product
-  onSwitchProduct?: () => void
+  readonly open: boolean
+  readonly onOpenChange: (open: boolean) => void
+  readonly product: Product
+  readonly onSwitchProduct?: () => void
 }
 
-export function VirtualTryOnDialog({ open, onOpenChange, product, onSwitchProduct }: VirtualTryOnDialogProps) {
+export function VirtualTryOnDialog({ open, onOpenChange, product, onSwitchProduct }: VirtualTryOnDialogProps): JSX.Element {
   const [isWebcamActive, setIsWebcamActive] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [capturedImage, setCapturedImage] = useState<string | null>(null)
@@ -42,7 +44,7 @@ export function VirtualTryOnDialog({ open, onOpenChange, product, onSwitchProduc
     }
   }, [open, facingMode])
 
-  const startWebcam = async () => {
+  const startWebcam = async (): Promise<void> => {
     try {
       setIsLoading(true)
 
@@ -69,15 +71,17 @@ export function VirtualTryOnDialog({ open, onOpenChange, product, onSwitchProduc
     }
   }
 
-  const stopWebcam = () => {
+  const stopWebcam = (): void => {
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop())
+      for (const track of streamRef.current.getTracks()) {
+        track.stop()
+      }
       streamRef.current = null
     }
     setIsWebcamActive(false)
   }
 
-  const capturePhoto = () => {
+  const capturePhoto = (): void => {
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current
       const canvas = canvasRef.current
@@ -100,21 +104,21 @@ export function VirtualTryOnDialog({ open, onOpenChange, product, onSwitchProduc
     void startWebcam()
   }
 
-  const downloadPhoto = () => {
+  const downloadPhoto = (): void => {
     if (capturedImage) {
       const link = document.createElement("a")
       link.href = capturedImage
-      link.download = `virtual-tryon-${product.name.replace(/\s+/g, "-").toLowerCase()}.png`
+      link.download = `virtual-tryon-${product.name.replaceAll(/\s+/g, "-").toLowerCase()}.png`
       link.click()
     }
   }
 
-  const switchCamera = () => {
+  const switchCamera = (): void => {
     setFacingMode((prev) => (prev === "user" ? "environment" : "user"))
     setCapturedImage(null)
   }
 
-  const handleClose = () => {
+  const handleClose = (): void => {
     stopWebcam()
     setCapturedImage(null)
     onOpenChange(false)
@@ -131,9 +135,11 @@ export function VirtualTryOnDialog({ open, onOpenChange, product, onSwitchProduc
         <div className="space-y-4">
           {/* Product Info */}
           <div className="flex items-center gap-3 p-3 rounded-lg bg-muted">
-            <img
-              src={product.imageUrls[0] || "/placeholder.svg"}
+            <Image
+              src={product.imageUrls[0] ?? "/placeholder.svg"}
               alt={product.name}
+              width={64}
+              height={64}
               className="h-16 w-16 rounded-lg object-cover"
             />
             <div className="flex-1">
@@ -154,7 +160,7 @@ export function VirtualTryOnDialog({ open, onOpenChange, product, onSwitchProduc
             )}
 
             {capturedImage ? (
-              <img src={capturedImage || "/placeholder.svg"} alt="Captured" className="h-full w-full object-cover" />
+              <Image src={capturedImage || "/placeholder.svg"} alt="Captured" fill className="object-cover" />
             ) : (
               <video
                 ref={videoRef}

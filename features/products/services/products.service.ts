@@ -17,7 +17,7 @@ import type {
 } from "@/types";
 import { ProductSchema } from "@/types/product.types";
 import { createPaginatedResponseSchema } from "@/types/common.types";
-import { z } from "zod";
+import { type z } from "zod";
 
 // Create paginated products schema with type assertion for exactOptionalPropertyTypes compatibility
 const PaginatedProductsSchema = createPaginatedResponseSchema(

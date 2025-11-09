@@ -27,12 +27,23 @@ describe("useAddresses", () => {
     createdAt: "2025-01-01T00:00:00Z",
   };
 
+  // Create typed mock functions to avoid unbound-method errors
+  const mockGetAll = jest.fn();
+  const mockCreate = jest.fn();
+  const mockUpdate = jest.fn();
+  const mockDelete = jest.fn();
+
   beforeEach(() => {
     jest.clearAllMocks();
+    // Setup mocks
+    (addressesApi.getAll as jest.Mock) = mockGetAll;
+    (addressesApi.create as jest.Mock) = mockCreate;
+    (addressesApi.update as jest.Mock) = mockUpdate;
+    (addressesApi.delete as jest.Mock) = mockDelete;
   });
 
   it("fetches addresses on mount", async () => {
-    (addressesApi.getAll as jest.Mock).mockResolvedValue([mockAddress]);
+    mockGetAll.mockResolvedValue([mockAddress]);
 
     const { result } = renderHook(() => useAddresses());
 
@@ -43,14 +54,12 @@ describe("useAddresses", () => {
     });
 
     expect(result.current.addresses).toEqual([mockAddress]);
-    expect(addressesApi.getAll).toHaveBeenCalled();
+    expect(mockGetAll).toHaveBeenCalled();
   });
 
   it("handles fetch error", async () => {
     const errorMessage = "Failed to fetch addresses";
-    (addressesApi.getAll as jest.Mock).mockRejectedValue(
-      new Error(errorMessage),
-    );
+    mockGetAll.mockRejectedValue(new Error(errorMessage));
     (getErrorMessage as jest.Mock).mockReturnValue(errorMessage);
 
     const { result } = renderHook(() => useAddresses());
@@ -64,7 +73,7 @@ describe("useAddresses", () => {
   });
 
   it("creates new address", async () => {
-    (addressesApi.getAll as jest.Mock).mockResolvedValue([]);
+    mockGetAll.mockResolvedValue([]);
 
     const { result } = renderHook(() => useAddresses());
 
@@ -83,7 +92,7 @@ describe("useAddresses", () => {
     };
 
     const newAddress = { ...mockAddress, ...createData, id: "addr-456" };
-    (addressesApi.create as jest.Mock).mockResolvedValue(newAddress);
+    mockCreate.mockResolvedValue(newAddress);
 
     let createdAddress;
     await act(async () => {
@@ -96,7 +105,7 @@ describe("useAddresses", () => {
   });
 
   it("handles create error", async () => {
-    (addressesApi.getAll as jest.Mock).mockResolvedValue([mockAddress]);
+    mockGetAll.mockResolvedValue([mockAddress]);
 
     const { result } = renderHook(() => useAddresses());
 
@@ -105,9 +114,7 @@ describe("useAddresses", () => {
     });
 
     const errorMessage = "Failed to create address";
-    (addressesApi.create as jest.Mock).mockRejectedValue(
-      new Error(errorMessage),
-    );
+    mockCreate.mockRejectedValue(new Error(errorMessage));
     (getErrorMessage as jest.Mock).mockReturnValue(errorMessage);
 
     const createData = {
@@ -129,7 +136,7 @@ describe("useAddresses", () => {
   });
 
   it("updates address", async () => {
-    (addressesApi.getAll as jest.Mock).mockResolvedValue([mockAddress]);
+    mockGetAll.mockResolvedValue([mockAddress]);
 
     const { result } = renderHook(() => useAddresses());
 
@@ -138,7 +145,7 @@ describe("useAddresses", () => {
     });
 
     const updateData = { ...mockAddress, fullName: "Jane Doe" };
-    (addressesApi.update as jest.Mock).mockResolvedValue(updateData);
+    mockUpdate.mockResolvedValue(updateData);
 
     let updated;
     await act(async () => {
@@ -151,7 +158,7 @@ describe("useAddresses", () => {
   });
 
   it("removes address", async () => {
-    (addressesApi.getAll as jest.Mock).mockResolvedValue([mockAddress]);
+    mockGetAll.mockResolvedValue([mockAddress]);
 
     const { result } = renderHook(() => useAddresses());
 
@@ -159,7 +166,7 @@ describe("useAddresses", () => {
       expect(result.current.loading).toBe(false);
     });
 
-    (addressesApi.delete as jest.Mock).mockResolvedValue(undefined);
+    mockDelete.mockResolvedValue(undefined);
 
     await act(async () => {
       await result.current.remove("addr-123");
@@ -170,7 +177,7 @@ describe("useAddresses", () => {
   });
 
   it("handles remove error", async () => {
-    (addressesApi.getAll as jest.Mock).mockResolvedValue([mockAddress]);
+    mockGetAll.mockResolvedValue([mockAddress]);
 
     const { result } = renderHook(() => useAddresses());
 
@@ -179,9 +186,7 @@ describe("useAddresses", () => {
     });
 
     const errorMessage = "Failed to remove address";
-    (addressesApi.delete as jest.Mock).mockRejectedValue(
-      new Error(errorMessage),
-    );
+    mockDelete.mockRejectedValue(new Error(errorMessage));
     (getErrorMessage as jest.Mock).mockReturnValue(errorMessage);
 
     await expect(

@@ -19,8 +19,15 @@ describe("paymentsApi", () => {
     updatedAt: "2025-01-01T00:00:00Z",
   };
 
+  // Create typed mock functions to avoid unbound-method errors
+  const mockPost = jest.fn();
+  const mockGet = jest.fn();
+
   beforeEach(() => {
     jest.clearAllMocks();
+    // Setup mocks
+    (apiClient.apiClient.post as jest.Mock) = mockPost;
+    (apiClient.apiClient.get as jest.Mock) = mockGet;
   });
 
   describe("process", () => {
@@ -33,7 +40,7 @@ describe("paymentsApi", () => {
         amountInt: 199900,
       };
 
-      (apiClient.apiClient.post as jest.Mock).mockResolvedValue({
+      mockPost.mockResolvedValue({
         data: mockResponse,
       });
 
@@ -43,14 +50,11 @@ describe("paymentsApi", () => {
         199900,
       );
 
-      expect(apiClient.apiClient.post).toHaveBeenCalledWith(
-        "/payments/process",
-        {
-          orderId: mockOrderId,
-          method: PaymentMethod.COD,
-          amountInt: 199900,
-        },
-      );
+      expect(mockPost).toHaveBeenCalledWith("/payments/process", {
+        orderId: mockOrderId,
+        method: PaymentMethod.COD,
+        amountInt: 199900,
+      });
       expect(result).toEqual(mockResponse);
     });
 
@@ -64,7 +68,7 @@ describe("paymentsApi", () => {
         qrCode: "00020101021202031050...",
       };
 
-      (apiClient.apiClient.post as jest.Mock).mockResolvedValue({
+      mockPost.mockResolvedValue({
         data: mockResponse,
       });
 
@@ -74,44 +78,37 @@ describe("paymentsApi", () => {
         199900,
       );
 
-      expect(apiClient.apiClient.post).toHaveBeenCalledWith(
-        "/payments/process",
-        {
-          orderId: mockOrderId,
-          method: PaymentMethod.SEPAY,
-          amountInt: 199900,
-        },
-      );
+      expect(mockPost).toHaveBeenCalledWith("/payments/process", {
+        orderId: mockOrderId,
+        method: PaymentMethod.SEPAY,
+        amountInt: 199900,
+      });
       expect(result.qrCode).toBeDefined();
     });
   });
 
   describe("getByOrder", () => {
     it("gets payment by order ID", async () => {
-      (apiClient.apiClient.get as jest.Mock).mockResolvedValue({
+      mockGet.mockResolvedValue({
         data: mockPayment,
       });
 
       const result = await paymentsApi.getByOrder(mockOrderId);
 
-      expect(apiClient.apiClient.get).toHaveBeenCalledWith(
-        `/payments/order/${mockOrderId}`,
-      );
+      expect(mockGet).toHaveBeenCalledWith(`/payments/order/${mockOrderId}`);
       expect(result).toEqual(mockPayment);
     });
   });
 
   describe("getById", () => {
     it("gets payment by payment ID", async () => {
-      (apiClient.apiClient.get as jest.Mock).mockResolvedValue({
+      mockGet.mockResolvedValue({
         data: mockPayment,
       });
 
       const result = await paymentsApi.getById(mockPaymentId);
 
-      expect(apiClient.apiClient.get).toHaveBeenCalledWith(
-        `/payments/${mockPaymentId}`,
-      );
+      expect(mockGet).toHaveBeenCalledWith(`/payments/${mockPaymentId}`);
       expect(result).toEqual(mockPayment);
     });
   });
@@ -123,13 +120,13 @@ describe("paymentsApi", () => {
         status: PaymentStatus.PAID,
       };
 
-      (apiClient.apiClient.post as jest.Mock).mockResolvedValue({
+      mockPost.mockResolvedValue({
         data: paidPayment,
       });
 
       const result = await paymentsApi.confirmCod(mockOrderId);
 
-      expect(apiClient.apiClient.post).toHaveBeenCalledWith(
+      expect(mockPost).toHaveBeenCalledWith(
         `/payments/confirm-cod/${mockOrderId}`,
       );
       expect(result.status).toBe(PaymentStatus.PAID);

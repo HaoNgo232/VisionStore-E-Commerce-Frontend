@@ -47,7 +47,7 @@ const statusConfig: Record<
 export function OrderStatusBadge({
     status,
     className,
-}: OrderStatusBadgeProps) {
+}: OrderStatusBadgeProps): JSX.Element {
     const config = statusConfig[status];
 
     return (

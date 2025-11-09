@@ -33,7 +33,7 @@ export function SepayQRDisplay({
     payment,
     amountInt,
     onPaymentSuccess,
-}: SepayQRDisplayProps) {
+}: SepayQRDisplayProps): JSX.Element {
     const { isPaid, loading, error, startPolling, stopPolling } = usePaymentStatus({
         orderId,
         autoStart: true,
@@ -114,12 +114,13 @@ export function SepayQRDisplay({
                     {payment.qrCode && (
                         <div className="flex justify-center">
                             <div className="rounded-lg border border-gray-200 p-4 bg-white">
-                                <img
+                                <Image
                                     src={payment.qrCode}
                                     alt="SePay QR Code"
+                                    width={192}
+                                    height={192}
                                     className="h-48 w-48"
-                                    onError={(e) => {
-                                        // console.error("Failed to load QR code:", e)
+                                    onError={() => {
                                         // Handle error silently or show toast
                                     }}
                                 />

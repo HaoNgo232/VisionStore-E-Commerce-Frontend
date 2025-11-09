@@ -2,6 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
+import type { JSX } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ProtectedRoute } from "@/components/auth/protected-route"
@@ -21,6 +22,7 @@ import type { Order, Address } from "@/types"
 import { OrderStatusBadge } from "@/features/orders/components/order-status-badge"
 import { PaymentStatusBadge } from "@/features/payments/components/payment-status-badge"
 import { usersApi } from "@/features/users/services/users.service"
+import Image from "next/image"
 
 export default function OrderDetailPage(): JSX.Element {
     const params = useParams()
@@ -33,7 +35,7 @@ export default function OrderDetailPage(): JSX.Element {
     const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
-        const fetchOrder = async () => {
+        const fetchOrder = async (): Promise<void> => {
             if (!orderId) {
                 setError("Không tìm thấy mã đơn hàng")
                 setLoading(false)
@@ -51,8 +53,8 @@ export default function OrderDetailPage(): JSX.Element {
                     try {
                         const fetchedAddress = await usersApi.getAddressById(fetchedOrder.addressId)
                         setAddress(fetchedAddress)
-                    } catch (addressErr) {
-                        console.warn("Không thể tải thông tin địa chỉ:", addressErr)
+                    } catch (error_) {
+                        console.warn("Không thể tải thông tin địa chỉ:", error_)
                         // Không dừng loading nếu lấy địa chỉ thất bại
                     }
                 }
@@ -88,7 +90,7 @@ export default function OrderDetailPage(): JSX.Element {
                 <div className="container py-12">
                     <div className="text-center">
                         <p className="text-muted-foreground mb-4">{error ?? "Không tìm thấy đơn hàng"}</p>
-                        <Button onClick={() => void router.back()}>Quay lại</Button>
+                        <Button onClick={() => router.back()}>Quay lại</Button>
                     </div>
                 </div>
             </ProtectedRoute>
@@ -212,9 +214,11 @@ export default function OrderDetailPage(): JSX.Element {
                                         {order.items.map((item) => (
                                             <div key={item.id} className="flex gap-4 pb-4 border-b last:border-0">
                                                 {item.imageUrls?.[0] && (
-                                                    <img
+                                                    <Image
                                                         src={item.imageUrls[0]}
-                                                        alt={item.productName || "Sản phẩm"}
+                                                        alt={item.productName ?? "Sản phẩm"}
+                                                        width={80}
+                                                        height={80}
                                                         className="h-20 w-20 rounded object-cover"
                                                     />
                                                 )}
@@ -240,40 +244,48 @@ export default function OrderDetailPage(): JSX.Element {
                         )}
 
                         {/* Shipping Address */}
-                        {address ? (
-                            <Card className="mb-6">
-                                <CardHeader>
-                                    <CardTitle>Địa chỉ giao hàng</CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-3">
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">Họ tên</p>
-                                        <p className="font-semibold">{address.fullName}</p>
-                                    </div>
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">Số điện thoại</p>
-                                        <p className="font-semibold">{address.phone}</p>
-                                    </div>
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">Địa chỉ</p>
-                                        <p className="font-semibold">
-                                            {address.street}, {address.ward}, {address.district}, {address.city}
-                                        </p>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        ) : order.addressId ? (
-                            <Card className="mb-6">
-                                <CardHeader>
-                                    <CardTitle>Địa chỉ giao hàng</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="text-sm text-muted-foreground">
-                                        Không thể tải thông tin địa chỉ (ID: {order.addressId})
-                                    </p>
-                                </CardContent>
-                            </Card>
-                        ) : null}
+                        {(() => {
+                            if (address) {
+                                return (
+                                    <Card className="mb-6">
+                                        <CardHeader>
+                                            <CardTitle>Địa chỉ giao hàng</CardTitle>
+                                        </CardHeader>
+                                        <CardContent className="space-y-3">
+                                            <div>
+                                                <p className="text-sm text-muted-foreground">Họ tên</p>
+                                                <p className="font-semibold">{address.fullName}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-muted-foreground">Số điện thoại</p>
+                                                <p className="font-semibold">{address.phone}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-muted-foreground">Địa chỉ</p>
+                                                <p className="font-semibold">
+                                                    {address.street}, {address.ward}, {address.district}, {address.city}
+                                                </p>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                )
+                            }
+                            if (order.addressId) {
+                                return (
+                                    <Card className="mb-6">
+                                        <CardHeader>
+                                            <CardTitle>Địa chỉ giao hàng</CardTitle>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <p className="text-sm text-muted-foreground">
+                                                Không thể tải thông tin địa chỉ (ID: {order.addressId})
+                                            </p>
+                                        </CardContent>
+                                    </Card>
+                                )
+                            }
+                            return null
+                        })()}
 
                         {/* Order Summary */}
                         <Card>
@@ -301,7 +313,9 @@ export default function OrderDetailPage(): JSX.Element {
                             <Button variant="outline" onClick={() => router.back()}>
                                 Quay lại
                             </Button>
-                            <Button onClick={() => void router.push("/profile#orders")}>
+                            <Button onClick={() => {
+                                router.push("/profile#orders")
+                            }}>
                                 Xem tất cả đơn hàng
                             </Button>
                         </div>

@@ -5,7 +5,7 @@
  */
 
 import { z } from "zod";
-import { cuidSchema } from "./common.types";
+import { cuidSchema, preprocessDateString } from "./common.types";
 
 export enum UserRole {
   ADMIN = "ADMIN",
@@ -41,16 +41,8 @@ export const UserSchema = z.object({
   phone: z.string().nullable(),
   role: UserRoleSchema,
   isActive: z.boolean(),
-  createdAt: z.preprocess((val) => {
-    if (val instanceof Date) return val.toISOString();
-    if (typeof val === "string") return val;
-    return String(val);
-  }, z.string()),
-  updatedAt: z.preprocess((val) => {
-    if (val instanceof Date) return val.toISOString();
-    if (typeof val === "string") return val;
-    return String(val);
-  }, z.string()),
+  createdAt: z.preprocess(preprocessDateString, z.string()),
+  updatedAt: z.preprocess(preprocessDateString, z.string()),
 });
 
 /**

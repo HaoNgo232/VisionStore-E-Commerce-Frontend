@@ -8,8 +8,21 @@
 import { useEffect, useState } from "react";
 import { useCartStore } from "@/stores/cart.store";
 import { useAuthStore } from "@/stores/auth.store";
+import type { Cart } from "@/types";
 
-export function useCart() {
+export function useCart(): {
+  cart: Cart | null;
+  loading: boolean;
+  error: string | null;
+  addItem: (productId: string, quantity: number) => Promise<void>;
+  updateItem: (itemId: string, quantity: number) => Promise<void>;
+  removeItem: (itemId: string) => Promise<void>;
+  clearCart: () => Promise<void>;
+  getItemCount: () => number;
+  getTotal: () => number;
+  mounted: boolean;
+  isAuthenticated: boolean;
+} {
   const [mounted, setMounted] = useState(false);
   const cart = useCartStore((state) => state.cart);
   const loading = useCartStore((state) => state.loading);

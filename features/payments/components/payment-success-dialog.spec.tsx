@@ -1,10 +1,15 @@
-import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
+import { render, screen, fireEvent, act } from "@testing-library/react";
 import { PaymentSuccessDialog } from "./payment-success-dialog";
 import { OrderStatus, PaymentStatus } from "@/types";
 
 // Mock the formatPrice utility
 jest.mock("@/features/products/utils", () => ({
-    formatPrice: jest.fn((price) => `${price.toLocaleString("vi-VN")}`),
+    formatPrice: jest.fn((price: number) => {
+        if (typeof price === "number") {
+            return `${price.toLocaleString("vi-VN")}`;
+        }
+        return String(price);
+    }),
 }));
 
 // Mock the badge components

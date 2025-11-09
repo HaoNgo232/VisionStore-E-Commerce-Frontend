@@ -10,13 +10,17 @@ import { getErrorMessage } from "@/lib/api-client";
 import { categoriesApi } from "@/features/categories/services/categories.service";
 import type { Category, CategoryTree } from "@/types";
 
-export function useCategories() {
+export function useCategories(): {
+  categories: Category[];
+  loading: boolean;
+  error: string | null;
+} {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetch = async (): Promise<void> => {
       try {
         setLoading(true);
         setError(null);
@@ -29,7 +33,7 @@ export function useCategories() {
       }
     };
 
-    fetch();
+    void fetch();
   }, []);
 
   return { categories, loading, error };
@@ -39,13 +43,17 @@ export function useCategories() {
  * useCategoryTree Hook
  * Fetches categories as tree structure
  */
-export function useCategoryTree() {
+export function useCategoryTree(): {
+  tree: CategoryTree[];
+  loading: boolean;
+  error: string | null;
+} {
   const [tree, setTree] = useState<CategoryTree[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetch = async (): Promise<void> => {
       try {
         setLoading(true);
         setError(null);
@@ -58,7 +66,7 @@ export function useCategoryTree() {
       }
     };
 
-    fetch();
+    void fetch();
   }, []);
 
   return { tree, loading, error };

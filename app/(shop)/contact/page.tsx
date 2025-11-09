@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import type { JSX } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -13,6 +14,7 @@ import { Mail, Phone, MapPin, Clock, Send } from "lucide-react"
 import { siteConfig } from "@/config/site"
 import { toast } from "sonner"
 import { contactFormSchema, type ContactFormValues } from "@/lib/validations/forms"
+import Image from "next/image"
 
 export default function ContactPage(): JSX.Element {
   const [submitted, setSubmitted] = useState(false)
@@ -132,8 +134,13 @@ export default function ContactPage(): JSX.Element {
           {/* Map Placeholder */}
           <Card>
             <CardContent className="p-0">
-              <div className="aspect-square w-full bg-muted rounded-lg overflow-hidden">
-                <img src="/store-location-map.jpg" alt="Vị trí cửa hàng" className="h-full w-full object-cover" />
+              <div className="aspect-square w-full bg-muted rounded-lg overflow-hidden relative">
+                <Image
+                  src="/store-location-map.jpg"
+                  alt="Vị trí cửa hàng"
+                  fill
+                  className="object-cover"
+                />
               </div>
             </CardContent>
           </Card>

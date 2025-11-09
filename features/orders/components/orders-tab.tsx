@@ -1,6 +1,8 @@
 "use client"
 
 import { useRouter } from "next/navigation"
+import Link from "next/link"
+import type { JSX } from "react"
 import { useOrders } from "@/features/orders/hooks/use-orders"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -27,7 +29,7 @@ const ORDER_STATUS_CONFIG: Record<OrderStatus, { label: string; variant: "defaul
     CANCELLED: { label: "Đã hủy", variant: "destructive" },
 }
 
-export function OrdersTab() {
+export function OrdersTab(): JSX.Element {
     const router = useRouter()
     const { orders, loading, error, total } = useOrders()
 
@@ -66,7 +68,7 @@ export function OrdersTab() {
                     <p className="text-muted-foreground mb-2 font-medium">Bạn chưa có đơn hàng nào</p>
                     <p className="text-sm text-muted-foreground mb-4">Bắt đầu mua sắm để xem đơn hàng của bạn tại đây</p>
                     <Button asChild variant="outline">
-                        <a href="/products">Tiếp tục mua sắm</a>
+                        <Link href="/products">Tiếp tục mua sắm</Link>
                     </Button>
                 </CardContent>
             </Card>
@@ -117,7 +119,9 @@ export function OrdersTab() {
                                         <Button
                                             variant="ghost"
                                             size="sm"
-                                            onClick={() => void router.push(`/orders/${order.id}`)}
+                                            onClick={() => {
+                                                router.push(`/orders/${order.id}`)
+                                            }}
                                             className="gap-1"
                                         >
                                             Chi tiết

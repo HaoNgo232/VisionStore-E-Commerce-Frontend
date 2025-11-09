@@ -5,7 +5,12 @@
  */
 
 import { z } from "zod";
-import { cuidSchema } from "./common.types";
+import {
+  cuidSchema,
+  preprocessImageUrls,
+  preprocessDateString,
+  preprocessNullableCuid,
+} from "./common.types";
 
 export enum OrderStatus {
   PENDING = "PENDING",
@@ -46,20 +51,12 @@ export const OrderItemSchema = z.object({
   productId: cuidSchema(), // Backend uses CUID, not UUID
   productName: z.string().min(1),
   imageUrls: z.preprocess(
-    (val) => {
-      if (val === null || val === undefined) return [];
-      if (Array.isArray(val)) return val;
-      return [];
-    },
+    preprocessImageUrls,
     z.array(z.string()).default([]), // Accept any string array, not strict URL validation
   ),
   quantity: z.number().int().positive(),
   priceInt: z.number().int().nonnegative(),
-  createdAt: z.preprocess((val) => {
-    if (val instanceof Date) return val.toISOString();
-    if (typeof val === "string") return val;
-    return String(val);
-  }, z.string()),
+  createdAt: z.preprocess(preprocessDateString, z.string()),
 });
 
 export interface Order {
@@ -80,24 +77,13 @@ export interface Order {
 export const OrderSchema = z.object({
   id: cuidSchema(), // Backend uses CUID, not UUID
   userId: cuidSchema(), // Backend uses CUID, not UUID
-  addressId: z.preprocess((val) => {
-    if (val === null || val === undefined || val === "") return null;
-    return String(val);
-  }, cuidSchema().nullable()), // Backend uses CUID, not UUID
+  addressId: z.preprocess(preprocessNullableCuid, cuidSchema().nullable()), // Backend uses CUID, not UUID
   status: OrderStatusSchema,
   paymentStatus: PaymentStatusSchema,
   totalInt: z.number().int().nonnegative(),
   items: z.array(OrderItemSchema),
-  createdAt: z.preprocess((val) => {
-    if (val instanceof Date) return val.toISOString();
-    if (typeof val === "string") return val;
-    return String(val);
-  }, z.string()),
-  updatedAt: z.preprocess((val) => {
-    if (val instanceof Date) return val.toISOString();
-    if (typeof val === "string") return val;
-    return String(val);
-  }, z.string()),
+  createdAt: z.preprocess(preprocessDateString, z.string()),
+  updatedAt: z.preprocess(preprocessDateString, z.string()),
 });
 
 export interface CreateOrderRequest {

@@ -17,7 +17,7 @@ import type {
   UpdateCartItemRequest,
   CartWithProductsResponse,
 } from "@/types";
-import { CartSchema, CartWithProductsResponseSchema } from "@/types";
+import { CartWithProductsResponseSchema } from "@/types";
 import type { z } from "zod";
 
 export const cartApi = {
@@ -38,7 +38,7 @@ export const cartApi = {
   async addItem(data: AddToCartRequest): Promise<Cart> {
     const userId = useAuthStore.getState().getUserId();
     if (!userId) {
-      throw new Error("User not authenticated");
+      throw new Error("Bạn phải đăng nhập để thêm sản phẩm vào giỏ hàng");
     }
     const response = await apiPostValidated<
       CartWithProductsResponse,

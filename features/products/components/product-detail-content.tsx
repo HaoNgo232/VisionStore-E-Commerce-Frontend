@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from "react"
+import type { JSX } from "react"
+import Image from "next/image"
 import { useProductDetail } from "@/features/products/hooks/use-product-detail"
 import { ProductDetailSkeleton } from "@/components/skeletons/product-detail-skeleton"
 import { Button } from "@/components/ui/button"
@@ -20,11 +22,11 @@ import { useCartStore } from "@/stores/cart.store"
 import { formatPrice } from "@/features/products/utils"
 
 interface ProductDetailContentProps {
-    productId?: string
-    productSlug?: string
+    readonly productId?: string
+    readonly productSlug?: string
 }
 
-export function ProductDetailContent({ productId, productSlug }: ProductDetailContentProps) {
+export function ProductDetailContent({ productId, productSlug }: ProductDetailContentProps): JSX.Element {
     const { product, loading, error } = useProductDetail({
         ...(productId ? { id: productId } : {}),
         ...(productSlug ? { slug: productSlug } : {})
@@ -51,7 +53,7 @@ export function ProductDetailContent({ productId, productSlug }: ProductDetailCo
     const inStock = product.stock > 0
     const attributes = product.attributes ?? null
 
-    const handleAddToCart = async () => {
+    const handleAddToCart = async (): Promise<void> => {
         setIsAdding(true)
         try {
             await addItem(product.id, quantity)
@@ -92,28 +94,33 @@ export function ProductDetailContent({ productId, productSlug }: ProductDetailCo
                 {/* Images */}
                 <div className="space-y-4">
                     <div className="relative aspect-square overflow-hidden rounded-lg bg-muted">
-                        <img
+                        <Image
                             src={product.imageUrls[selectedImage] ?? "/placeholder.svg"}
                             alt={product.name}
-                            className="h-full w-full object-cover"
+                            fill
+                            className="object-cover"
                         />
                     </div>
                     {product.imageUrls.length > 1 && (
                         <div className="grid grid-cols-4 gap-4">
-                            {product.imageUrls.map((image, index) => (
-                                <button
-                                    key={index}
-                                    onClick={() => setSelectedImage(index)}
-                                    className={`relative aspect-square overflow-hidden rounded-lg border-2 transition-colors ${selectedImage === index ? "border-primary" : "border-transparent"
-                                        }`}
-                                >
-                                    <img
-                                        src={image ?? "/placeholder.svg"}
-                                        alt={`${product.name} ${index + 1}`}
-                                        className="h-full w-full object-cover"
-                                    />
-                                </button>
-                            ))}
+                            {product.imageUrls.map((image, index) => {
+                                const imageKey = `product-image-${product.id}-${index}`
+                                return (
+                                    <button
+                                        key={imageKey}
+                                        onClick={() => setSelectedImage(index)}
+                                        className={`relative aspect-square overflow-hidden rounded-lg border-2 transition-colors ${selectedImage === index ? "border-primary" : "border-transparent"
+                                            }`}
+                                    >
+                                        <Image
+                                            src={image ?? "/placeholder.svg"}
+                                            alt={`${product.name} ${index + 1}`}
+                                            fill
+                                            className="object-cover"
+                                        />
+                                    </button>
+                                )
+                            })}
                         </div>
                     )}
                 </div>
@@ -137,7 +144,7 @@ export function ProductDetailContent({ productId, productSlug }: ProductDetailCo
                     <Separator />
 
                     {/* Attributes */}
-                    {attributes && (attributes.brand || attributes.frameShape || attributes.frameMaterial || attributes.color) && (
+                    {attributes && ((attributes.brand ?? attributes.frameShape ?? attributes.frameMaterial ?? attributes.color) !== null) && (
                         <div className="space-y-3">
                             {attributes.brand && (
                                 <div>
@@ -171,8 +178,8 @@ export function ProductDetailContent({ productId, productSlug }: ProductDetailCo
                     {/* Quantity and Add to Cart */}
                     <div className="space-y-4">
                         <div className="flex items-center gap-4">
-                            <label className="text-sm font-medium">Số lượng:</label>
-                            <div className="flex items-center border rounded-lg">
+                            <label htmlFor="quantity" className="text-sm font-medium">Số lượng:</label>
+                            <div id="quantity" className="flex items-center border rounded-lg">
                                 <Button
                                     variant="ghost"
                                     size="sm"
@@ -197,7 +204,9 @@ export function ProductDetailContent({ productId, productSlug }: ProductDetailCo
                             size="lg"
                             className="w-full"
                             disabled={!inStock || isAdding}
-                            onClick={() => void handleAddToCart()}
+                            onClick={() => {
+                                void handleAddToCart()
+                            }}
                         >
                             <ShoppingCart className="mr-2 h-5 w-5" />
                             {inStock ? "Thêm vào giỏ hàng" : "Hết hàng"}

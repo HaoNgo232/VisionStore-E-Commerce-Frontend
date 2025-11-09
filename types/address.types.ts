@@ -4,7 +4,7 @@
  */
 
 import { z } from "zod";
-import { cuidSchema } from "./common.types";
+import { cuidSchema, preprocessDateString } from "./common.types";
 
 export interface Address {
   id: string;
@@ -32,11 +32,7 @@ export const AddressSchema = z.object({
   district: z.string().min(1),
   city: z.string().min(1),
   isDefault: z.boolean(),
-  createdAt: z.preprocess((val) => {
-    if (val instanceof Date) return val.toISOString();
-    if (typeof val === "string") return val;
-    return String(val);
-  }, z.string()),
+  createdAt: z.preprocess(preprocessDateString, z.string()),
 });
 
 /**

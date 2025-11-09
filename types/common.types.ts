@@ -10,7 +10,7 @@ import { z } from "zod";
  * Backend uses CUID format (e.g., "cmhozukjp000z...") instead of UUID
  * All models in backend use @default(cuid()) in Prisma schema
  */
-export const cuidSchema = () => z.string().min(10); // CUIDs are typically 25+ chars, but we'll be lenient
+export const cuidSchema = (): z.ZodString => z.string().min(10); // CUIDs are typically 25+ chars, but we'll be lenient
 
 /**
  * Standard API error response from backend
@@ -100,4 +100,56 @@ export function createApiError(code: string, message: string): ApiError {
     message,
     error: code,
   };
+}
+
+/**
+ * Preprocess function for imageUrls array
+ * Handles null, undefined, or invalid values and ensures type safety
+ */
+export function preprocessImageUrls(val: unknown): string[] {
+  if (val === null || val === undefined) {
+    return [];
+  }
+  if (Array.isArray(val)) {
+    return val as string[];
+  }
+  return [];
+}
+
+/**
+ * Preprocess function for date strings
+ * Converts Date objects to ISO strings, handles string dates, and safely converts other types
+ */
+export function preprocessDateString(val: unknown): string {
+  if (val instanceof Date) {
+    return val.toISOString();
+  }
+  if (typeof val === "string") {
+    return val;
+  }
+  // Only convert primitive types to string
+  if (typeof val === "number" || typeof val === "boolean") {
+    return String(val);
+  }
+  // For objects or other types, return empty string as fallback
+  return "";
+}
+
+/**
+ * Preprocess function for nullable CUID strings
+ * Handles null, undefined, empty strings, and safely converts to string
+ */
+export function preprocessNullableCuid(val: unknown): string | null {
+  if (val === null || val === undefined || val === "") {
+    return null;
+  }
+  if (typeof val === "string") {
+    return val;
+  }
+  // Only convert primitive types to string
+  if (typeof val === "number" || typeof val === "boolean") {
+    return String(val);
+  }
+  // For objects, return null instead of unsafe stringification
+  return null;
 }

@@ -16,7 +16,7 @@ import { authService } from "@/features/auth/services/auth.service";
 import { getErrorMessage } from "@/lib/api-client";
 import { toast } from "sonner";
 
-export function RegisterForm() {
+export function RegisterForm(): JSX.Element {
     const router = useRouter();
     const [fullName, setFullName] = useState("");
     const [email, setEmail] = useState("");
@@ -74,7 +74,7 @@ export function RegisterForm() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                    <form onSubmit={(e) => { void handleSubmit(e); }} className="space-y-4">
                         <div className="space-y-2">
                             <Label htmlFor="fullName">Họ và tên *</Label>
                             <Input

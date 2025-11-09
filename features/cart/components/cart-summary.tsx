@@ -20,7 +20,7 @@ export function CartSummary({
   onCheckout,
   showCheckoutButton = true,
   isLoading = false,
-}: CartSummaryProps) {
+}: CartSummaryProps): JSX.Element {
   const shippingFree = true // Free shipping for now
   const subtotal = total
   const shipping = shippingFree ? 0 : 0

@@ -1,7 +1,8 @@
 "use client"
 
 import { useRouter, useSearchParams } from "next/navigation"
-import { JSX, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
+import type { JSX } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ProtectedRoute } from "@/components/auth/protected-route"
@@ -23,6 +24,7 @@ import type { Order } from "@/types"
 import { PaymentMethod } from "@/types"
 import { OrderStatusBadge } from "@/features/orders/components/order-status-badge"
 import { PaymentStatusBadge } from "@/features/payments/components/payment-status-badge"
+import Image from "next/image"
 
 export default function SuccessPage(): JSX.Element {
   const router = useRouter()
@@ -37,9 +39,9 @@ export default function SuccessPage(): JSX.Element {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const fetchOrder = async () => {
+    const fetchOrder = async (): Promise<void> => {
       if (!orderId) {
-        void router.push("/cart");
+        router.push("/cart");
         return;
       }
 
@@ -51,7 +53,7 @@ export default function SuccessPage(): JSX.Element {
       } catch (error) {
         console.error("Lỗi khi tải đơn hàng:", error)
         toast.error("Không thể tải chi tiết đơn hàng")
-        void router.push("/cart")
+        router.push("/cart")
       } finally {
         setLoading(false)
       }
@@ -199,7 +201,7 @@ export default function SuccessPage(): JSX.Element {
                         {order.items.map((item) => (
                           <div key={item.productId} className="flex gap-4 pb-4 border-b last:border-0">
                             {item.imageUrls?.[0] && (
-                              <img
+                              <Image
                                 src={item.imageUrls[0]}
                                 alt={item.productName ?? "Sản phẩm"}
                                 className="h-16 w-16 rounded object-cover"

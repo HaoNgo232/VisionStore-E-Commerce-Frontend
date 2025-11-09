@@ -13,7 +13,7 @@ interface AddressCardProps {
   isDeleting?: boolean
 }
 
-export function AddressCard({ address, onEdit, onDelete, isDeleting }: AddressCardProps) {
+export function AddressCard({ address, onEdit, onDelete, isDeleting }: AddressCardProps): JSX.Element {
   return (
     <Card className={address.isDefault ? "border-primary" : ""}>
       <CardContent className="p-4">

@@ -9,7 +9,7 @@ import { useAuth } from "@/features/auth/hooks/use-auth";
  * Redirects user to returnUrl after successful login
  * Used in login/register pages
  */
-export function useRedirectAfterLogin() {
+export function useRedirectAfterLogin(): void {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isAuthenticated } = useAuth();

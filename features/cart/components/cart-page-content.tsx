@@ -7,7 +7,7 @@ import { CartSkeleton } from "@/components/skeletons/cart-skeleton"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 
-export function CartPageContent() {
+export function CartPageContent(): JSX.Element {
     const router = useRouter()
     const {
         cart,

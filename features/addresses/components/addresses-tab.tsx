@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import type { JSX } from "react"
 import { useAddresses } from "@/features/addresses/hooks/use-addresses"
 import { AddressCard } from "./address-card"
 import { AddressFormDialog } from "./address-form-dialog"
@@ -10,7 +11,7 @@ import { MapPin, Plus } from "lucide-react"
 import type { Address, CreateAddressRequest } from "@/types"
 import type { AddressFormValues } from "@/lib/validations/forms"
 
-export function AddressesTab() {
+export function AddressesTab(): JSX.Element {
     const {
         addresses,
         loading,
@@ -23,17 +24,17 @@ export function AddressesTab() {
     const [editingAddress, setEditingAddress] = useState<Address | null>(null)
     const [deletingId, setDeletingId] = useState<string | null>(null)
 
-    const handleEditAddress = (address: Address) => {
+    const handleEditAddress = (address: Address): void => {
         setEditingAddress(address)
         setAddressDialogOpen(true)
     }
 
-    const handleAddAddress = () => {
+    const handleAddAddress = (): void => {
         setEditingAddress(null)
         setAddressDialogOpen(true)
     }
 
-    const handleSaveAddress = async (values: AddressFormValues, isEdit: boolean) => {
+    const handleSaveAddress = async (values: AddressFormValues, isEdit: boolean): Promise<void> => {
         const data: CreateAddressRequest = {
             fullName: values.fullName,
             phone: values.phone,
@@ -51,7 +52,7 @@ export function AddressesTab() {
         }
     }
 
-    const handleDeleteAddress = async (id: string) => {
+    const handleDeleteAddress = async (id: string): Promise<void> => {
         setDeletingId(id)
         try {
             await remove(id)
@@ -76,35 +77,45 @@ export function AddressesTab() {
                     </div>
                 </CardHeader>
                 <CardContent>
-                    {loading ? (
-                        <div className="grid gap-4 sm:grid-cols-2">
-                            {[...Array(2)].map((_, i) => (
-                                <div key={i} className="h-48 bg-muted animate-pulse rounded-lg" />
-                            ))}
-                        </div>
-                    ) : addresses.length === 0 ? (
-                        <div className="text-center py-12">
-                            <MapPin className="mx-auto h-12 w-12 text-muted-foreground" />
-                            <p className="mt-4 text-lg font-medium">Chưa có địa chỉ nào</p>
-                            <p className="text-sm text-muted-foreground mt-2">Thêm địa chỉ để thanh toán nhanh hơn</p>
-                            <Button className="mt-4" onClick={handleAddAddress}>
-                                <Plus className="mr-2 h-4 w-4" />
-                                Thêm địa chỉ
-                            </Button>
-                        </div>
-                    ) : (
-                        <div className="grid gap-4 sm:grid-cols-2">
-                            {addresses.map((address) => (
-                                <AddressCard
-                                    key={address.id}
-                                    address={address}
-                                    onEdit={handleEditAddress}
-                                    onDelete={handleDeleteAddress}
-                                    isDeleting={deletingId === address.id}
-                                />
-                            ))}
-                        </div>
-                    )}
+                    {(() => {
+                        if (loading) {
+                            return (
+                                <div className="grid gap-4 sm:grid-cols-2">
+                                    {Array.from({ length: 2 }, (_, i) => `skeleton-${i}`).map((key) => (
+                                        <div key={key} className="h-48 bg-muted animate-pulse rounded-lg" />
+                                    ))}
+                                </div>
+                            )
+                        }
+
+                        if (addresses.length === 0) {
+                            return (
+                                <div className="text-center py-12">
+                                    <MapPin className="mx-auto h-12 w-12 text-muted-foreground" />
+                                    <p className="mt-4 text-lg font-medium">Chưa có địa chỉ nào</p>
+                                    <p className="text-sm text-muted-foreground mt-2">Thêm địa chỉ để thanh toán nhanh hơn</p>
+                                    <Button className="mt-4" onClick={handleAddAddress}>
+                                        <Plus className="mr-2 h-4 w-4" />
+                                        Thêm địa chỉ
+                                    </Button>
+                                </div>
+                            )
+                        }
+
+                        return (
+                            <div className="grid gap-4 sm:grid-cols-2">
+                                {addresses.map((address) => (
+                                    <AddressCard
+                                        key={address.id}
+                                        address={address}
+                                        onEdit={handleEditAddress}
+                                        onDelete={handleDeleteAddress}
+                                        isDeleting={deletingId === address.id}
+                                    />
+                                ))}
+                            </div>
+                        )
+                    })()}
                 </CardContent>
             </Card>
 

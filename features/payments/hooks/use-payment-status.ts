@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { paymentsApi } from "@/features/payments/services/payments.service";
 import { getErrorMessage } from "@/lib/api-client";
-import { PaymentStatus } from "@/types";
+import { PaymentStatus } from "@/types/payment.types";
 import type { Payment } from "@/types";
 
 interface UsePaymentStatusOptions {
@@ -75,7 +75,6 @@ export function usePaymentStatus(
 
       return false; // Still waiting
     } catch (err) {
-      // console.error("Error checking payment status:", err);
       setError(getErrorMessage(err));
       return false;
     } finally {
@@ -84,30 +83,36 @@ export function usePaymentStatus(
   }, [orderId]);
 
   const startPolling = useCallback(() => {
-    if (isPolling) {return;}
+    if (isPolling) {
+      return;
+    }
 
     setIsPolling(true);
     let _attempts = 0;
 
-    const interval = setInterval(async () => {
-      const isDone = await checkPaymentStatus();
+    const interval = setInterval(() => {
+      void (async () => {
+        const isDone = await checkPaymentStatus();
 
-      _attempts++;
+        _attempts++;
 
-      // Stop polling after max attempts
-      if (_attempts >= maxAttempts) {
-        clearInterval(interval);
-        setIsPolling(false);
-        if (!isDone) {
-          setError("Quá thời gian chờ. Vui lòng kiểm tra trạng thái đơn hàng.");
+        // Stop polling after max attempts
+        if (_attempts >= maxAttempts) {
+          clearInterval(interval);
+          setIsPolling(false);
+          if (!isDone) {
+            setError(
+              "Quá thời gian chờ. Vui lòng kiểm tra trạng thái đơn hàng.",
+            );
+          }
+          return;
         }
-        return;
-      }
 
-      if (isDone) {
-        clearInterval(interval);
-        setIsPolling(false);
-      }
+        if (isDone) {
+          clearInterval(interval);
+          setIsPolling(false);
+        }
+      })();
     }, pollInterval);
 
     return () => {

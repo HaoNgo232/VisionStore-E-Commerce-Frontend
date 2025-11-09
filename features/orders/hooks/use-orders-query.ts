@@ -2,16 +2,18 @@
  * Orders React Query Hooks
  */
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, type UseQueryResult, type UseMutationResult } from "@tanstack/react-query";
 import { ordersApi } from "../services/orders.service";
 import { queryKeys } from "@/lib/query-keys";
 import type {
   CreateOrderRequest,
   UpdateOrderStatusRequest,
   OrderFilters,
+  Order,
+  PaginatedResponse,
 } from "@/types";
 
-export function useOrders(filters?: OrderFilters) {
+export function useOrders(filters?: OrderFilters): UseQueryResult<PaginatedResponse<Order>, Error> {
   return useQuery({
     queryKey: queryKeys.orders.list(filters),
     queryFn: () => ordersApi.getAll(),
@@ -19,7 +21,7 @@ export function useOrders(filters?: OrderFilters) {
   });
 }
 
-export function useOrder(orderId: string) {
+export function useOrder(orderId: string): UseQueryResult<Order, Error> {
   return useQuery({
     queryKey: queryKeys.orders.detail(orderId),
     queryFn: () => ordersApi.getById(orderId),
@@ -27,7 +29,7 @@ export function useOrder(orderId: string) {
   });
 }
 
-export function useCreateOrder() {
+export function useCreateOrder(): UseMutationResult<Order, Error, CreateOrderRequest, unknown> {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -39,7 +41,7 @@ export function useCreateOrder() {
   });
 }
 
-export function useUpdateOrderStatus() {
+export function useUpdateOrderStatus(): UseMutationResult<Order, Error, { orderId: string; data: UpdateOrderStatusRequest }, unknown> {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -59,7 +61,7 @@ export function useUpdateOrderStatus() {
   });
 }
 
-export function useCancelOrder() {
+export function useCancelOrder(): UseMutationResult<void, Error, string, unknown> {
   const queryClient = useQueryClient();
 
   return useMutation({

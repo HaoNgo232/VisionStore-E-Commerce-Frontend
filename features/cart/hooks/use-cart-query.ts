@@ -3,17 +3,17 @@
  * Hooks for cart data fetching with React Query
  */
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, type UseQueryResult, type UseMutationResult } from "@tanstack/react-query";
 import { cartApi } from "../services/cart.service";
 import { queryKeys } from "@/lib/query-keys";
 import { useAuthStore } from "@/stores/auth.store";
-import type { AddToCartRequest, UpdateCartItemRequest } from "@/types";
+import type { AddToCartRequest, UpdateCartItemRequest, Cart } from "@/types";
 import { toast } from "sonner";
 
 /**
  * Get current cart
  */
-export function useCart() {
+export function useCart(): UseQueryResult<Cart, Error> {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated());
 
   return useQuery({
@@ -27,7 +27,7 @@ export function useCart() {
 /**
  * Add item to cart mutation
  */
-export function useAddToCart() {
+export function useAddToCart(): UseMutationResult<Cart, Error, AddToCartRequest, unknown> {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -47,7 +47,7 @@ export function useAddToCart() {
 /**
  * Update cart item mutation
  */
-export function useUpdateCartItem() {
+export function useUpdateCartItem(): UseMutationResult<Cart, Error, { itemId: string; data: UpdateCartItemRequest }, unknown> {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -75,7 +75,7 @@ export function useUpdateCartItem() {
 /**
  * Remove item from cart mutation
  */
-export function useRemoveCartItem() {
+export function useRemoveCartItem(): UseMutationResult<void, Error, { itemId: string; productId: string }, unknown> {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -96,7 +96,7 @@ export function useRemoveCartItem() {
 /**
  * Clear cart mutation
  */
-export function useClearCart() {
+export function useClearCart(): UseMutationResult<void, Error, void, unknown> {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -116,7 +116,7 @@ export function useClearCart() {
 /**
  * Helper hook to get cart item count
  */
-export function useCartItemCount() {
+export function useCartItemCount(): number {
   const { data: cart } = useCart();
   return cart?.items.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
 }
@@ -124,7 +124,7 @@ export function useCartItemCount() {
 /**
  * Helper hook to get cart total
  */
-export function useCartTotal() {
+export function useCartTotal(): number {
   const { data: cart } = useCart();
   return cart?.totalInt ?? 0;
 }

@@ -1,4 +1,6 @@
 import Link from "next/link"
+import Image from "next/image"
+import type { JSX } from "react"
 import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
 
@@ -10,7 +12,7 @@ export function HeroSection(): JSX.Element {
           {/* Content */}
           <div className="flex flex-col gap-6">
             <div className="inline-flex items-center rounded-full border px-3 py-1 text-sm w-fit">
-              <span className="text-muted-foreground">Bộ sưu tập mới 2024</span>
+              <span className="text-muted-foreground">Bộ sưu tập mới 2025</span>
             </div>
             <h1 className="text-4xl font-bold tracking-tight text-balance sm:text-5xl md:text-6xl lg:text-7xl">
               Nhìn thế giới theo phong cách của bạn
@@ -50,10 +52,11 @@ export function HeroSection(): JSX.Element {
           {/* Hero Image */}
           <div className="relative aspect-square lg:aspect-auto lg:h-[600px]">
             <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10" />
-            <img
+            <Image
               src="/hero-eyewear-collection.jpg"
               alt="Bộ sưu tập kính mắt cao cấp"
-              className="relative h-full w-full object-cover rounded-2xl"
+              fill
+              className="relative object-cover rounded-2xl"
             />
           </div>
         </div>

@@ -4,7 +4,7 @@
  */
 
 import { z } from "zod";
-import { cuidSchema } from "./common.types";
+import { cuidSchema, preprocessDateString } from "./common.types";
 
 export enum PaymentMethod {
   COD = "COD",
@@ -45,20 +45,16 @@ export const PaymentSchema = z
     status: PaymentStatusSchema,
     payload: z.preprocess((val) => {
       // Handle null, undefined, or empty object
-      if (val === null || val === undefined) return null;
-      if (typeof val === "object" && val !== null) return val;
+      if (val === null || val === undefined) {
+        return null;
+      }
+      if (typeof val === "object" && val !== null) {
+        return val;
+      }
       return null;
     }, z.record(z.unknown()).nullable().optional()),
-    createdAt: z.preprocess((val) => {
-      if (val instanceof Date) return val.toISOString();
-      if (typeof val === "string") return val;
-      return String(val);
-    }, z.string()),
-    updatedAt: z.preprocess((val) => {
-      if (val instanceof Date) return val.toISOString();
-      if (typeof val === "string") return val;
-      return String(val);
-    }, z.string()),
+    createdAt: z.preprocess(preprocessDateString, z.string()),
+    updatedAt: z.preprocess(preprocessDateString, z.string()),
   })
   .passthrough(); // Allow additional fields from backend
 

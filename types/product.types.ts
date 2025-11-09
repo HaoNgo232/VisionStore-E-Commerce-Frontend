@@ -6,7 +6,12 @@
 import { z } from "zod";
 import type { Category } from "./category.types";
 import { CategorySchema } from "./category.types";
-import { cuidSchema } from "./common.types";
+import {
+  cuidSchema,
+  preprocessImageUrls,
+  preprocessDateString,
+  preprocessNullableCuid,
+} from "./common.types";
 
 export interface ProductAttributes {
   // Core attributes - optional to handle incomplete data from backend
@@ -102,36 +107,24 @@ export const ProductSchema = z
     priceInt: z.number().int().nonnegative(),
     stock: z.number().int().nonnegative(),
     description: z.string().nullable(),
-    imageUrls: z.preprocess((val) => {
-      // Handle null, undefined, or empty values
-      if (val === null || val === undefined) return [];
-      if (Array.isArray(val)) return val;
-      return [];
-    }, z.array(z.string()).default([])),
-    categoryId: z.preprocess((val) => {
-      // Handle null, undefined, or empty string
-      if (val === null || val === undefined || val === "") return null;
-      return String(val);
-    }, cuidSchema().nullable()),
+    imageUrls: z.preprocess(
+      preprocessImageUrls,
+      z.array(z.string()).default([]),
+    ),
+    categoryId: z.preprocess(preprocessNullableCuid, cuidSchema().nullable()),
     attributes: z.preprocess((val) => {
       // Handle null, undefined, or empty object
-      if (val === null || val === undefined) return null;
-      if (typeof val === "object" && val !== null) return val;
+      if (val === null || val === undefined) {
+        return null;
+      }
+      if (typeof val === "object" && val !== null) {
+        return val;
+      }
       return null;
     }, ProductAttributesSchema.nullable()),
     model3dUrl: z.string().nullable(), // Accept any string or null, not strict URL validation
-    createdAt: z.preprocess((val) => {
-      // Convert Date to ISO string if needed
-      if (val instanceof Date) return val.toISOString();
-      if (typeof val === "string") return val;
-      return String(val);
-    }, z.string()),
-    updatedAt: z.preprocess((val) => {
-      // Convert Date to ISO string if needed
-      if (val instanceof Date) return val.toISOString();
-      if (typeof val === "string") return val;
-      return String(val);
-    }, z.string()),
+    createdAt: z.preprocess(preprocessDateString, z.string()),
+    updatedAt: z.preprocess(preprocessDateString, z.string()),
     // Optional populated category field - use lazy to avoid circular dependency issues
     category: CategorySchema.nullable().optional(),
   })
@@ -216,14 +209,6 @@ export const ProductReviewSchema = z.object({
   rating: z.number().int().min(1).max(5),
   comment: z.string().min(1),
   helpful: z.number().int().nonnegative(),
-  createdAt: z.preprocess((val) => {
-    if (val instanceof Date) return val.toISOString();
-    if (typeof val === "string") return val;
-    return String(val);
-  }, z.string()),
-  updatedAt: z.preprocess((val) => {
-    if (val instanceof Date) return val.toISOString();
-    if (typeof val === "string") return val;
-    return String(val);
-  }, z.string()),
+  createdAt: z.preprocess(preprocessDateString, z.string()),
+  updatedAt: z.preprocess(preprocessDateString, z.string()),
 });

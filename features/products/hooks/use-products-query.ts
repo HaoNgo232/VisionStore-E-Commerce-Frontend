@@ -46,7 +46,7 @@ export function useProductBySlug(slug: string): UseQueryResult<Product, Error> {
 /**
  * Create product mutation (admin only)
  */
-export function useCreateProduct() {
+export function useCreateProduct(): UseMutationResult<Product, Error, CreateProductRequest, unknown> {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -63,7 +63,7 @@ export function useCreateProduct() {
 /**
  * Update product mutation (admin only)
  */
-export function useUpdateProduct() {
+export function useUpdateProduct(): UseMutationResult<Product, Error, { id: string; data: UpdateProductRequest }, unknown> {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -84,7 +84,7 @@ export function useUpdateProduct() {
 /**
  * Delete product mutation (admin only)
  */
-export function useDeleteProduct() {
+export function useDeleteProduct(): UseMutationResult<void, Error, string, unknown> {
   const queryClient = useQueryClient();
 
   return useMutation({

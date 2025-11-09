@@ -10,13 +10,17 @@ import { getErrorMessage } from "@/lib/api-client";
 import { arApi } from "@/features/ar/services/ar.service";
 import type { ARSnapshot } from "@/types";
 
-export function useARSnapshots() {
+export function useARSnapshots(): {
+  snapshots: ARSnapshot[];
+  loading: boolean;
+  error: string | null;
+} {
   const [snapshots, setSnapshots] = useState<ARSnapshot[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetch = async (): Promise<void> => {
       try {
         setLoading(true);
         setError(null);
@@ -29,7 +33,7 @@ export function useARSnapshots() {
       }
     };
 
-    fetch();
+    void fetch();
   }, []);
 
   return { snapshots, loading, error };

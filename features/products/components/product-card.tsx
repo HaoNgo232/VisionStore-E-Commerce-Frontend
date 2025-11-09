@@ -1,6 +1,8 @@
 "use client"
 
 import Link from "next/link"
+import type { JSX } from "react"
+import Image from "next/image"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -11,17 +13,17 @@ import { useCartStore } from "@/stores/cart.store"
 import { formatPrice } from "@/features/products/utils"
 
 interface ProductCardProps {
-  product: Product
+  readonly product: Product
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product }: ProductCardProps): JSX.Element {
   const [isAdding, setIsAdding] = useState(false)
   const addItem = useCartStore((state) => state.addItem)
 
   const price = formatPrice(product.priceInt)
   const inStock = product.stock > 0
 
-  const handleAddToCart = async () => {
+  const handleAddToCart = async (): Promise<void> => {
     setIsAdding(true)
     try {
       await addItem(product.id, 1)
@@ -34,10 +36,11 @@ export function ProductCard({ product }: ProductCardProps) {
     <Card className="group overflow-hidden transition-shadow hover:shadow-lg" data-testid="product-card">
       <Link href={`/products/${product.slug}`}>
         <div className="relative aspect-square overflow-hidden bg-muted">
-          <img
+          <Image
             src={product.imageUrls[0] ?? "/placeholder.svg"}
             alt={product.name}
-            className="h-full w-full object-cover transition-transform group-hover:scale-105"
+            fill
+            className="object-cover transition-transform group-hover:scale-105"
           />
           {!inStock && (
             <Badge className="absolute top-2 left-2" variant="secondary">
@@ -67,7 +70,9 @@ export function ProductCard({ product }: ProductCardProps) {
           size="icon"
           variant="outline"
           disabled={!inStock || isAdding}
-          onClick={() => void handleAddToCart()}
+          onClick={() => {
+            void handleAddToCart()
+          }}
         >
           <ShoppingCart className="h-4 w-4" />
           <span className="sr-only">Thêm vào giỏ hàng</span>

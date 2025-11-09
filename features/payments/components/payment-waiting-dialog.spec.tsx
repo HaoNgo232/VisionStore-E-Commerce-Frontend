@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
+import { render, screen, fireEvent, act } from "@testing-library/react";
 import { PaymentWaitingDialog } from "./payment-waiting-dialog";
 import { usePaymentPolling } from "../hooks/use-payment-polling";
 import { PaymentStatus } from "@/types";
@@ -13,7 +13,12 @@ const mockUsePaymentPolling = usePaymentPolling as jest.MockedFunction<typeof us
 
 // Mock the formatPrice utility
 jest.mock("@/features/products/utils", () => ({
-    formatPrice: jest.fn((price) => `${price.toLocaleString("vi-VN")}`),
+    formatPrice: jest.fn((price: number) => {
+        if (typeof price === "number") {
+            return `${price.toLocaleString("vi-VN")}`;
+        }
+        return String(price);
+    }),
 }));
 
 // Mock toast
@@ -23,12 +28,7 @@ jest.mock("sonner", () => ({
     },
 }));
 
-// Mock clipboard API
-Object.assign(navigator, {
-    clipboard: {
-        writeText: jest.fn(),
-    },
-});
+// Clipboard mock is set up in beforeEach
 
 // Mock ordersApi to avoid userId error
 jest.mock("@/features/orders/services/orders.service", () => ({
@@ -64,6 +64,9 @@ describe("PaymentWaitingDialog", () => {
         onError: jest.fn(),
     };
 
+    // Create typed mock function for clipboard
+    const mockWriteText = jest.fn();
+
     beforeEach(() => {
         jest.clearAllMocks();
         mockUsePaymentPolling.mockReturnValue({
@@ -71,6 +74,12 @@ describe("PaymentWaitingDialog", () => {
             attempts: 5,
             error: null,
             stopPolling: jest.fn(),
+        });
+        // Setup clipboard mock
+        Object.assign(navigator, {
+            clipboard: {
+                writeText: mockWriteText,
+            },
         });
     });
 
@@ -149,7 +158,7 @@ describe("PaymentWaitingDialog", () => {
     });
 
     describe("Copy functionality", () => {
-        it("copies order reference when copy button is clicked", async () => {
+        it("copies order reference when copy button is clicked", () => {
             render(<PaymentWaitingDialog {...mockProps} />);
 
             const copyButtons = screen.getAllByRole("button");
@@ -160,11 +169,11 @@ describe("PaymentWaitingDialog", () => {
             expect(orderCopyButton).toBeInTheDocument();
             fireEvent.click(orderCopyButton!);
 
-            expect(navigator.clipboard.writeText).toHaveBeenCalledWith("DHorder-123");
+            expect(mockWriteText).toHaveBeenCalledWith("DHorder-123");
             expect(toast.success).toHaveBeenCalledWith("Đã sao chép mã đơn hàng");
         });
 
-        it("copies account info when account copy button is clicked", async () => {
+        it("copies account info when account copy button is clicked", () => {
             render(<PaymentWaitingDialog {...mockProps} />);
 
             const copyButtons = screen.getAllByRole("button");
@@ -176,7 +185,7 @@ describe("PaymentWaitingDialog", () => {
             fireEvent.click(accountCopyButton!);
 
             const expectedAccountInfo = `Ngân hàng: Vietcombank\nSố tài khoản: 1234567890\nTên tài khoản: CONG TY TNHH E-COMMERCE\nNội dung: DHorder-123`;
-            expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expectedAccountInfo);
+            expect(mockWriteText).toHaveBeenCalledWith(expectedAccountInfo);
             expect(toast.success).toHaveBeenCalledWith("Đã sao chép thông tin tài khoản");
         });
     });
@@ -188,9 +197,9 @@ describe("PaymentWaitingDialog", () => {
             expect(mockUsePaymentPolling).toHaveBeenCalledWith(
                 expect.objectContaining({
                     orderId: mockProps.orderId,
-                    onSuccess: expect.any(Function),
-                    onTimeout: expect.any(Function),
-                    onError: expect.any(Function),
+                    onSuccess: expect.any(Function) as unknown,
+                    onTimeout: expect.any(Function) as unknown,
+                    onError: expect.any(Function) as unknown,
                     enabled: true,
                 })
             );

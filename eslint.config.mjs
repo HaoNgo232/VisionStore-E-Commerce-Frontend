@@ -120,6 +120,7 @@ export default [
       "*.config.mjs",
       "out/",
       "next-env.d.ts",
+      "components/ui/**", // Ignore UI library components (shadcn/ui)
     ],
   },
 ];

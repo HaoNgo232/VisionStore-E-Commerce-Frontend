@@ -11,12 +11,20 @@ import { addressesApi } from "@/features/addresses/services/addresses.service";
 import { toast } from "sonner";
 import type { Address, CreateAddressRequest } from "@/types";
 
-export function useAddresses() {
+export function useAddresses(): {
+  addresses: Address[];
+  loading: boolean;
+  error: string | null;
+  create: (data: CreateAddressRequest) => Promise<Address>;
+  update: (id: string, data: CreateAddressRequest) => Promise<Address>;
+  remove: (id: string) => Promise<void>;
+  refetch: () => Promise<void>;
+} {
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchAddresses = async () => {
+  const fetchAddresses = async (): Promise<void> => {
     try {
       setLoading(true);
       setError(null);
@@ -32,10 +40,10 @@ export function useAddresses() {
   };
 
   useEffect(() => {
-    fetchAddresses();
+    void fetchAddresses();
   }, []);
 
-  const create = async (data: CreateAddressRequest) => {
+  const create = async (data: CreateAddressRequest): Promise<Address> => {
     try {
       const newAddress = await addressesApi.create(data);
       setAddresses([...addresses, newAddress]);
@@ -49,7 +57,7 @@ export function useAddresses() {
     }
   };
 
-  const update = async (id: string, data: CreateAddressRequest) => {
+  const update = async (id: string, data: CreateAddressRequest): Promise<Address> => {
     try {
       const updated = await addressesApi.update(id, data);
       setAddresses(addresses.map((addr) => (addr.id === id ? updated : addr)));
@@ -63,7 +71,7 @@ export function useAddresses() {
     }
   };
 
-  const remove = async (id: string) => {
+  const remove = async (id: string): Promise<void> => {
     try {
       await addressesApi.delete(id);
       setAddresses(addresses.filter((addr) => addr.id !== id));

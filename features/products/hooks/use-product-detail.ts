@@ -25,7 +25,7 @@ export function useProductDetail({ id, slug }: UseProductDetailParams): {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetch = async (): Promise<void> => {
       try {
         setLoading(true);
         setError(null);

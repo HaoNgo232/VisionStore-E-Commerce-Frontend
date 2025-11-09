@@ -3,24 +3,25 @@
 import { Button } from "@/components/ui/button"
 import { Minus, Plus, X } from "lucide-react"
 import type { CartItem as CartItemType } from "@/types"
+import type { JSX } from "react"
+import Image from "next/image"
 import Link from "next/link"
 import { useState } from "react"
 import { formatPrice } from "@/features/products/utils"
 
 interface CartItemProps {
-  item: CartItemType
-  onUpdateQuantity: (itemId: string, quantity: number) => Promise<void>
-  onRemove: (itemId: string) => Promise<void>
+  readonly item: CartItemType
+  readonly onUpdateQuantity: (itemId: string, quantity: number) => Promise<void>
+  readonly onRemove: (itemId: string) => Promise<void>
 }
 
-export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
+export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps): JSX.Element | null {
   const [updating, setUpdating] = useState(false)
   const { quantity } = item
   const product = item.product
 
   // Safety check: ensure product data exists
   if (!product?.id || typeof product.priceInt !== 'number') {
-    // console.error('Invalid cart item data:', item);
     return null;
   }
 
@@ -52,9 +53,11 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
   return (
     <div className="flex gap-4 py-4 px-5" data-testid="cart-item">
       <Link href={`/products/${product.slug ?? product.id}`} className="shrink-0">
-        <img
+        <Image
           src={product.imageUrls[0] ?? "/placeholder.svg"}
           alt={product.name}
+          width={96}
+          height={96}
           className="h-24 w-24 rounded-lg object-cover"
         />
       </Link>
