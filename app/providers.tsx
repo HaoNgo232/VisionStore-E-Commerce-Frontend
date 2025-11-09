@@ -5,7 +5,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import type { JSX } from "react";
 import { useState } from "react";
 
-export function Providers({ children }: { children: React.ReactNode }): JSX.Element {
+export function Providers({ children }: Readonly<{ children: React.ReactNode }>): JSX.Element {
   const [queryClient] = useState(
     () =>
       new QueryClient({

@@ -15,11 +15,10 @@ import type {
   UpdateOrderStatusRequest,
   PaginatedOrdersResponse,
 } from "@/types";
-import {
-  OrderSchema,
-  PaginatedOrdersResponseSchema,
-} from "@/types";
+import type { OrderAdminListQuery } from "@/types/order.types";
+import { OrderSchema, PaginatedOrdersResponseSchema } from "@/types";
 import { useAuthStore } from "@/stores/auth.store";
+import { type z } from "zod";
 
 export const ordersApi = {
   async getAll(): Promise<PaginatedOrdersResponse> {
@@ -29,7 +28,7 @@ export const ordersApi = {
     }
     return apiGetValidated<PaginatedOrdersResponse>(
       "/orders",
-      PaginatedOrdersResponseSchema,
+      PaginatedOrdersResponseSchema as z.ZodType<PaginatedOrdersResponse>,
       {
         params: { userId },
       },
@@ -37,7 +36,10 @@ export const ordersApi = {
   },
 
   async getById(orderId: string): Promise<Order> {
-    return apiGetValidated<Order>(`/orders/${orderId}`, OrderSchema);
+    return apiGetValidated<Order>(
+      `/orders/${orderId}`,
+      OrderSchema as z.ZodType<Order>,
+    );
   },
 
   async create(data: CreateOrderRequest): Promise<Order> {
@@ -47,7 +49,7 @@ export const ordersApi = {
     }
     return apiPostValidated<Order, CreateOrderRequest & { userId: string }>(
       "/orders",
-      OrderSchema,
+      OrderSchema as z.ZodType<Order>,
       {
         ...data,
         userId,
@@ -61,7 +63,7 @@ export const ordersApi = {
   ): Promise<Order> {
     return apiPatchValidated<Order, UpdateOrderStatusRequest>(
       `/orders/${orderId}/status`,
-      OrderSchema,
+      OrderSchema as z.ZodType<Order>,
       data,
     );
   },
@@ -69,7 +71,7 @@ export const ordersApi = {
   async cancel(orderId: string): Promise<Order> {
     return apiPatchValidated<Order, Record<string, never>>(
       `/orders/${orderId}/cancel`,
-      OrderSchema,
+      OrderSchema as z.ZodType<Order>,
       {},
     );
   },
@@ -77,4 +79,60 @@ export const ordersApi = {
   async delete(orderId: string): Promise<void> {
     return apiDelete<void>(`/orders/${orderId}`);
   },
+
+  /**
+   * List all orders (Admin only)
+   * Filters: status, paymentStatus, search, date range
+   */
+  async listAllOrders(
+    query?: OrderAdminListQuery,
+  ): Promise<PaginatedOrdersResponse> {
+    const searchParams = buildOrderQueryParams(query);
+    const queryString = searchParams.toString();
+    const endpoint = queryString
+      ? `/orders/admin/all?${queryString}`
+      : "/orders/admin/all";
+
+    return apiGetValidated<PaginatedOrdersResponse>(
+      endpoint,
+      PaginatedOrdersResponseSchema as z.ZodType<PaginatedOrdersResponse>,
+    );
+  },
 };
+
+/**
+ * Build URLSearchParams from OrderAdminListQuery
+ */
+function buildOrderQueryParams(
+  query: OrderAdminListQuery | undefined,
+): URLSearchParams {
+  const searchParams = new URLSearchParams();
+
+  if (query === undefined) {
+    return searchParams;
+  }
+
+  if (query.page !== undefined) {
+    searchParams.set("page", query.page.toString());
+  }
+  if (query.pageSize !== undefined) {
+    searchParams.set("pageSize", query.pageSize.toString());
+  }
+  if (query.status !== undefined) {
+    searchParams.set("status", query.status);
+  }
+  if (query.paymentStatus !== undefined) {
+    searchParams.set("paymentStatus", query.paymentStatus);
+  }
+  if (query.search !== undefined && query.search !== "") {
+    searchParams.set("search", query.search);
+  }
+  if (query.startDate !== undefined) {
+    searchParams.set("startDate", query.startDate);
+  }
+  if (query.endDate !== undefined) {
+    searchParams.set("endDate", query.endDate);
+  }
+
+  return searchParams;
+}

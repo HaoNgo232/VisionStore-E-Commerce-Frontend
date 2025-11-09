@@ -48,10 +48,10 @@ const userEditFormSchema = z.object({
 type UserEditFormValues = z.infer<typeof userEditFormSchema>;
 
 interface UserEditFormDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  user: User | null;
-  onSave: (userId: string, data: UpdateUserRequest) => Promise<void>;
+  readonly open: boolean;
+  readonly onOpenChange: (open: boolean) => void;
+  readonly user: User | null;
+  readonly onSave: (userId: string, data: UpdateUserRequest) => Promise<void>;
 }
 
 export function UserEditFormDialog({
@@ -84,13 +84,15 @@ export function UserEditFormDialog({
   }, [user, open, form]);
 
   const onSubmit = async (values: UserEditFormValues): Promise<void> => {
-    if (!user) return;
+    if (!user) {
+      return;
+    }
 
     setIsSubmitting(true);
     try {
       const updateData: UpdateUserRequest = {
         fullName: values.fullName,
-        phone: values.phone || undefined,
+        ...(values.phone ? { phone: values.phone } : {}),
         role: values.role,
         isActive: values.isActive,
       };
@@ -111,7 +113,12 @@ export function UserEditFormDialog({
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form
+            onSubmit={(e) => {
+              void form.handleSubmit(onSubmit)(e);
+            }}
+            className="space-y-4"
+          >
             <FormField
               control={form.control}
               name="fullName"

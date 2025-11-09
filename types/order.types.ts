@@ -132,3 +132,29 @@ export const PaginatedOrdersResponseSchema = z.object({
   pageSize: z.number().int().positive(),
   totalPages: z.number().int().nonnegative().optional(),
 });
+
+/**
+ * Admin order list query filters
+ */
+export interface OrderAdminListQuery {
+  page?: number;
+  pageSize?: number;
+  status?: OrderStatus;
+  paymentStatus?: PaymentStatus;
+  search?: string; // Search by order ID or user ID/email
+  startDate?: string; // ISO date string
+  endDate?: string; // ISO date string
+}
+
+/**
+ * Zod schema for OrderAdminListQuery validation
+ */
+export const OrderAdminListQuerySchema = z.object({
+  page: z.number().int().positive().optional(),
+  pageSize: z.number().int().positive().optional(),
+  status: OrderStatusSchema.optional(),
+  paymentStatus: PaymentStatusSchema.optional(),
+  search: z.string().optional(),
+  startDate: z.string().datetime().optional(),
+  endDate: z.string().datetime().optional(),
+});

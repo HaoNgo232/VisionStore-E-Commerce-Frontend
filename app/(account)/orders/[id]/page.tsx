@@ -21,7 +21,7 @@ import { toast } from "sonner"
 import type { Order, Address } from "@/types"
 import { OrderStatusBadge } from "@/features/orders/components/order-status-badge"
 import { PaymentStatusBadge } from "@/features/payments/components/payment-status-badge"
-import { usersApi } from "@/features/users/services/users.service"
+import { addressesApi } from "@/features/addresses/services/addresses.service"
 import Image from "next/image"
 
 export default function OrderDetailPage(): JSX.Element {
@@ -51,7 +51,7 @@ export default function OrderDetailPage(): JSX.Element {
                 // Lấy thông tin địa chỉ nếu có addressId
                 if (fetchedOrder.addressId) {
                     try {
-                        const fetchedAddress = await usersApi.getAddressById(fetchedOrder.addressId)
+                        const fetchedAddress = await addressesApi.getById(fetchedOrder.addressId)
                         setAddress(fetchedAddress)
                     } catch (error_) {
                         console.warn("Không thể tải thông tin địa chỉ:", error_)

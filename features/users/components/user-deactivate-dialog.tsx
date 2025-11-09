@@ -20,10 +20,10 @@ import type { User } from "@/types";
 import { UserRole } from "@/types/auth.types";
 
 interface UserDeactivateDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  user: User | null;
-  onConfirm: (userId: string) => Promise<void>;
+  readonly open: boolean;
+  readonly onOpenChange: (open: boolean) => void;
+  readonly user: User | null;
+  readonly onConfirm: (userId: string) => Promise<void>;
 }
 
 export function UserDeactivateDialog({
@@ -32,7 +32,9 @@ export function UserDeactivateDialog({
   user,
   onConfirm,
 }: UserDeactivateDialogProps): React.ReactElement {
-  if (!user) return <></>;
+  if (!user) {
+    return <></>;
+  }
 
   const handleConfirm = async (): Promise<void> => {
     await onConfirm(user.id);
@@ -41,6 +43,31 @@ export function UserDeactivateDialog({
 
   const isAdmin = user.role === UserRole.ADMIN;
   const isAlreadyInactive = !user.isActive;
+
+  const getDescription = (): React.ReactElement => {
+    if (isAdmin) {
+      return (
+        <>
+          <strong>Warning:</strong> You cannot deactivate an admin user.
+          Please contact a system administrator.
+        </>
+      );
+    }
+    if (isAlreadyInactive) {
+      return (
+        <>
+          The user <strong>{user.fullName}</strong> ({user.email}) is already
+          inactive.
+        </>
+      );
+    }
+    return (
+      <>
+        Are you sure you want to deactivate <strong>{user.fullName}</strong> (
+        {user.email})? This will prevent them from logging in to their account.
+      </>
+    );
+  };
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -52,31 +79,15 @@ export function UserDeactivateDialog({
               {isAlreadyInactive ? "User Already Inactive" : "Deactivate User"}
             </AlertDialogTitle>
           </div>
-          <AlertDialogDescription>
-            {isAdmin ? (
-              <>
-                <strong>Warning:</strong> You cannot deactivate an admin user.
-                Please contact a system administrator.
-              </>
-            ) : isAlreadyInactive ? (
-              <>
-                The user <strong>{user.fullName}</strong> ({user.email}) is
-                already inactive.
-              </>
-            ) : (
-              <>
-                Are you sure you want to deactivate{" "}
-                <strong>{user.fullName}</strong> ({user.email})? This will
-                prevent them from logging in to their account.
-              </>
-            )}
-          </AlertDialogDescription>
+          <AlertDialogDescription>{getDescription()}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           {!isAdmin && !isAlreadyInactive && (
             <AlertDialogAction
-              onClick={handleConfirm}
+              onClick={() => {
+                void handleConfirm();
+              }}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Deactivate User

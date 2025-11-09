@@ -42,7 +42,7 @@ export default function AdminLayout({
   children,
 }: AdminLayoutProps): React.ReactElement {
   const router = useRouter();
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return
+   
   const getUserRole = useAuthStore((state) => state.getUserRole);
 
   const handleLogout = (): void => {
@@ -51,8 +51,8 @@ export default function AdminLayout({
   };
 
   // Type assertion needed due to Zustand selector type inference
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-  const userRole = getUserRole() as "ADMIN" | "CUSTOMER" | null;
+   
+  const userRole = getUserRole();
   const userInitials = userRole === "ADMIN" ? "A" : "U";
 
   return (

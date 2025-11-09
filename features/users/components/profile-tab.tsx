@@ -14,15 +14,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Edit2, X, Check } from "lucide-react";
 import { useUserProfile } from "../hooks/use-user-profile";
 import { useUpdateProfile } from "../hooks/use-update-profile";
-import { UpdateProfileRequestSchema, type UpdateProfileRequest, type User } from "@/types";
+import { UpdateProfileRequestSchema, type UpdateProfileRequest } from "@/types";
 import { UserRole } from "@/types/auth.types";
 
 type ProfileFormValues = UpdateProfileRequest;
 
 export function ProfileTab(): JSX.Element {
     const [isEditing, setIsEditing] = useState(false);
-    const userProfileQuery = useUserProfile();
-    const { data: user, isLoading, error } = userProfileQuery;
+    const { data: user, isLoading, error } = useUserProfile();
     const updateProfileMutation = useUpdateProfile();
 
     const form = useForm<ProfileFormValues>({
@@ -34,14 +33,15 @@ export function ProfileTab(): JSX.Element {
     });
 
     useEffect(() => {
-        if (user && !error && !isLoading) {
-            const userData = user as User;
-            form.reset({
-                fullName: userData.fullName,
-                phone: userData.phone ?? "",
-            });
+        if (!user) {
+            return;
         }
-    }, [user, error, isLoading, form]);
+        // SAFE: user is guaranteed to exist after above check
+        form.reset({
+            fullName: user.fullName,
+            phone: user.phone ?? "",
+        });
+    }, [user, form]);
 
     const handleEdit = (): void => {
         setIsEditing(true);
@@ -49,13 +49,14 @@ export function ProfileTab(): JSX.Element {
 
     const handleCancel = (): void => {
         setIsEditing(false);
-        if (user && !error && !isLoading) {
-            const userData = user as User;
-            form.reset({
-                fullName: userData.fullName,
-                phone: userData.phone ?? "",
-            });
+        if (!user) {
+            return;
         }
+        // SAFE: user is guaranteed to exist after above check
+        form.reset({
+            fullName: user.fullName,
+            phone: user.phone ?? "",
+        });
     };
 
     const onSubmit = async (values: ProfileFormValues): Promise<void> => {
@@ -135,8 +136,8 @@ export function ProfileTab(): JSX.Element {
         );
     }
 
-    const userData = user as User;
-    const isAdmin = userData.role === UserRole.ADMIN;
+    // SAFE: user is guaranteed to exist after above !user check + return
+    const isAdmin = user.role === UserRole.ADMIN;
 
     return (
         <Card>
@@ -160,7 +161,7 @@ export function ProfileTab(): JSX.Element {
                     <div className="flex items-center gap-4">
                         <Avatar className="h-20 w-20">
                             <AvatarFallback className="bg-primary/10 text-primary text-lg">
-                                {getInitials(userData.fullName)}
+                                {getInitials(user.fullName)}
                             </AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
@@ -217,10 +218,10 @@ export function ProfileTab(): JSX.Element {
                                 </Form>
                             ) : (
                                 <>
-                                    <p className="font-semibold text-lg">{userData.fullName}</p>
-                                    <p className="text-sm text-muted-foreground">{userData.email}</p>
-                                    {userData.phone && (
-                                        <p className="text-sm text-muted-foreground">{userData.phone}</p>
+                                    <p className="font-semibold text-lg">{user.fullName}</p>
+                                    <p className="text-sm text-muted-foreground">{user.email}</p>
+                                    {user.phone && (
+                                        <p className="text-sm text-muted-foreground">{user.phone}</p>
                                     )}
                                 </>
                             )}
@@ -231,10 +232,10 @@ export function ProfileTab(): JSX.Element {
                     {!isEditing && (
                         <div className="flex flex-wrap gap-2">
                             <Badge variant={isAdmin ? "default" : "secondary"}>
-                                {userData.role}
+                                {user.role}
                             </Badge>
-                            <Badge variant={userData.isActive ? "default" : "destructive"}>
-                                {userData.isActive ? "Hoạt động" : "Không hoạt động"}
+                            <Badge variant={user.isActive ? "default" : "destructive"}>
+                                {user.isActive ? "Hoạt động" : "Không hoạt động"}
                             </Badge>
                         </div>
                     )}
@@ -244,11 +245,11 @@ export function ProfileTab(): JSX.Element {
                         <div className="grid grid-cols-2 gap-4 text-sm">
                             <div>
                                 <p className="font-medium text-muted-foreground">Ngày tạo</p>
-                                <p>{new Date(userData.createdAt).toLocaleDateString("vi-VN")}</p>
+                                <p>{new Date(user.createdAt).toLocaleDateString("vi-VN")}</p>
                             </div>
                             <div>
                                 <p className="font-medium text-muted-foreground">Cập nhật lần cuối</p>
-                                <p>{new Date(userData.updatedAt).toLocaleDateString("vi-VN")}</p>
+                                <p>{new Date(user.updatedAt).toLocaleDateString("vi-VN")}</p>
                             </div>
                         </div>
                     )}

@@ -84,8 +84,13 @@ export function AdminSidebar(
             <SidebarMenu>
               {navItems.map((item) => {
                 const Icon = item.icon;
-                const isActive = pathname === item.url || pathname.startsWith(`${item.url}/`);
-                
+                // For root path (/admin), only check exact match
+                // For nested paths, check exact match or startsWith
+                const isActive =
+                  item.url === "/admin"
+                    ? pathname === item.url
+                    : pathname === item.url || pathname.startsWith(`${item.url}/`);
+
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild isActive={isActive}>

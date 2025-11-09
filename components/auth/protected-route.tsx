@@ -4,12 +4,21 @@ import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { useAuth } from "@/features/auth/hooks/use-auth"
 import { useAuthStore } from "@/stores/auth.store"
-import { UserRole } from "@/types/auth.types"
+import type { UserRole } from "@/types/auth.types"
 
 interface ProtectedRouteProps {
-    children: React.ReactNode
-    redirectTo?: string
-    requiredRole?: UserRole | UserRole[]
+    readonly children: React.ReactNode
+    readonly redirectTo?: string
+    readonly requiredRole?: UserRole | UserRole[]
+}
+
+/**
+ * Get user role from auth store with proper typing
+ */
+function getUserRole(): "ADMIN" | "CUSTOMER" | null {
+    const store = useAuthStore.getState()
+     
+    return store.getUserRole()
 }
 
 /**
@@ -26,7 +35,6 @@ export function ProtectedRoute({
 }: ProtectedRouteProps): React.ReactElement | null {
     const router = useRouter()
     const { isAuthenticated } = useAuth()
-    const getUserRole = useAuthStore((state) => state.getUserRole)
     const [isChecking, setIsChecking] = useState(true)
     const [hasAccess, setHasAccess] = useState(false)
 
@@ -35,8 +43,13 @@ export function ProtectedRoute({
         const timer = setTimeout(() => {
             if (!isAuthenticated) {
                 // Save current path để redirect sau khi login
-                const currentPath = typeof window !== "undefined" ? window.location.pathname : ""
-                const returnUrl = currentPath ? `?returnUrl=${encodeURIComponent(currentPath)}` : ""
+                const currentPath =
+                    globalThis.window === undefined
+                        ? ""
+                        : globalThis.window.location.pathname
+                const returnUrl = currentPath
+                    ? `?returnUrl=${encodeURIComponent(currentPath)}`
+                    : ""
                 router.push(`${redirectTo}${returnUrl}`)
                 return
             }
@@ -44,16 +57,18 @@ export function ProtectedRoute({
             // Check role if required
             if (requiredRole) {
                 const userRole = getUserRole()
-                if (!userRole) {
+                if (userRole === null || userRole === undefined) {
                     router.push("/unauthorized")
                     return
                 }
 
                 // Check if user has required role
                 const roles = Array.isArray(requiredRole) ? requiredRole : [requiredRole]
-                const hasRequiredRole = roles.some(
-                    (role) => role.toUpperCase() === userRole.toUpperCase()
-                )
+                const hasRequiredRole = roles.some((role) => {
+                    const roleUpper: string = role.toUpperCase()
+                    const userRoleUpper: string = userRole.toUpperCase()
+                    return roleUpper === userRoleUpper
+                })
 
                 if (!hasRequiredRole) {
                     router.push("/unauthorized")
@@ -68,8 +83,10 @@ export function ProtectedRoute({
             setIsChecking(false)
         }, 100)
 
-        return () => clearTimeout(timer)
-    }, [isAuthenticated, router, redirectTo, requiredRole, getUserRole])
+        return () => {
+            clearTimeout(timer)
+        }
+    }, [isAuthenticated, router, redirectTo, requiredRole])
 
     // Show nothing while checking authentication
     if (isChecking || !isAuthenticated || !hasAccess) {

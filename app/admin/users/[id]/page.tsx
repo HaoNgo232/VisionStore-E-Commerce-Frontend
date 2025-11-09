@@ -52,7 +52,7 @@ export default function UserDetailPage({
     ): Promise<void> => {
         const mutationData: { userId: string; data: UpdateUserRequest } = {
             userId,
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+             
             data,
         };
         await updateUserMutation.mutateAsync(mutationData);

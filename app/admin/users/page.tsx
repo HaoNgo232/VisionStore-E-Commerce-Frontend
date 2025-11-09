@@ -29,7 +29,7 @@ import type { ListUsersQuery, User, UpdateUserRequest } from "@/types";
 
 export default function AdminUsersPage(): React.ReactElement {
   const router = useRouter();
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+   
   const [query, setQuery] = useState<ListUsersQuery>({
     page: 1,
     pageSize: 10,
@@ -63,7 +63,7 @@ export default function AdminUsersPage(): React.ReactElement {
   ): Promise<void> => {
     const mutationData: { userId: string; data: UpdateUserRequest } = {
       userId,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+       
       data,
     };
     await updateUserMutation.mutateAsync(mutationData);
@@ -98,7 +98,7 @@ export default function AdminUsersPage(): React.ReactElement {
       </div>
 
       <UsersFilters
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+         
         query={query}
         onQueryChange={setQuery}
       />
