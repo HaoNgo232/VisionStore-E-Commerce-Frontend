@@ -114,6 +114,111 @@ interface ApiError {
 }
 ```
 
+## **Default Parameters Best Practices**
+
+### **❌ TRÁNH: Default Parameter với Object Literal**
+
+Default parameter với object literal `= {}` gây ra TypeScript strict mode false positives và unsafe member access errors:
+
+```typescript
+// ❌ WRONG - Gây false positives với TypeScript strict mode
+async function listUsers(query: ListUsersQuery = {}): Promise<ListUsersResponse> {
+  // TypeScript không thể infer type đúng, gây unsafe member access errors
+  if (query.page !== undefined) {
+    searchParams.set("page", query.page.toString());
+  }
+}
+
+// ❌ WRONG - Cần nhiều eslint-disable comments
+async function listUsers(query: ListUsersQuery = {}): Promise<ListUsersResponse> {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  if (query.page !== undefined) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-argument
+    searchParams.set("page", query.page.toString());
+  }
+}
+```
+
+### **✅ ĐÚNG: Optional Parameter + Optional Chaining**
+
+Sử dụng optional parameter `?` và optional chaining `?.` để tránh false positives:
+
+```typescript
+// ✅ CORRECT - Type-safe, không có false positives
+async function listUsers(query?: ListUsersQuery): Promise<ListUsersResponse> {
+  const searchParams = new URLSearchParams();
+  
+  if (query?.page !== undefined) {
+    searchParams.set("page", query.page.toString());
+  }
+  if (query?.pageSize !== undefined) {
+    searchParams.set("pageSize", query.pageSize.toString());
+  }
+  if (query?.search) {
+    searchParams.set("search", query.search);
+  }
+  if (query?.role) {
+    searchParams.set("role", query.role);
+  }
+  
+  // ...
+}
+```
+
+### **✅ ĐÚNG: Local Interface Definition (Nếu cần)**
+
+Nếu vẫn gặp vấn đề với imported types, định nghĩa local interface:
+
+```typescript
+// ✅ CORRECT - Local interface cho better type inference
+interface ListUsersParams {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  role?: UserRole;
+}
+
+async function listUsers(query?: ListUsersParams): Promise<ListUsersResponse> {
+  // TypeScript infer type tốt hơn với local interface
+  if (query?.page !== undefined) {
+    searchParams.set("page", query.page.toString());
+  }
+}
+```
+
+### **✅ ĐÚNG: Destructuring với Default Values**
+
+Cho function parameters phức tạp, dùng destructuring:
+
+```typescript
+// ✅ CORRECT - Destructuring với default values
+function calculateCartTotals(
+  items: CartItem[],
+  options: {
+    shippingCost?: number;
+    taxRate?: number;
+    discountAmount?: number;
+  } = {},
+): CartTotals {
+  const {
+    shippingCost = 30000,
+    taxRate = 0.1,
+    discountAmount = 0,
+  } = options;
+  
+  // Type-safe usage
+  const tax = subtotal * taxRate;
+  // ...
+}
+```
+
+### **Lý do:**
+
+1. **TypeScript strict mode**: Default parameter `= {}` với object literal không được TypeScript infer đúng type
+2. **ESLint false positives**: Gây ra `@typescript-eslint/no-unsafe-member-access` errors mặc dù code đúng
+3. **Code cleanliness**: Tránh phải thêm nhiều `eslint-disable` comments
+4. **Better type inference**: Optional parameter `?` cho TypeScript infer type tốt hơn
+
 ## **Component Props Type Safety**
 
 ```typescript

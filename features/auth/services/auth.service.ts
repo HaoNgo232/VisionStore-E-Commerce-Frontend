@@ -5,6 +5,7 @@
 
 import {
   apiPostValidated,
+  apiGetValidated,
   getErrorMessage,
 } from "@/lib/api-client";
 import { useAuthStore } from "@/stores/auth.store";
@@ -106,12 +107,10 @@ export const authService = {
    */
   async getCurrentUser(): Promise<User> {
     try {
-      // Note: Backend might use GET /auth/me or POST /auth/me
-      // Using POST for now, can be changed to GET if needed
-      return await apiPostValidated<User, Record<string, never>>(
+      // Backend uses GET /auth/me
+      return await apiGetValidated<User>(
         "/auth/me",
         UserSchema,
-        {},
       );
     } catch (error) {
       throw new Error(getErrorMessage(error));

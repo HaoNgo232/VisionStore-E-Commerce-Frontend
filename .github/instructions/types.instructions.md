@@ -98,6 +98,62 @@ export function validateApiResponse<T>(
 }
 ```
 
+## **Default Parameters Best Practices**
+
+### **❌ TRÁNH: Default Parameter với Object Literal**
+
+Default parameter với object literal `= {}` gây ra TypeScript strict mode false positives:
+
+```typescript
+// ❌ WRONG - Gây false positives với TypeScript strict mode
+async function listUsers(query: ListUsersQuery = {}): Promise<ListUsersResponse> {
+  // TypeScript không thể infer type đúng, gây unsafe member access errors
+  if (query.page !== undefined) {
+    searchParams.set("page", query.page.toString());
+  }
+}
+```
+
+### **✅ ĐÚNG: Optional Parameter + Optional Chaining**
+
+```typescript
+// ✅ CORRECT - Type-safe, không có false positives
+async function listUsers(query?: ListUsersQuery): Promise<ListUsersResponse> {
+  const searchParams = new URLSearchParams();
+  
+  if (query?.page !== undefined) {
+    searchParams.set("page", query.page.toString());
+  }
+  if (query?.pageSize !== undefined) {
+    searchParams.set("pageSize", query.pageSize.toString());
+  }
+  if (query?.search) {
+    searchParams.set("search", query.search);
+  }
+  if (query?.role) {
+    searchParams.set("role", query.role);
+  }
+}
+```
+
+### **✅ ĐÚNG: Local Interface (Nếu cần)**
+
+```typescript
+// ✅ CORRECT - Local interface cho better type inference
+interface ListUsersParams {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  role?: UserRole;
+}
+
+async function listUsers(query?: ListUsersParams): Promise<ListUsersResponse> {
+  if (query?.page !== undefined) {
+    searchParams.set("page", query.page.toString());
+  }
+}
+```
+
 ## **Error Handling Types**
 
 ```typescript

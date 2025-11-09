@@ -50,6 +50,7 @@ interface AuthStore {
   clearTokens: () => void;
   isAuthenticated: () => boolean;
   getUserId: () => string | null;
+  getUserRole: () => "ADMIN" | "CUSTOMER" | null;
 }
 
 /**
@@ -105,6 +106,18 @@ export const useAuthStore = create<AuthStore>()(
         if (accessToken) {
           const payload = decodeToken(accessToken);
           return payload?.sub ?? null;
+        }
+        return null;
+      },
+
+      /**
+       * Get user role from token
+       */
+      getUserRole: () => {
+        const { accessToken } = get();
+        if (accessToken) {
+          const payload = decodeToken(accessToken);
+          return payload?.role ?? null;
         }
         return null;
       },

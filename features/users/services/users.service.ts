@@ -1,22 +1,110 @@
 /**
  * Users Service
- * API integration for user profile management
+ * API integration for user management (Admin)
+ * Note: User profile endpoints are in auth.service.ts
  */
 
-import { apiGet, apiPatch } from "@/lib/api-client";
-import type { User, Address } from "@/types";
-import type { UpdateProfileRequest } from "@/types/user.types";
+import { type z } from "zod";
+import { apiGetValidated, apiPutValidated } from "@/lib/api-client";
+import type {
+  User,
+  ListUsersResponse,
+  UpdateUserRequest,
+  UpdateProfileRequest,
+} from "@/types";
+import { UserSchema, ListUsersResponseSchema } from "@/types";
+import type { UserRole } from "@/types/auth.types";
+
+// Local interface for better type inference (avoids TypeScript strict mode false positives)
+interface ListUsersParams {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  role?: UserRole;
+}
 
 export const usersApi = {
-  async getProfile(): Promise<User> {
-    return apiGet<User>("/users/profile");
+  /**
+   * List all users with pagination and filters (Admin only)
+   */
+  async listUsers(query?: ListUsersParams): Promise<ListUsersResponse> {
+    const searchParams = new URLSearchParams();
+
+    if (query?.page !== undefined) {
+      searchParams.set("page", query.page.toString());
+    }
+    if (query?.pageSize !== undefined) {
+      searchParams.set("pageSize", query.pageSize.toString());
+    }
+    if (query?.search) {
+      searchParams.set("search", query.search);
+    }
+    if (query?.role) {
+      searchParams.set("role", query.role);
+    }
+
+    const queryString = searchParams.toString();
+    const endpoint = queryString ? `/users?${queryString}` : "/users";
+
+    return apiGetValidated<ListUsersResponse>(
+      endpoint,
+      ListUsersResponseSchema as z.ZodType<ListUsersResponse>,
+    );
   },
 
-  async updateProfile(data: UpdateProfileRequest): Promise<User> {
-    return apiPatch<User>("/users/profile", data);
+  /**
+   * Get user by ID
+   */
+  async getUserById(userId: string): Promise<User> {
+    return apiGetValidated<User>(
+      `/users/${userId}`,
+      UserSchema as z.ZodType<User>,
+    );
   },
 
-  async getAddressById(addressId: string): Promise<Address> {
-    return apiGet<Address>(`/addresses/${addressId}`);
+  /**
+   * Get user by email (Admin only)
+   */
+  async getUserByEmail(email: string): Promise<User> {
+    return apiGetValidated<User>(
+      `/users/email/${encodeURIComponent(email)}`,
+      UserSchema as z.ZodType<User>,
+    );
+  },
+
+  /**
+   * Update user profile (for current user)
+   */
+  async updateProfile(
+    userId: string,
+    data: UpdateProfileRequest,
+  ): Promise<User> {
+    return apiPutValidated<User, UpdateProfileRequest>(
+      `/users/${userId}`,
+      UserSchema as z.ZodType<User>,
+      data,
+    );
+  },
+
+  /**
+   * Update user (Admin only)
+   */
+  async updateUser(userId: string, data: UpdateUserRequest): Promise<User> {
+    return apiPutValidated<User, UpdateUserRequest>(
+      `/users/${userId}`,
+      UserSchema as z.ZodType<User>,
+      data,
+    );
+  },
+
+  /**
+   * Deactivate user account (Admin only)
+   */
+  async deactivateUser(userId: string): Promise<User> {
+    return apiPutValidated<User, Record<string, never>>(
+      `/users/${userId}/deactivate`,
+      UserSchema as z.ZodType<User>,
+      {},
+    );
   },
 };

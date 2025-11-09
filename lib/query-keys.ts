@@ -6,6 +6,7 @@
 import type {
   ProductFilters,
   OrderFilters,
+  ListUsersQuery,
 } from "@/types";
 
 export const queryKeys = {
@@ -61,9 +62,12 @@ export const queryKeys = {
   users: {
     all: ["users"] as const,
     lists: () => [...queryKeys.users.all, "list"] as const,
-    list: () => [...queryKeys.users.lists()] as const,
+    list: (query?: ListUsersQuery) =>
+      [...queryKeys.users.lists(), query] as const,
     details: () => [...queryKeys.users.all, "detail"] as const,
     detail: (id: string) => [...queryKeys.users.details(), id] as const,
+    byEmail: (email: string) =>
+      [...queryKeys.users.details(), "email", email] as const,
   },
   ar: {
     all: ["ar"] as const,

@@ -145,6 +145,126 @@ Khi phát hiện sai lệch, sử dụng template sau:
 Create adapter layer for immediate fix, then coordinate with BE team for Option B long-term.
 ```
 
+## **Default Parameters Best Practices**
+
+### **❌ TRÁNH: Default Parameter với Object Literal**
+
+Default parameter với object literal `= {}` gây ra TypeScript strict mode false positives và unsafe member access errors. Đây là một vấn đề phổ biến với TypeScript strict mode và ESLint.
+
+```typescript
+// ❌ WRONG - Gây false positives với TypeScript strict mode
+async function listUsers(query: ListUsersQuery = {}): Promise<ListUsersResponse> {
+  // TypeScript không thể infer type đúng, gây unsafe member access errors
+  if (query.page !== undefined) {
+    searchParams.set("page", query.page.toString());
+  }
+}
+
+// ❌ WRONG - Cần nhiều eslint-disable comments (không clean)
+async function listUsers(query: ListUsersQuery = {}): Promise<ListUsersResponse> {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  if (query.page !== undefined) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-argument
+    searchParams.set("page", query.page.toString());
+  }
+}
+```
+
+### **✅ ĐÚNG: Optional Parameter + Optional Chaining**
+
+Sử dụng optional parameter `?` và optional chaining `?.` để tránh false positives. Đây là best practice được TypeScript community khuyến nghị.
+
+```typescript
+// ✅ CORRECT - Type-safe, không có false positives, clean code
+async function listUsers(query?: ListUsersQuery): Promise<ListUsersResponse> {
+  const searchParams = new URLSearchParams();
+  
+  if (query?.page !== undefined) {
+    searchParams.set("page", query.page.toString());
+  }
+  if (query?.pageSize !== undefined) {
+    searchParams.set("pageSize", query.pageSize.toString());
+  }
+  if (query?.search) {
+    searchParams.set("search", query.search);
+  }
+  if (query?.role) {
+    searchParams.set("role", query.role);
+  }
+  
+  const queryString = searchParams.toString();
+  const endpoint = queryString ? `/users?${queryString}` : "/users";
+  
+  return apiGetValidated<ListUsersResponse>(endpoint, schema);
+}
+```
+
+### **✅ ĐÚNG: Local Interface Definition (Nếu cần)**
+
+Nếu vẫn gặp vấn đề với imported types, định nghĩa local interface trong file để TypeScript infer type tốt hơn:
+
+```typescript
+// ✅ CORRECT - Local interface cho better type inference
+interface ListUsersParams {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  role?: UserRole;
+}
+
+async function listUsers(query?: ListUsersParams): Promise<ListUsersResponse> {
+  // TypeScript infer type tốt hơn với local interface
+  if (query?.page !== undefined) {
+    searchParams.set("page", query.page.toString());
+  }
+}
+```
+
+### **✅ ĐÚNG: Destructuring với Default Values**
+
+Cho function parameters phức tạp với nhiều options, dùng destructuring với default values:
+
+```typescript
+// ✅ CORRECT - Destructuring với default values (không gây false positives)
+function calculateCartTotals(
+  items: CartItem[],
+  options: {
+    shippingCost?: number;
+    taxRate?: number;
+    discountAmount?: number;
+    freeShippingThreshold?: number;
+  } = {},
+): CartTotals {
+  const {
+    shippingCost = 30000, // 30,000 VND
+    taxRate = 0.1,
+    discountAmount = 0,
+    freeShippingThreshold = 500000, // 500,000 VND
+  } = options;
+  
+  // Type-safe usage sau khi destructure
+  const subtotal = items.reduce((sum, item) => sum + item.product.priceInt * item.quantity, 0);
+  const shipping = subtotal >= freeShippingThreshold ? 0 : shippingCost;
+  const tax = (subtotal - discountAmount) * taxRate;
+  
+  return { subtotal, shipping, tax, discount: discountAmount, total: subtotal - discountAmount + shipping + tax };
+}
+```
+
+### **Lý do và Best Practices:**
+
+1. **TypeScript strict mode**: Default parameter `= {}` với object literal không được TypeScript infer đúng type trong strict mode
+2. **ESLint false positives**: Gây ra `@typescript-eslint/no-unsafe-member-access` errors mặc dù code đúng về mặt logic
+3. **Code cleanliness**: Tránh phải thêm nhiều `eslint-disable` comments làm code không clean
+4. **Better type inference**: Optional parameter `?` cho TypeScript infer type tốt hơn và chính xác hơn
+5. **Consistency**: Pattern này được sử dụng trong các file khác như `products.service.ts` và được TypeScript community khuyến nghị
+
+### **Khi nào dùng mỗi pattern:**
+
+- **Optional Parameter `?`**: Cho simple optional objects (khuyến nghị)
+- **Local Interface**: Khi imported type gây vấn đề với type inference
+- **Destructuring với defaults**: Cho complex options objects với nhiều fields
+
 ## **Implementation Best Practices**
 
 ### **Component Props với Type Safety**

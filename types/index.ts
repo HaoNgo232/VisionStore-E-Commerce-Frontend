@@ -46,8 +46,17 @@ export {
 export type {
   UserProfile,
   UpdateProfileRequest,
+  UpdateUserRequest,
   ChangePasswordRequest,
+  ListUsersQuery,
   ListUsersResponse,
+} from "./user.types";
+
+export {
+  UpdateProfileRequestSchema,
+  UpdateUserRequestSchema,
+  ListUsersQuerySchema,
+  ListUsersResponseSchema,
 } from "./user.types";
 
 // Product Types

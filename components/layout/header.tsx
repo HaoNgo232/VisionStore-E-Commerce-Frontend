@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import type { JSX } from "react"
 import Link from "next/link"
-import { ShoppingCart, Menu, Search, User, LogOut, Settings, Package } from "lucide-react"
+import { ShoppingCart, Menu, Search, User, LogOut, Settings, Package, ShieldCheck } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Badge } from "@/components/ui/badge"
@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useCartStore } from "@/stores/cart.store"
 import { useAuth } from "@/features/auth/hooks/use-auth"
+import { useAuthStore } from "@/stores/auth.store"
 import { authService } from "@/features/auth/services/auth.service"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
@@ -44,9 +45,12 @@ const categories = [
 
 export function Header(): JSX.Element {
   const { accessToken, logout } = useAuth()
+  const getUserRole = useAuthStore((state) => state.getUserRole)
   const router = useRouter()
   const itemCount = useCartStore((state) => state.getItemCount())
   const [isMounted, setIsMounted] = useState(false)
+  const userRole = getUserRole()
+  const isAdmin = userRole === "ADMIN"
 
   // Prevent hydration mismatch by only showing cart count after mount
   useEffect(() => {
@@ -150,6 +154,17 @@ export function Header(): JSX.Element {
                     Cài đặt
                   </Link>
                 </DropdownMenuItem>
+                {isAdmin && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href="/admin" className="cursor-pointer">
+                        <ShieldCheck className="mr-2 h-4 w-4" />
+                        Admin Panel
+                      </Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   className="text-destructive focus:text-destructive cursor-pointer"
@@ -268,6 +283,15 @@ export function Header(): JSX.Element {
                       <Settings className="mr-2 h-4 w-4" />
                       Cài đặt
                     </Link>
+                    {isAdmin && (
+                      <Link
+                        href="/admin"
+                        className="flex items-center rounded-md px-3 py-2 text-base font-medium transition-colors hover:bg-accent"
+                      >
+                        <ShieldCheck className="mr-2 h-4 w-4" />
+                        Admin Panel
+                      </Link>
+                    )}
                     <button
                       className="flex items-center rounded-md px-3 py-2 text-base font-medium text-destructive transition-colors hover:bg-accent"
                       onClick={() => handleLogout()}
