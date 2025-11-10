@@ -997,9 +997,10 @@ export class TryOnHistoryController {
 // Backend DTO với Zod
 import { createZodDto } from "@anatine/zod-nestjs";
 import { z } from "zod";
+import { cuidSchema } from '@shared/types/common.types';
 
 const CreateTryOnHistorySchema = z.object({
-  productId: z.string().uuid(),
+  productId: cuidSchema(), // Backend uses CUID, not UUID
 });
 
 export class CreateTryOnHistoryDto extends createZodDto(

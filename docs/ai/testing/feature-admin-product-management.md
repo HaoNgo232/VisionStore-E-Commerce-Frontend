@@ -211,7 +211,7 @@ pnpm test:e2e
 **Additional Coverage:**
 
 - Prisma query optimization (parallel count + find)
-- DTO validation (price >= 0, valid UUID for categoryId)
+- DTO validation (price >= 0, valid CUID for categoryId - backend uses CUID, not UUID)
 - Error handling for DB connection issues
 
 ---
@@ -230,8 +230,8 @@ pnpm test:e2e
 - [ ] **Test: Get product by ID**
 
   - Given: apiClient.get mocked with product data
-  - When: `adminProductsApi.getById("uuid")` called
-  - Then: GET request to `/products/uuid`
+  - When: `adminProductsApi.getById("clx123abc456def789ghi012")` called (CUID format)
+  - Then: GET request to `/products/clx123abc456def789ghi012`
   - Then: Returns Product object
 
 - [ ] **Test: Create product with image**
@@ -252,15 +252,15 @@ pnpm test:e2e
 - [ ] **Test: Update product - partial data**
 
   - Given: apiClient.put mocked
-  - When: `adminProductsApi.update("uuid", { price: 2000000 })` called
+  - When: `adminProductsApi.update("clx123abc456def789ghi012", { price: 2000000 })` called (CUID format)
   - Then: PUT request with FormData containing only price
   - Then: Other fields not included
 
 - [ ] **Test: Delete product**
 
   - Given: apiClient.delete mocked
-  - When: `adminProductsApi.delete("uuid")` called
-  - Then: DELETE request to `/products/uuid`
+  - When: `adminProductsApi.delete("clx123abc456def789ghi012")` called (CUID format)
+  - Then: DELETE request to `/products/clx123abc456def789ghi012`
   - Then: No body sent
 
 - [ ] **Test: FormData construction - price conversion**
@@ -393,10 +393,10 @@ pnpm test:e2e
   - When: Schema validates
   - Then: No errors
 
-- [ ] **Test: Invalid UUID for categoryId fails**
-  - Given: { categoryId: "not-a-uuid" }
+- [ ] **Test: Invalid CUID for categoryId fails**
+  - Given: { categoryId: "not-a-valid-cuid" }
   - When: Schema validates
-  - Then: Error: "Category ID không hợp lệ"
+  - Then: Error: "Category ID không hợp lệ" (Backend uses CUID format, not UUID)
 
 **Additional Coverage:**
 
@@ -754,13 +754,13 @@ test-fixtures/
     "name": "Gọng kính Rayban Classic",
     "price": 1999000,
     "description": "Gọng kính thời trang cao cấp",
-    "categoryId": "uuid-category-1"
+    "categoryId": "clx123abc456def789ghi012" // CUID format
   },
   {
     "name": "Kính mát Oakley Sport",
     "price": 2499000,
     "description": "Kính mát thể thao chuyên nghiệp",
-    "categoryId": "uuid-category-2"
+    "categoryId": "clx456def789ghi012jkl345" // CUID format
   }
 ]
 ```
@@ -771,13 +771,14 @@ test-fixtures/
 
 ```sql
 -- Run before E2E tests
+-- Note: Backend uses CUID format, not UUID
 INSERT INTO categories (id, name, slug) VALUES
-  ('uuid-cat-1', 'Gọng Kính', 'gong-kinh'),
-  ('uuid-cat-2', 'Kính Mát', 'kinh-mat');
+  ('clx123abc456def789ghi012', 'Gọng Kính', 'gong-kinh'),
+  ('clx456def789ghi012jkl345', 'Kính Mát', 'kinh-mat');
 
 INSERT INTO users (id, email, password_hash, role) VALUES
-  ('uuid-admin', 'admin@test.com', '$hashed', 'ADMIN'),
-  ('uuid-user', 'user@test.com', '$hashed', 'USER');
+  ('clx789ghi012jkl345mno678', 'admin@test.com', '$hashed', 'ADMIN'),
+  ('clx012jkl345mno678pqr901', 'user@test.com', '$hashed', 'USER');
 ```
 
 ### Mock Data (Unit Tests)
@@ -786,14 +787,14 @@ INSERT INTO users (id, email, password_hash, role) VALUES
 
 ```typescript
 const mockProduct: Product = {
-  id: "uuid-product-1",
+  id: "clx123abc456def789ghi012", // CUID format
   name: "Test Product",
   price: 1000000,
   description: "Test description",
   imageUrl: "http://localhost:9000/products/test.jpg",
   imageFilename: "test.jpg",
-  categoryId: "uuid-cat-1",
-  category: { id: "uuid-cat-1", name: "Gọng Kính", slug: "gong-kinh" },
+  categoryId: "clx456def789ghi012jkl345", // CUID format
+  category: { id: "clx456def789ghi012jkl345", name: "Gọng Kính", slug: "gong-kinh" },
   isDeleted: false,
   createdAt: "2025-11-04T00:00:00.000Z",
   updatedAt: "2025-11-04T00:00:00.000Z",

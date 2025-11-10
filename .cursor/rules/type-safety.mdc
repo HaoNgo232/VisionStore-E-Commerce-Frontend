@@ -51,12 +51,14 @@ function handleUnknownData(data: unknown): string {
 
 ```typescript
 // Backend reference: @shared/types/product.types.ts
+import { cuidSchema } from './common.types'
+
 // Zod schema for runtime validation
 export const ProductSchema = z.object({
-  id: z.string().uuid(),
+  id: cuidSchema(), // Backend uses CUID, not UUID
   name: z.string().min(1),
   priceInt: z.number().int().positive(),
-  categoryId: z.string().uuid(),
+  categoryId: cuidSchema(), // Backend uses CUID, not UUID
   imageUrls: z.array(z.string().url()).default([]),
   isActive: z.boolean().default(true),
   createdAt: z.string().datetime(),

@@ -153,7 +153,9 @@ Default parameter với object literal `= {}` gây ra TypeScript strict mode fal
 
 ```typescript
 // ❌ WRONG - Gây false positives với TypeScript strict mode
-async function listUsers(query: ListUsersQuery = {}): Promise<ListUsersResponse> {
+async function listUsers(
+  query: ListUsersQuery = {},
+): Promise<ListUsersResponse> {
   // TypeScript không thể infer type đúng, gây unsafe member access errors
   if (query.page !== undefined) {
     searchParams.set("page", query.page.toString());
@@ -161,7 +163,9 @@ async function listUsers(query: ListUsersQuery = {}): Promise<ListUsersResponse>
 }
 
 // ❌ WRONG - Cần nhiều eslint-disable comments (không clean)
-async function listUsers(query: ListUsersQuery = {}): Promise<ListUsersResponse> {
+async function listUsers(
+  query: ListUsersQuery = {},
+): Promise<ListUsersResponse> {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   if (query.page !== undefined) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-argument
@@ -178,7 +182,7 @@ Sử dụng optional parameter `?` và optional chaining `?.` để tránh false
 // ✅ CORRECT - Type-safe, không có false positives, clean code
 async function listUsers(query?: ListUsersQuery): Promise<ListUsersResponse> {
   const searchParams = new URLSearchParams();
-  
+
   if (query?.page !== undefined) {
     searchParams.set("page", query.page.toString());
   }
@@ -191,10 +195,10 @@ async function listUsers(query?: ListUsersQuery): Promise<ListUsersResponse> {
   if (query?.role) {
     searchParams.set("role", query.role);
   }
-  
+
   const queryString = searchParams.toString();
   const endpoint = queryString ? `/users?${queryString}` : "/users";
-  
+
   return apiGetValidated<ListUsersResponse>(endpoint, schema);
 }
 ```
@@ -241,13 +245,22 @@ function calculateCartTotals(
     discountAmount = 0,
     freeShippingThreshold = 500000, // 500,000 VND
   } = options;
-  
+
   // Type-safe usage sau khi destructure
-  const subtotal = items.reduce((sum, item) => sum + item.product.priceInt * item.quantity, 0);
+  const subtotal = items.reduce(
+    (sum, item) => sum + item.product.priceInt * item.quantity,
+    0,
+  );
   const shipping = subtotal >= freeShippingThreshold ? 0 : shippingCost;
   const tax = (subtotal - discountAmount) * taxRate;
-  
-  return { subtotal, shipping, tax, discount: discountAmount, total: subtotal - discountAmount + shipping + tax };
+
+  return {
+    subtotal,
+    shipping,
+    tax,
+    discount: discountAmount,
+    total: subtotal - discountAmount + shipping + tax,
+  };
 }
 ```
 
@@ -304,10 +317,12 @@ export const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(
 
 ```typescript
 // Schema-first approach
+import { cuidSchema } from "@/types";
+
 const productFormSchema = z.object({
   name: z.string().min(1, "Product name required"),
   priceInt: z.number().int().positive("Price must be positive"),
-  categoryId: z.string().uuid("Invalid category"),
+  categoryId: cuidSchema(), // Backend uses CUID, not UUID
   imageUrls: z.array(z.string().url()).default([]),
 });
 

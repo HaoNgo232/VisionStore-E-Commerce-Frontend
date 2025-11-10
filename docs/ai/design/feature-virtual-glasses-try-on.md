@@ -95,7 +95,7 @@ graph TD
 
 @Entity("products")
 export class Product {
-  @PrimaryGeneratedColumn("uuid")
+  @PrimaryGeneratedColumn("uuid") // Note: Backend uses CUID, not UUID - TypeORM example shows UUID but actual backend uses @default(cuid())
   id: string;
 
   @Column({ type: "varchar", length: 255 })
@@ -107,7 +107,7 @@ export class Product {
   @Column({ type: "integer" })
   priceInt: number; // Giá theo cent
 
-  @Column({ type: "uuid" })
+  @Column({ type: "varchar", length: 25 }) // CUID format, not UUID
   categoryId: string;
 
   @Column({ type: "jsonb", nullable: true, default: [] })
@@ -146,17 +146,17 @@ export interface VirtualTryOnConfig {
 
 @Entity('try_on_history')
 export class TryOnHistory {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn('uuid') // Note: Backend uses CUID, not UUID - TypeORM example shows UUID but actual backend uses @default(cuid())
   id: string;
 
-  @Column({ type: 'uuid' })
+  @Column({ type: 'varchar', length: 25 }) // CUID format, not UUID
   userId: string;
 
   @ManyToOne(() => User)
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  @Column({ type: 'uuid' })
+  @Column({ type: 'varchar', length: 25 }) // CUID format, not UUID
   productId: string;
 
   @ManyToOne(() => Product)
@@ -206,9 +206,11 @@ export const VirtualTryOnConfigSchema = z.object({
 
 export type VirtualTryOnConfig = z.infer<typeof VirtualTryOnConfigSchema>;
 
+import { cuidSchema } from '@/types'
+
 // Product with try-on support
 export const ProductWithTryOnSchema = z.object({
-  id: z.string().uuid(),
+  id: cuidSchema(), // Backend uses CUID, not UUID
   name: z.string(),
   priceInt: z.number().int(),
   imageUrls: z.array(z.string().url()),
@@ -220,11 +222,11 @@ export type ProductWithTryOn = z.infer<typeof ProductWithTryOnSchema>;
 
 // Try-on history item
 export const TryOnHistoryItemSchema = z.object({
-  id: z.string().uuid(),
-  productId: z.string().uuid(),
+  id: cuidSchema(), // Backend uses CUID, not UUID
+  productId: cuidSchema(), // Backend uses CUID, not UUID
   triedAt: z.string().datetime(),
   product: z.object({
-    id: z.string().uuid(),
+    id: cuidSchema(), // Backend uses CUID, not UUID
     name: z.string(),
     imageUrls: z.array(z.string().url()),
   }),
@@ -249,10 +251,11 @@ ON products(has_virtual_try_on)
 WHERE has_virtual_try_on = TRUE;
 
 -- Create try_on_history table
+-- Note: Backend uses CUID (VARCHAR), not UUID - SQL example shows UUID but actual backend uses @default(cuid())
 CREATE TABLE try_on_history (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  id VARCHAR(25) PRIMARY KEY, -- CUID format, not UUID
+  user_id VARCHAR(25) NOT NULL REFERENCES users(id) ON DELETE CASCADE, -- CUID format
+  product_id VARCHAR(25) NOT NULL REFERENCES products(id) ON DELETE CASCADE, -- CUID format
   tried_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   try_count INTEGER DEFAULT 1,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -596,7 +599,7 @@ function VirtualTryOnModal({ productId }: Props) {
 
 4. **Input Validation**:
    - Zod schema validation cho mọi API response
-   - Product ID validation (UUID format)
+   - Product ID validation (CUID format - backend uses CUID, not UUID)
 
 ### Reliability/Availability Needs
 

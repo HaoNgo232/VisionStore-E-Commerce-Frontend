@@ -96,7 +96,7 @@ graph TD
 
 ```prisma
 model Product {
-  id            String    @id @default(uuid())
+  id            String    @id @default(cuid()) // Backend uses CUID, not UUID
   name          String
   price         Decimal   @db.Decimal(10, 2)
   description   String?   @db.Text
@@ -121,7 +121,7 @@ model Product {
 }
 
 model Category {
-  id        String    @id @default(uuid())
+  id        String    @id @default(cuid()) // Backend uses CUID, not UUID
   name      String    @unique
   slug      String    @unique
   products  Product[]
@@ -224,7 +224,7 @@ sequenceDiagram
 #### 1. List Products (Admin Only - GET /products)
 
 ```http
-GET /products?page=1&limit=10&search=iPhone&categoryId=uuid
+GET /products?page=1&limit=10&search=iPhone&categoryId=clx123abc456def789
 Authorization: Bearer {jwt_token}
 
 Guards: @UseGuards(AuthGuard, RolesGuard) + @Roles(UserRole.ADMIN)
@@ -234,13 +234,13 @@ Response: 200 OK
 {
   "data": [
     {
-      "id": "uuid",
+      "id": "clx123abc456def789ghi012",
       "name": "iPhone 15 Pro",
       "price": 2500000,
       "description": "...",
       "imageUrl": "http://localhost:9000/products/abc123.jpg",
-      "categoryId": "uuid",
-      "category": { "id": "uuid", "name": "Electronics" },
+      "categoryId": "clx123abc456def789ghi012",
+      "category": { "id": "clx123abc456def789ghi012", "name": "Electronics" },
       "isDeleted": false,
       "createdAt": "2025-11-04T00:00:00.000Z",
       "updatedAt": "2025-11-04T00:00:00.000Z"
@@ -280,7 +280,7 @@ Body (form-data):
 - name: "Gọng kính Rayban Classic" (text)
 - price: 1999000 (text)
 - description: "Gọng kính thời trang..." (text)
-- categoryId: "uuid-category" (text)
+- categoryId: "clx123abc456def789ghi012" (CUID format)
 - image: [binary file] (file)
 
 Response: 201 Created
@@ -300,7 +300,7 @@ Body (form-data):
 - name: "Updated name" (optional)
 - price: 2199000 (optional)
 - description: "..." (optional)
-- categoryId: "uuid" (optional)
+- categoryId: "clx123abc456def789ghi012" (optional, CUID format)
 - image: [binary file] (optional - if provided, replace old image)
 
 Response: 200 OK

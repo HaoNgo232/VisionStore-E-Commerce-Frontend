@@ -823,11 +823,13 @@ const ACCEPTED_IMAGE_TYPES = [
   "image/webp",
 ];
 
+import { cuidSchema } from '@/types'
+
 export const productFormSchema = z.object({
   name: z.string().min(1, "Tên sản phẩm là bắt buộc").max(255),
   price: z.number().min(0, "Giá phải lớn hơn hoặc bằng 0"),
   description: z.string().optional(),
-  categoryId: z.string().uuid("Category ID không hợp lệ").optional(),
+  categoryId: cuidSchema().optional(), // Backend uses CUID, not UUID
   image: z
     .instanceof(File)
     .refine((file) => file.size <= MAX_FILE_SIZE, "File size tối đa 5MB")

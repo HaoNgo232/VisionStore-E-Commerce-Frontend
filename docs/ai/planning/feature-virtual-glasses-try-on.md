@@ -115,7 +115,7 @@ feature: virtual-glasses-try-on
 
 ```typescript
 {
-  id: "uuid",
+  id: "clx123abc456def789ghi012", // CUID format
   name: "Kính 3D - Sport Glasses B307",
   hasVirtualTryOn: true,
   virtualTryOnConfig: {
