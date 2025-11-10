@@ -24,6 +24,7 @@ import {
   VerifyTokenResponseSchema,
   UserSchema,
 } from "@/types/auth.types";
+import { type z } from "zod";
 
 export const authService = {
   /**
@@ -110,7 +111,7 @@ export const authService = {
       // Backend uses GET /auth/me
       return await apiGetValidated<User>(
         "/auth/me",
-        UserSchema,
+        UserSchema as z.ZodType<User>,
       );
     } catch (error) {
       throw new Error(getErrorMessage(error));

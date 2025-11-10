@@ -120,7 +120,7 @@ export default function CheckoutContent(): JSX.Element {
             if (selectedPayment === PaymentMethod.COD) {
                 // COD flow: Show success toast and redirect to success page
                 toast.success("Đặt hàng thành công!")
-                void router.push(`/cart/success?orderId=${order.id}&paymentMethod=${selectedPayment}`)
+                router.push(`/cart/success?orderId=${order.id}&paymentMethod=${selectedPayment}`)
             } else if (selectedPayment === PaymentMethod.SEPAY) {
                 // SePay flow: Process payment to get QR, then open waiting dialog (no toast yet)
                 setCreatedOrderId(order.id)
@@ -225,30 +225,30 @@ export default function CheckoutContent(): JSX.Element {
                         <CardContent>
                             <RadioGroup value={selectedPayment} onValueChange={(value) => setSelectedPayment(value as PaymentMethod)}>
                                 <div className="space-y-3">
-                                    <div
-                                        className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer"
-                                        onClick={() => setSelectedPayment(PaymentMethod.COD)}
+                                    <label
+                                        htmlFor="cod"
+                                        className="w-full flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer bg-transparent"
                                     >
                                         <RadioGroupItem value={PaymentMethod.COD} id="cod" />
-                                        <Label htmlFor="cod" className="flex-1 cursor-pointer">
+                                        <div className="flex-1 cursor-pointer">
                                             <div className="font-semibold">Thanh toán khi nhận hàng (COD)</div>
                                             <div className="text-sm text-muted-foreground">
                                                 Thanh toán tiền mặt khi nhân viên giao hàng tới
                                             </div>
-                                        </Label>
-                                    </div>
-                                    <div
-                                        className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer"
-                                        onClick={() => setSelectedPayment(PaymentMethod.SEPAY)}
+                                        </div>
+                                    </label>
+                                    <label
+                                        htmlFor="sepay"
+                                        className="w-full flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer bg-transparent"
                                     >
                                         <RadioGroupItem value={PaymentMethod.SEPAY} id="sepay" />
-                                        <Label htmlFor="sepay" className="flex-1 cursor-pointer">
+                                        <div className="flex-1 cursor-pointer">
                                             <div className="font-semibold">Chuyển khoản ngân hàng (SePay)</div>
                                             <div className="text-sm text-muted-foreground">
                                                 Quét mã QR để thanh toán qua ngân hàng
                                             </div>
-                                        </Label>
-                                    </div>
+                                        </div>
+                                    </label>
                                 </div>
                             </RadioGroup>
                         </CardContent>

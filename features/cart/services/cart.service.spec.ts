@@ -1,7 +1,7 @@
 import { cartApi } from "./cart.service";
 import { useAuthStore } from "@/stores/auth.store";
 import * as apiClient from "@/lib/api-client";
-import type { Cart } from "@/types";
+import type { Cart, CartWithProductsResponse } from "@/types";
 
 jest.mock("@/stores/auth.store");
 jest.mock("@/lib/api-client");
@@ -33,6 +33,20 @@ describe("cartApi", () => {
     updatedAt: "2025-01-01T00:00:00Z",
   };
 
+  const createMockResponse = (cart: Cart): CartWithProductsResponse => ({
+    cart: {
+      id: cart.id,
+      sessionId: cart.sessionId,
+      userId: cart.userId,
+      items: cart.items.map(({ product, ...item }) => item), // Remove product field for CartResponse
+      totalInt: cart.totalInt,
+      createdAt: cart.createdAt,
+      updatedAt: cart.updatedAt,
+    },
+    items: cart.items,
+    totalInt: cart.totalInt,
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     (useAuthStore.getState as jest.Mock).mockReturnValue({
@@ -42,11 +56,15 @@ describe("cartApi", () => {
 
   describe("getCart", () => {
     it("fetches user cart", async () => {
-      (apiClient.apiGet as jest.Mock).mockResolvedValue(mockCart);
+      const mockResponse = createMockResponse(mockCart);
+      (apiClient.apiGetValidated as jest.Mock).mockResolvedValue(mockResponse);
 
       const result = await cartApi.getCart();
 
-      expect(apiClient.apiGet).toHaveBeenCalledWith("/cart");
+      expect(apiClient.apiGetValidated).toHaveBeenCalledWith(
+        "/cart",
+        expect.anything(),
+      );
       expect(result).toEqual(mockCart);
     });
   });
@@ -59,19 +77,40 @@ describe("cartApi", () => {
         priceInt: 299900,
       };
 
-      const updatedCart = {
-        ...mockCart,
-        items: [...mockCart.items, addRequest],
+      const newItem = {
+        id: "item-456",
+        cartId: "cart-123",
+        productId: "prod-456",
+        quantity: 1,
+        createdAt: "2025-01-01T00:00:00Z",
+        updatedAt: "2025-01-01T00:00:00Z",
+        product: {
+          id: "prod-456",
+          name: "Product 2",
+          priceInt: 299900,
+          imageUrls: ["https://example.com/image2.jpg"],
+        },
       };
 
-      (apiClient.apiPost as jest.Mock).mockResolvedValue(updatedCart);
+      const updatedCart: Cart = {
+        ...mockCart,
+        items: [...mockCart.items, newItem],
+        totalInt: mockCart.totalInt + addRequest.priceInt,
+      };
+
+      const mockResponse = createMockResponse(updatedCart);
+      (apiClient.apiPostValidated as jest.Mock).mockResolvedValue(mockResponse);
 
       const result = await cartApi.addItem(addRequest);
 
-      expect(apiClient.apiPost).toHaveBeenCalledWith("/cart/items", {
-        userId: mockUserId,
-        ...addRequest,
-      });
+      expect(apiClient.apiPostValidated).toHaveBeenCalledWith(
+        "/cart/items",
+        expect.anything(),
+        {
+          userId: mockUserId,
+          ...addRequest,
+        },
+      );
       expect(result).toEqual(updatedCart);
     });
 
@@ -87,7 +126,7 @@ describe("cartApi", () => {
       };
 
       await expect(cartApi.addItem(addRequest)).rejects.toThrow(
-        "User not authenticated",
+        "Bạn phải đăng nhập để thêm sản phẩm vào giỏ hàng",
       );
     });
   });
@@ -96,19 +135,37 @@ describe("cartApi", () => {
     it("updates cart item with userId", async () => {
       const updateRequest = { productId: "prod-123", quantity: 3 };
 
-      const updatedCart = {
+      const originalItem = mockCart.items[0];
+      if (!originalItem) {
+        throw new Error("mockCart.items[0] is required for test");
+      }
+
+      const updatedCart: Cart = {
         ...mockCart,
-        items: [{ ...mockCart.items[0], quantity: 3 }],
+        items: [
+          {
+            ...originalItem,
+            quantity: 3,
+          },
+        ],
+        totalInt: 99950 * 3,
       };
 
-      (apiClient.apiPatch as jest.Mock).mockResolvedValue(updatedCart);
+      const mockResponse = createMockResponse(updatedCart);
+      (apiClient.apiPatchValidated as jest.Mock).mockResolvedValue(
+        mockResponse,
+      );
 
-      const result = await cartApi.updateItem("item-123", updateRequest);
+      const result = await cartApi.updateItem(updateRequest);
 
-      expect(apiClient.apiPatch).toHaveBeenCalledWith("/cart/items", {
-        userId: mockUserId,
-        ...updateRequest,
-      });
+      expect(apiClient.apiPatchValidated).toHaveBeenCalledWith(
+        "/cart/items",
+        expect.anything(),
+        {
+          userId: mockUserId,
+          ...updateRequest,
+        },
+      );
       expect(result).toEqual(updatedCart);
     });
 
@@ -118,7 +175,7 @@ describe("cartApi", () => {
       });
 
       await expect(
-        cartApi.updateItem("item-123", { productId: "prod-123", quantity: 3 }),
+        cartApi.updateItem({ productId: "prod-123", quantity: 3 }),
       ).rejects.toThrow("User not authenticated");
     });
   });
@@ -131,13 +188,20 @@ describe("cartApi", () => {
         totalInt: 0,
       };
 
-      (apiClient.apiDelete as jest.Mock).mockResolvedValue(emptyCart);
+      const mockResponse = createMockResponse(emptyCart);
+      (apiClient.apiDeleteValidated as jest.Mock).mockResolvedValue(
+        mockResponse,
+      );
 
-      const result = await cartApi.removeItem("item-123", "prod-123");
+      const result = await cartApi.removeItem("prod-123");
 
-      expect(apiClient.apiDelete).toHaveBeenCalledWith("/cart/items", {
-        data: { userId: mockUserId, productId: "prod-123" },
-      });
+      expect(apiClient.apiDeleteValidated).toHaveBeenCalledWith(
+        "/cart/items",
+        expect.anything(),
+        {
+          data: { userId: mockUserId, productId: "prod-123" },
+        },
+      );
       expect(result).toEqual(emptyCart);
     });
 
@@ -146,7 +210,7 @@ describe("cartApi", () => {
         getUserId: jest.fn().mockReturnValue(null),
       });
 
-      await expect(cartApi.removeItem("item-123", "prod-123")).rejects.toThrow(
+      await expect(cartApi.removeItem("prod-123")).rejects.toThrow(
         "User not authenticated",
       );
     });

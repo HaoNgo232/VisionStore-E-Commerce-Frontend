@@ -60,7 +60,7 @@ export const cartApi = {
     };
   },
 
-  async updateItem(itemId: string, data: UpdateCartItemRequest): Promise<Cart> {
+  async updateItem(data: UpdateCartItemRequest): Promise<Cart> {
     const userId = useAuthStore.getState().getUserId();
     if (!userId) {
       throw new Error("User not authenticated");
@@ -85,7 +85,7 @@ export const cartApi = {
     };
   },
 
-  async removeItem(itemId: string, productId: string): Promise<Cart> {
+  async removeItem(productId: string): Promise<Cart> {
     const userId = useAuthStore.getState().getUserId();
     if (!userId) {
       throw new Error("User not authenticated");

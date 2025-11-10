@@ -3,15 +3,31 @@
  * Hooks for product data fetching with React Query
  */
 
-import { useQuery, useMutation, useQueryClient, type UseQueryResult } from "@tanstack/react-query";
-import { productsApi, type GetProductsParams } from "../services/products.service";
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  type UseQueryResult,
+  type UseMutationResult,
+} from "@tanstack/react-query";
+import {
+  productsApi,
+  type GetProductsParams,
+} from "../services/products.service";
 import { queryKeys } from "@/lib/query-keys";
-import type { UpdateProductRequest, CreateProductRequest, Product, PaginatedResponse } from "@/types";
+import type {
+  UpdateProductRequest,
+  CreateProductRequest,
+  Product,
+  PaginatedResponse,
+} from "@/types";
 
 /**
  * Get paginated products list
  */
-export function useProducts(params?: GetProductsParams): UseQueryResult<PaginatedResponse<Product>, Error> {
+export function useProducts(
+  params?: GetProductsParams,
+): UseQueryResult<PaginatedResponse<Product>, Error> {
   return useQuery({
     queryKey: queryKeys.products.list(params),
     queryFn: () => productsApi.getAll(params),
@@ -46,7 +62,12 @@ export function useProductBySlug(slug: string): UseQueryResult<Product, Error> {
 /**
  * Create product mutation (admin only)
  */
-export function useCreateProduct(): UseMutationResult<Product, Error, CreateProductRequest, unknown> {
+export function useCreateProduct(): UseMutationResult<
+  Product,
+  Error,
+  CreateProductRequest,
+  unknown
+> {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -63,7 +84,12 @@ export function useCreateProduct(): UseMutationResult<Product, Error, CreateProd
 /**
  * Update product mutation (admin only)
  */
-export function useUpdateProduct(): UseMutationResult<Product, Error, { id: string; data: UpdateProductRequest }, unknown> {
+export function useUpdateProduct(): UseMutationResult<
+  Product,
+  Error,
+  { id: string; data: UpdateProductRequest },
+  unknown
+> {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -84,7 +110,12 @@ export function useUpdateProduct(): UseMutationResult<Product, Error, { id: stri
 /**
  * Delete product mutation (admin only)
  */
-export function useDeleteProduct(): UseMutationResult<void, Error, string, unknown> {
+export function useDeleteProduct(): UseMutationResult<
+  void,
+  Error,
+  string,
+  unknown
+> {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -97,4 +128,3 @@ export function useDeleteProduct(): UseMutationResult<void, Error, string, unkno
     },
   });
 }
-

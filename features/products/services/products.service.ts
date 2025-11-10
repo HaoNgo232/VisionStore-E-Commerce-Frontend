@@ -58,8 +58,9 @@ export const productsApi = {
     }
 
     const query = queryParams.toString();
+    const endpoint = query ? `/products?${query}` : "/products";
     return apiGetValidated<PaginatedResponse<Product>>(
-      `/products${query ? `?${query}` : ""}`,
+      endpoint,
       PaginatedProductsSchema,
     );
   },

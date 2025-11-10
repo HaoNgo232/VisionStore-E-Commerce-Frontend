@@ -9,14 +9,18 @@ import { useState, useEffect } from "react";
 import { getErrorMessage } from "@/lib/api-client";
 import { addressesApi } from "@/features/addresses/services/addresses.service";
 import { toast } from "sonner";
-import type { Address, CreateAddressRequest } from "@/types";
+import type {
+  Address,
+  CreateAddressRequest,
+  UpdateAddressRequest,
+} from "@/types";
 
 export function useAddresses(): {
   addresses: Address[];
   loading: boolean;
   error: string | null;
   create: (data: CreateAddressRequest) => Promise<Address>;
-  update: (id: string, data: CreateAddressRequest) => Promise<Address>;
+  update: (id: string, data: UpdateAddressRequest) => Promise<Address>;
   remove: (id: string) => Promise<void>;
   refetch: () => Promise<void>;
 } {
@@ -57,7 +61,10 @@ export function useAddresses(): {
     }
   };
 
-  const update = async (id: string, data: CreateAddressRequest): Promise<Address> => {
+  const update = async (
+    id: string,
+    data: UpdateAddressRequest,
+  ): Promise<Address> => {
     try {
       const updated = await addressesApi.update(id, data);
       setAddresses(addresses.map((addr) => (addr.id === id ? updated : addr)));

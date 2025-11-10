@@ -8,8 +8,12 @@ import { AddressFormDialog } from "./address-form-dialog"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { MapPin, Plus } from "lucide-react"
-import type { Address, CreateAddressRequest } from "@/types"
-import type { AddressFormValues } from "@/lib/validations/forms"
+import type {
+    Address,
+    CreateAddressRequest,
+    UpdateAddressRequest,
+} from "@/types";
+import type { AddressFormValues } from "@/lib/validations/forms";
 
 export function AddressesTab(): JSX.Element {
     const {
@@ -19,41 +23,52 @@ export function AddressesTab(): JSX.Element {
         update,
         remove,
         refetch,
-    } = useAddresses()
+    } = useAddresses();
 
-    const [addressDialogOpen, setAddressDialogOpen] = useState(false)
-    const [editingAddress, setEditingAddress] = useState<Address | null>(null)
-    const [deletingId, setDeletingId] = useState<string | null>(null)
+    const [addressDialogOpen, setAddressDialogOpen] = useState(false);
+    const [editingAddress, setEditingAddress] = useState<Address | null>(null);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
 
     const handleEditAddress = (address: Address): void => {
-        setEditingAddress(address)
-        setAddressDialogOpen(true)
-    }
+        setEditingAddress(address);
+        setAddressDialogOpen(true);
+    };
 
     const handleAddAddress = (): void => {
-        setEditingAddress(null)
-        setAddressDialogOpen(true)
-    }
+        setEditingAddress(null);
+        setAddressDialogOpen(true);
+    };
 
-    const handleSaveAddress = async (values: AddressFormValues, isEdit: boolean): Promise<void> => {
-        const data: CreateAddressRequest = {
-            fullName: values.fullName,
-            phone: values.phone,
-            street: values.street,
-            ward: values.ward,
-            district: values.district,
-            city: values.city,
-            isDefault: values.isDefault,
-        }
-
+    const handleSaveAddress = async (
+        values: AddressFormValues,
+        isEdit: boolean,
+    ): Promise<void> => {
         if (isEdit && editingAddress) {
-            await update(editingAddress.id, data)
+            const updateData: UpdateAddressRequest = {
+                fullName: values.fullName,
+                phone: values.phone,
+                street: values.street,
+                ward: values.ward,
+                district: values.district,
+                city: values.city,
+                isDefault: values.isDefault,
+            };
+            await update(editingAddress.id, updateData);
         } else {
-            await create(data)
+            const createData: CreateAddressRequest = {
+                fullName: values.fullName,
+                phone: values.phone,
+                street: values.street,
+                ward: values.ward,
+                district: values.district,
+                city: values.city,
+                isDefault: values.isDefault,
+            };
+            await create(createData);
         }
         // Refresh data từ server để đảm bảo hiển thị data mới nhất
-        await refetch()
-    }
+        await refetch();
+    };
 
     const handleDeleteAddress = async (id: string): Promise<void> => {
         setDeletingId(id)

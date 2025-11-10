@@ -12,7 +12,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertCircle, Clock, Copy, Loader2 } from "lucide-react";
+import { AlertCircle, Clock, Copy, Loader2, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { usePaymentPolling } from "../hooks/use-payment-polling";
 import { formatPrice } from "@/features/products/utils";
@@ -39,10 +39,9 @@ export function PaymentWaitingDialog({
     onTimeout,
     onError,
 }: PaymentWaitingDialogProps): JSX.Element {
-    const [timeRemaining, setTimeRemaining] = useState(900); // 15 minutes in seconds
-    const [_isRetrying, setIsRetrying] = useState(false);
+    const [showManualInfo, setShowManualInfo] = useState(false);
 
-    const { isPolling, attempts: _attempts, error, stopPolling } = usePaymentPolling({
+    const { isPolling, error, stopPolling } = usePaymentPolling({
         orderId,
         onSuccess,
         onTimeout,
@@ -51,39 +50,11 @@ export function PaymentWaitingDialog({
     });
 
     const amountVND = formatPrice(amountInt);
-    const maxTimeout = 900; // 15 minutes in seconds
-    const _progressPercent = ((maxTimeout - timeRemaining) / maxTimeout) * 100;
 
-    // Update countdown timer - only when dialog is open AND polling
-    useEffect(() => {
-        if (!isPolling || !open) {
-            // Reset timer when dialog closes
-            if (!open) {
-                setTimeRemaining(900);
-            }
-            return;
-        }
-
-        const interval = setInterval(() => {
-            setTimeRemaining((prev) => {
-                if (prev <= 1) {
-                    clearInterval(interval);
-                    return 0;
-                }
-                return prev - 1;
-            });
-        }, 1000);
-
-        return () => {
-            clearInterval(interval);
-        };
-    }, [isPolling, open]);
-
-    // Reset timer when dialog opens
+    // Reset manual info when dialog opens
     useEffect(() => {
         if (open) {
-            setTimeRemaining(900);
-            setIsRetrying(false);
+            setShowManualInfo(false);
         }
     }, [open]);
 
@@ -93,20 +64,10 @@ export function PaymentWaitingDialog({
         toast.success("Đã sao chép mã đơn hàng");
     };
 
-    const _handleCopyAccountInfo = (): void => {
-        const accountInfo = `Ngân hàng: Vietcombank\nSố tài khoản: 1234567890\nTên tài khoản: CONG TY TNHH E-COMMERCE\nNội dung: DH${orderId}`;
+    const handleCopyAccountInfo = (): void => {
+        const accountInfo = `Ngân hàng: BIDV\nSố tài khoản: 96247HAOVAO\nTên tài khoản: NGO GIA HAO\nNội dung: DH${orderId}`;
         void navigator.clipboard.writeText(accountInfo);
         toast.success("Đã sao chép thông tin tài khoản");
-    };
-
-    const _handleRetry = (): void => {
-        setIsRetrying(true);
-        setTimeRemaining(900); // Reset to 15 minutes
-        stopPolling();
-        setTimeout(() => {
-            // The polling will restart automatically when enabled
-            setIsRetrying(false);
-        }, 1000);
     };
 
     // Prevent backdrop click from closing dialog when polling
@@ -190,43 +151,60 @@ export function PaymentWaitingDialog({
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-sm text-gray-600">Ngân hàng</span>
-                                    <span className="font-semibold">Vietcombank</span>
+                                    <span className="font-semibold">BIDV</span>
                                 </div>
                             </div>
 
-                            {/* Manual Account Info */}
-                            {/* <div className="rounded-lg bg-blue-50 p-4">
-                                <div className="flex items-center justify-between mb-2">
-                                    <span className="text-sm font-semibold text-blue-800">
-                                        Thông tin chuyển khoản thủ công
-                                    </span>
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={handleCopyAccountInfo}
-                                        className="h-6 w-6 p-0"
-                                    >
-                                        <Copy className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                                <div className="space-y-1 text-sm text-blue-700">
-                                    <div>🏦 Ngân hàng: Vietcombank</div>
-                                    <div>💳 Số tài khoản: 1234567890</div>
-                                    <div>👤 Tên tài khoản: CONG TY TNHH E-COMMERCE</div>
-                                    <div>📝 Nội dung: DH{orderId}</div>
-                                </div>
-                            </div> */}
-
-                            {/* Instructions */}
-                            {/* <div className="rounded-lg bg-blue-50 p-4 text-sm text-blue-800">
-                                <p className="font-semibold mb-2">Hướng dẫn thanh toán:</p>
-                                <ol className="list-inside list-decimal space-y-1">
-                                    <li>Mở ứng dụng ngân hàng trên điện thoại</li>
-                                    <li>Chọn chức năng quét mã QR hoặc chuyển khoản</li>
-                                    <li>Quét mã QR ở trên hoặc nhập thông tin thủ công</li>
-                                    <li>Xác nhận và hoàn tất thanh toán</li>
-                                </ol>
-                            </div> */}
+                            {/* Manual Transfer Info - Collapsible */}
+                            <div className="border rounded-lg">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowManualInfo(!showManualInfo)}
+                                    className="w-full flex items-center justify-between p-3 text-sm font-medium hover:bg-gray-50 transition-colors"
+                                >
+                                    <span>Thông tin chuyển khoản thủ công</span>
+                                    <ChevronDown
+                                        className={`h-4 w-4 transition-transform ${showManualInfo ? "rotate-180" : ""
+                                            }`}
+                                    />
+                                </button>
+                                {showManualInfo && (
+                                    <div className="px-3 pb-3 space-y-2 border-t pt-3">
+                                        <div className="flex items-center justify-between text-sm">
+                                            <span className="text-gray-600">Số tài khoản:</span>
+                                            <div className="flex items-center gap-2">
+                                                <span className="font-mono font-semibold">
+                                                    96247HAOVAO
+                                                </span>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={handleCopyAccountInfo}
+                                                    className="h-6 w-6 p-0"
+                                                >
+                                                    <Copy className="h-3 w-3" />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-gray-600">Tên tài khoản:</span>
+                                            <span className="font-semibold">
+                                                NGO GIA HAO
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-gray-600">Nội dung:</span>
+                                            <span className="font-mono font-semibold">
+                                                DH{orderId}
+                                            </span>
+                                        </div>
+                                        <div className="pt-2 mt-2 border-t text-xs text-gray-500">
+                                            💡 Mở app ngân hàng → Chọn chuyển khoản → Nhập thông
+                                            tin trên → Xác nhận
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </CardContent>
                     </Card>
 

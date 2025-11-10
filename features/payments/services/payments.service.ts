@@ -3,20 +3,15 @@
  * Handles payment processing (COD, SePay) and status checking with runtime validation
  */
 
-import {
-  apiPostValidated,
-  apiGetValidated,
-} from "@/lib/api-client";
+import { apiPostValidated, apiGetValidated } from "@/lib/api-client";
 import type {
   PaymentProcessRequest,
   PaymentProcessResponse,
   Payment,
   PaymentMethod,
 } from "@/types";
-import {
-  PaymentProcessResponseSchema,
-  PaymentSchema,
-} from "@/types";
+import { PaymentProcessResponseSchema, PaymentSchema } from "@/types";
+import { type z } from "zod";
 
 export const paymentsApi = {
   /**
@@ -39,7 +34,7 @@ export const paymentsApi = {
 
     return apiPostValidated<PaymentProcessResponse, PaymentProcessRequest>(
       "/payments/process",
-      PaymentProcessResponseSchema,
+      PaymentProcessResponseSchema as z.ZodType<PaymentProcessResponse>,
       payload,
     );
   },
@@ -52,7 +47,7 @@ export const paymentsApi = {
   async getByOrder(orderId: string): Promise<Payment> {
     return apiGetValidated<Payment>(
       `/payments/order/${orderId}`,
-      PaymentSchema,
+      PaymentSchema as z.ZodType<Payment>,
     );
   },
 
@@ -62,7 +57,10 @@ export const paymentsApi = {
    * @returns Payment details
    */
   async getById(paymentId: string): Promise<Payment> {
-    return apiGetValidated<Payment>(`/payments/${paymentId}`, PaymentSchema);
+    return apiGetValidated<Payment>(
+      `/payments/${paymentId}`,
+      PaymentSchema as z.ZodType<Payment>,
+    );
   },
 
   /**
@@ -74,7 +72,7 @@ export const paymentsApi = {
   async confirmCod(orderId: string): Promise<Payment> {
     return apiPostValidated<Payment, Record<string, never>>(
       `/payments/confirm-cod/${orderId}`,
-      PaymentSchema,
+      PaymentSchema as z.ZodType<Payment>,
       {},
     );
   },
