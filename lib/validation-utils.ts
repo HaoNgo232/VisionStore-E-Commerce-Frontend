@@ -61,6 +61,12 @@ export function validateResponse<T>(
           return current;
         };
 
+        // Log full response data for debugging
+        const fullResponseData =
+          typeof data === "object" && data !== null
+            ? JSON.stringify(data, null, 2)
+            : String(data);
+
         console.error(`[Validation Error] ${context ?? "Response"}:`, {
           totalErrors: error.errors.length,
           errorsByPath,
@@ -75,10 +81,16 @@ export function validateResponse<T>(
               receivedType: typeof receivedValue,
             };
           }),
-          sampleData:
-            typeof data === "object" && data !== null
-              ? JSON.stringify(data, null, 2).substring(0, 3000)
-              : String(data).substring(0, 200),
+          // Log full response data (not truncated)
+          fullResponseData,
+          // Also log as object for easier inspection
+          responseObject: data,
+          // Log data type info
+          dataType: typeof data,
+          isArray: Array.isArray(data),
+          isNull: data === null,
+          keys:
+            typeof data === "object" && data !== null ? Object.keys(data) : [],
         });
       }
       throw new ValidationError(

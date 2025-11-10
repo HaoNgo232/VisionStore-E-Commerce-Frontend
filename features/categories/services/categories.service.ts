@@ -14,8 +14,9 @@ import type {
   CategoryTree,
   CreateCategoryRequest,
   UpdateCategoryRequest,
+  PaginatedCategoriesResponse,
 } from "@/types";
-import { CategorySchema } from "@/types";
+import { CategorySchema, PaginatedCategoriesResponseSchema } from "@/types";
 import { z } from "zod";
 
 // CategoryTree schema - recursive
@@ -30,9 +31,14 @@ const CategoryTreeArraySchema: z.ZodType<CategoryTree[]> =
 export const categoriesApi = {
   /**
    * Fetch all categories
+   * Backend returns paginated response, so we unwrap the categories array
    */
   async getAll(): Promise<Category[]> {
-    return apiGetValidated<Category[]>("/categories", CategoryArraySchema);
+    const response = await apiGetValidated<PaginatedCategoriesResponse>(
+      "/categories",
+      PaginatedCategoriesResponseSchema,
+    );
+    return response.categories;
   },
 
   /**

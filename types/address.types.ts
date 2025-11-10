@@ -50,16 +50,9 @@ export interface CreateAddressRequest {
 
 /**
  * Update address request
+ * Uses Partial to ensure all fields are optional and stay in sync with CreateAddressRequest
  */
-export interface UpdateAddressRequest {
-  fullName?: string;
-  phone?: string;
-  street?: string;
-  ward?: string;
-  district?: string;
-  city?: string;
-  isDefault?: boolean;
-}
+export type UpdateAddressRequest = Partial<CreateAddressRequest>;
 
 /**
  * Address suggestion from API

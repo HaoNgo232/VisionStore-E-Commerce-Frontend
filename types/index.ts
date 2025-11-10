@@ -66,6 +66,9 @@ export type {
   ProductSortBy,
   CreateProductRequest,
   UpdateProductRequest,
+  AdminCreateProductRequest,
+  AdminUpdateProductRequest,
+  AdminProductQueryParams,
   ProductReview,
   ProductAttributes,
 } from "./product.types";
@@ -82,9 +85,13 @@ export type {
   CategoryTree,
   CreateCategoryRequest,
   UpdateCategoryRequest,
+  PaginatedCategoriesResponse,
 } from "./category.types";
 
-export { CategorySchema } from "./category.types";
+export {
+  CategorySchema,
+  PaginatedCategoriesResponseSchema,
+} from "./category.types";
 
 // Address Types
 export type {

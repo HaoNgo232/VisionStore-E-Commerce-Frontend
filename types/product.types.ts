@@ -155,6 +155,7 @@ export type ProductSortBy =
 
 /**
  * Create product request (admin only)
+ * Note: For admin form upload, use AdminCreateProductRequest instead
  */
 export interface CreateProductRequest {
   sku: string;
@@ -171,18 +172,45 @@ export interface CreateProductRequest {
 
 /**
  * Update product request (admin only)
+ * Note: For admin form upload, use AdminUpdateProductRequest instead
+ * Uses Partial to ensure all fields are optional and stay in sync with CreateProductRequest
  */
-export interface UpdateProductRequest {
-  sku?: string;
-  name?: string;
-  slug?: string;
-  priceInt?: number;
-  stock?: number;
+export type UpdateProductRequest = Partial<CreateProductRequest>;
+
+/**
+ * Admin create product request with file upload support
+ * Used for multipart/form-data uploads in admin panel
+ */
+export interface AdminCreateProductRequest {
+  name: string;
+  priceInt: number; // VND (price in cents)
   description?: string;
-  imageUrls?: string[];
   categoryId?: string;
+  image?: File; // File for multipart upload
+  // Optional fields for future expansion
+  sku?: string;
+  slug?: string;
+  stock?: number;
   attributes?: Record<string, unknown>;
   model3dUrl?: string;
+}
+
+/**
+ * Admin update product request with optional file upload
+ * Used for multipart/form-data uploads in admin panel
+ * Note: id is passed separately to update method, not included in this type
+ */
+export type AdminUpdateProductRequest = Partial<AdminCreateProductRequest>;
+
+/**
+ * Product query parameters for admin list
+ * Backend expects 'pageSize' not 'limit'
+ */
+export interface AdminProductQueryParams {
+  page?: number;
+  pageSize?: number; // Backend uses 'pageSize', not 'limit'
+  search?: string;
+  categoryId?: string;
 }
 
 /**

@@ -232,6 +232,20 @@ export async function apiGetValidated<T>(
   config?: AxiosRequestConfig,
 ): Promise<T> {
   const response = await apiGet<unknown>(endpoint, config);
+
+  // Log raw response in development for debugging
+  if (process.env.NODE_ENV === "development") {
+    console.log(`[API Debug] GET ${endpoint} - Raw response:`, {
+      response,
+      type: typeof response,
+      isArray: Array.isArray(response),
+      keys:
+        typeof response === "object" && response !== null
+          ? Object.keys(response)
+          : [],
+    });
+  }
+
   return validateResponse(response, schema, `GET ${endpoint}`);
 }
 

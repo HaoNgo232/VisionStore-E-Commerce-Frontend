@@ -39,6 +39,22 @@ export const CategorySchema = z
   .passthrough(); // Allow additional fields from backend
 
 /**
+ * Paginated Categories Response Schema
+ * Backend returns paginated response, not direct array
+ */
+export const PaginatedCategoriesResponseSchema = z.object({
+  categories: z.array(CategorySchema),
+  total: z.number().int().nonnegative(),
+  page: z.number().int().positive(),
+  pageSize: z.number().int().positive(),
+  totalPages: z.number().int().nonnegative(),
+});
+
+export type PaginatedCategoriesResponse = z.infer<
+  typeof PaginatedCategoriesResponseSchema
+>;
+
+/**
  * Category tree structure (with nested children)
  */
 export interface CategoryTree extends Category {
@@ -57,10 +73,6 @@ export interface CreateCategoryRequest {
 
 /**
  * Update category request (admin only)
+ * Uses Partial to ensure all fields are optional and stay in sync with CreateCategoryRequest
  */
-export interface UpdateCategoryRequest {
-  name?: string;
-  slug?: string;
-  description?: string;
-  parentId?: string;
-}
+export type UpdateCategoryRequest = Partial<CreateCategoryRequest>;
