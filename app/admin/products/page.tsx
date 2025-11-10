@@ -33,8 +33,10 @@ export default function AdminProductsPage(): React.ReactElement {
     const deleteProduct = useDeleteProduct();
     const { categories: categoriesData, loading: categoriesLoading } = useCategories();
 
-    const handleFiltersChange = useCallback((newFilters: AdminProductQueryParams): void => {
-        setFilters(newFilters);
+    const handleFiltersChange = useCallback((
+        newFiltersOrUpdater: AdminProductQueryParams | ((prev: AdminProductQueryParams) => AdminProductQueryParams)
+    ): void => {
+        setFilters(newFiltersOrUpdater);
     }, []);
 
     const handlePageChange = useCallback((page: number): void => {

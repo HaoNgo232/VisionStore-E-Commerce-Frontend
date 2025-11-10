@@ -205,12 +205,13 @@ export type AdminUpdateProductRequest = Partial<AdminCreateProductRequest>;
 /**
  * Product query parameters for admin list
  * Backend expects 'pageSize' not 'limit'
+ * Backend expects 'categorySlug' not 'categoryId' for filtering
  */
 export interface AdminProductQueryParams {
   page?: number;
   pageSize?: number; // Backend uses 'pageSize', not 'limit'
   search?: string;
-  categoryId?: string;
+  categorySlug?: string; // Backend expects categorySlug for filtering
 }
 
 /**

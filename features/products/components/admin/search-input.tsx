@@ -26,9 +26,11 @@ export function SearchInput({
     const debouncedSearch = useDebounce(searchValue, 300);
 
     // Gửi debounced search value đến parent
+    // Chỉ gọi onSearch khi debouncedSearch thay đổi, không phụ thuộc vào onSearch reference
     useEffect(() => {
         onSearch(debouncedSearch);
-    }, [debouncedSearch, onSearch]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [debouncedSearch]);
 
     const handleClear = (): void => {
         setSearchValue("");

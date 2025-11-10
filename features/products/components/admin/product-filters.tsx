@@ -21,7 +21,9 @@ import type { Category } from "@/types";
 
 interface AdminProductFiltersProps {
     readonly filters: AdminProductQueryParams;
-    readonly onFiltersChange: (filters: AdminProductQueryParams) => void;
+    readonly onFiltersChange: (
+        filters: AdminProductQueryParams | ((prev: AdminProductQueryParams) => AdminProductQueryParams)
+    ) => void;
     readonly categories?: Category[];
     readonly isLoading?: boolean;
 }
@@ -34,44 +36,57 @@ export function AdminProductFilters({
 }: AdminProductFiltersProps): React.ReactElement {
     // Xử lý search từ SearchInput component
     const handleSearch = useCallback((searchValue: string): void => {
-        const newFilters: AdminProductQueryParams = {
-            ...filters,
-            page: 1, // Reset to first page
-        };
-        if (searchValue) {
-            newFilters.search = searchValue;
-        } else {
-            delete newFilters.search;
-        }
-        onFiltersChange(newFilters);
-    }, [filters, onFiltersChange]);
+        // Trim và normalize search term
+        const trimmedSearch = searchValue.trim();
 
-    const handleCategoryChange = useCallback((categoryId: string): void => {
-        const newFilters: AdminProductQueryParams = {
-            ...filters,
-            page: 1, // Reset to first page when filter changes
-        };
-        // Map "all" value to undefined (no filter)
-        if (categoryId && categoryId !== "all") {
-            newFilters.categoryId = categoryId;
-        } else {
-            delete newFilters.categoryId;
-        }
-        onFiltersChange(newFilters);
-    }, [filters, onFiltersChange]);
+        onFiltersChange((prevFilters) => {
+            const newFilters: AdminProductQueryParams = {
+                ...prevFilters,
+                page: 1, // Reset to first page
+            };
+            if (trimmedSearch) {
+                // Backend đã xử lý case-insensitive, chỉ cần trim
+                newFilters.search = trimmedSearch;
+            } else {
+                delete newFilters.search;
+            }
+            return newFilters;
+        });
+    }, [onFiltersChange]);
+
+    const handleCategoryChange = useCallback((categorySlug: string): void => {
+        onFiltersChange((prevFilters) => {
+            const newFilters: AdminProductQueryParams = {
+                ...prevFilters,
+                page: 1, // Reset to first page when filter changes
+            };
+            // Map "all" value to undefined (no filter)
+            if (categorySlug && categorySlug !== "all") {
+                newFilters.categorySlug = categorySlug;
+            } else {
+                delete newFilters.categorySlug;
+            }
+            return newFilters;
+        });
+    }, [onFiltersChange]);
 
     const handleClearFilters = useCallback((): void => {
-        const newFilters: AdminProductQueryParams = {
-            page: 1,
-        };
-        // Backend uses 'pageSize', not 'limit'
-        if (filters.pageSize) {
-            newFilters.pageSize = filters.pageSize;
-        }
-        onFiltersChange(newFilters);
-    }, [filters, onFiltersChange]);
+        onFiltersChange((prevFilters) => {
+            const newFilters: AdminProductQueryParams = {
+                page: 1,
+            };
+            // Backend uses 'pageSize', not 'limit'
+            if (prevFilters.pageSize) {
+                newFilters.pageSize = prevFilters.pageSize;
+            }
+            return newFilters;
+        });
+    }, [onFiltersChange]);
 
-    const hasActiveFilters = Boolean(filters.search ?? (filters.categoryId ?? "all") !== "all");
+    const hasActiveFilters = Boolean(
+        filters.search ??
+        (filters.categorySlug && filters.categorySlug !== "all")
+    );
 
     return (
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
@@ -84,7 +99,7 @@ export function AdminProductFilters({
 
             {/* Category Filter */}
             <Select
-                value={filters.categoryId ?? "all"}
+                value={(filters.categorySlug ?? "all") as string}
                 onValueChange={handleCategoryChange}
                 disabled={isLoading}
             >
@@ -94,7 +109,7 @@ export function AdminProductFilters({
                 <SelectContent>
                     <SelectItem value="all">Tất cả danh mục</SelectItem>
                     {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
+                        <SelectItem key={category.id} value={category.slug}>
                             {category.name}
                         </SelectItem>
                     ))}

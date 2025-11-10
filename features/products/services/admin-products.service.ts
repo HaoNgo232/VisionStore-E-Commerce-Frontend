@@ -158,8 +158,9 @@ export class AdminProductsService implements IAdminProductsService {
       if (query.search) {
         queryParams.append("search", query.search);
       }
-      if (query.categoryId) {
-        queryParams.append("categoryId", query.categoryId);
+      // Backend expects 'categorySlug', not 'categoryId'
+      if (query.categorySlug) {
+        queryParams.append("categorySlug", query.categorySlug);
       }
     }
 
