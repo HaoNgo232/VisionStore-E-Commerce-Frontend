@@ -6,8 +6,7 @@
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, type KeyboardEvent } from "react";
-import Image from "next/image";
-import { Upload, X, Image as ImageIcon } from "lucide-react";
+import { Upload, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -35,18 +34,21 @@ export function ProductImageUpload({
         // Validate file type
         if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
             onChange(null);
+            setPreview(null);
             return;
         }
 
         // Validate file size (5MB)
         if (file.size > 5 * 1024 * 1024) {
             onChange(null);
+            setPreview(null);
             return;
         }
 
+        // Update form value immediately
         onChange(file);
 
-        // Create preview URL
+        // Create preview immediately
         const reader = new FileReader();
         reader.onloadend = () => {
             setPreview(reader.result as string);
@@ -58,6 +60,10 @@ export function ProductImageUpload({
         const file = e.target.files?.[0];
         if (file) {
             handleFileSelect(file);
+        }
+        // Reset input to allow selecting the same file again
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
         }
     };
 
@@ -86,14 +92,6 @@ export function ProductImageUpload({
         }
     };
 
-    const handleRemove = (): void => {
-        onChange(null);
-        setPreview(null);
-        if (fileInputRef.current) {
-            fileInputRef.current.value = "";
-        }
-    };
-
     const handleClick = (): void => {
         if (!disabled) {
             fileInputRef.current?.click();
@@ -108,6 +106,7 @@ export function ProductImageUpload({
     };
 
     // Use preview from File or existing previewUrl
+    // Priority: 1. Local preview from selected file, 2. Existing previewUrl from server
     const displayPreview = preview ?? (previewUrl && !value ? previewUrl : null);
 
     // Determine border style
@@ -151,29 +150,36 @@ export function ProductImageUpload({
                 />
 
                 {displayPreview ? (
-                    <div className="relative group">
-                        <Image
-                            src={displayPreview}
-                            alt="Product preview"
-                            width={400}
-                            height={192}
-                            className="w-full h-48 object-cover rounded-md"
-                            unoptimized // For local file previews
-                        />
+                    <div className="space-y-3">
+                        <div className="relative group">
+                            {/* Use native img for preview to avoid Next.js Image re-render issues with data URLs */}
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                                src={displayPreview}
+                                alt="Product preview"
+                                className="w-full h-48 object-cover rounded-md"
+                            />
+                            {/* Hover overlay - subtle */}
+                            {!disabled && (
+                                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity rounded-md" />
+                            )}
+                        </div>
+
+                        {/* Action buttons below preview - always visible */}
                         {!disabled && (
-                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-md flex items-center justify-center">
+                            <div className="flex gap-2 justify-center">
                                 <Button
                                     type="button"
-                                    variant="destructive"
+                                    variant="outline"
                                     size="sm"
                                     onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleRemove();
+                                        e.stopPropagation(); // Prevent event bubbling to parent div
+                                        handleClick();
                                     }}
                                     className="gap-2"
                                 >
-                                    <X className="size-4" />
-                                    Xóa ảnh
+                                    <Upload className="size-4" />
+                                    Thay đổi ảnh
                                 </Button>
                             </div>
                         )}
@@ -213,4 +219,3 @@ export function ProductImageUpload({
         </div>
     );
 }
-

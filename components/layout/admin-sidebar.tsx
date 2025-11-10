@@ -31,27 +31,27 @@ import {
 
 const navItems = [
   {
-    title: "Dashboard",
+    title: "Bảng điều khiển",
     url: "/admin",
     icon: LayoutDashboard,
   },
   {
-    title: "Users",
+    title: "Người dùng",
     url: "/admin/users",
     icon: Users,
   },
   {
-    title: "Orders",
+    title: "Đơn hàng",
     url: "/admin/orders",
     icon: ShoppingCart,
   },
   {
-    title: "Products",
+    title: "Sản phẩm",
     url: "/admin/products",
     icon: Package,
   },
   {
-    title: "Settings",
+    title: "Cài đặt",
     url: "/admin/settings",
     icon: Settings,
   },
@@ -70,16 +70,16 @@ export function AdminSidebar(
             <Package className="size-4" />
           </div>
           <div className="flex flex-col gap-0.5 leading-none">
-            <span className="font-semibold">Admin Panel</span>
+            <span className="font-semibold">Bảng quản trị</span>
             <span className="text-xs text-muted-foreground">
-              Management Dashboard
+              Bảng điều khiển quản lý
             </span>
           </div>
         </div>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel>Điều hướng</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map((item) => {

@@ -12,61 +12,61 @@ export default function AdminDashboardPage(): React.ReactElement {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Bảng điều khiển</h1>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Users</CardTitle>
+            <CardTitle className="text-sm font-medium">Người dùng</CardTitle>
             <Users className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">-</div>
-            <p className="text-xs text-muted-foreground">Total users</p>
+            <p className="text-xs text-muted-foreground">Tổng số người dùng</p>
             <Button asChild variant="link" className="p-0 mt-2">
-              <Link href="/admin/users">Manage users →</Link>
+              <Link href="/admin/users">Quản lý người dùng →</Link>
             </Button>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Orders</CardTitle>
+            <CardTitle className="text-sm font-medium">Đơn hàng</CardTitle>
             <ShoppingCart className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">-</div>
-            <p className="text-xs text-muted-foreground">Total orders</p>
+            <p className="text-xs text-muted-foreground">Tổng số đơn hàng</p>
             <Button asChild variant="link" className="p-0 mt-2">
-              <Link href="/admin/orders">Manage orders →</Link>
+              <Link href="/admin/orders">Quản lý đơn hàng →</Link>
             </Button>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Products</CardTitle>
+            <CardTitle className="text-sm font-medium">Sản phẩm</CardTitle>
             <Package className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">-</div>
-            <p className="text-xs text-muted-foreground">Total products</p>
+            <p className="text-xs text-muted-foreground">Tổng số sản phẩm</p>
             <Button asChild variant="link" className="p-0 mt-2">
-              <Link href="/admin/products">Manage products →</Link>
+              <Link href="/admin/products">Quản lý sản phẩm →</Link>
             </Button>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Settings</CardTitle>
+            <CardTitle className="text-sm font-medium">Cài đặt</CardTitle>
             <Settings className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <CardDescription>System settings</CardDescription>
+            <CardDescription>Cài đặt hệ thống</CardDescription>
             <Button asChild variant="link" className="p-0 mt-2">
-              <Link href="/admin/settings">Configure →</Link>
+              <Link href="/admin/settings">Cấu hình →</Link>
             </Button>
           </CardContent>
         </Card>

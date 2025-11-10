@@ -82,7 +82,7 @@ export function ProductForm({
                 model3dUrl: product.model3dUrl ?? null,
             });
         }
-    }, [product, mode, form, categories]);
+    }, [product, mode, form]);
 
     const handleSubmit = (data: ProductFormValues): void => {
         void onSubmit(data);

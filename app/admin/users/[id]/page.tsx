@@ -104,22 +104,22 @@ export default function UserDetailPage({
                         <BreadcrumbSeparator />
                         <BreadcrumbItem>
                             <BreadcrumbLink asChild>
-                                <Link href="/admin/users">Users</Link>
+                                <Link href="/admin/users">Người dùng</Link>
                             </BreadcrumbLink>
                         </BreadcrumbItem>
                         <BreadcrumbSeparator />
                         <BreadcrumbItem>
-                            <BreadcrumbPage>User Detail</BreadcrumbPage>
+                            <BreadcrumbPage>Chi tiết người dùng</BreadcrumbPage>
                         </BreadcrumbItem>
                     </BreadcrumbList>
                 </Breadcrumb>
                 <Card>
                     <CardContent className="pt-6">
                         <p className="text-destructive">
-                            {error instanceof Error ? error.message : "User not found"}
+                            {error instanceof Error ? error.message : "Không tìm thấy người dùng"}
                         </p>
                         <Button asChild className="mt-4">
-                            <Link href="/admin/users">Back to Users</Link>
+                            <Link href="/admin/users">Quay lại danh sách người dùng</Link>
                         </Button>
                     </CardContent>
                 </Card>
@@ -140,7 +140,7 @@ export default function UserDetailPage({
                         <BreadcrumbSeparator />
                         <BreadcrumbItem>
                             <BreadcrumbLink asChild>
-                                <Link href="/admin/users">Users</Link>
+                                <Link href="/admin/users">Người dùng</Link>
                             </BreadcrumbLink>
                         </BreadcrumbItem>
                         <BreadcrumbSeparator />
@@ -156,10 +156,10 @@ export default function UserDetailPage({
                     <Button variant="ghost" size="icon" asChild>
                         <Link href="/admin/users">
                             <ArrowLeft className="size-4" />
-                            <span className="sr-only">Back to users</span>
+                            <span className="sr-only">Quay lại danh sách người dùng</span>
                         </Link>
                     </Button>
-                    <h1 className="text-3xl font-bold tracking-tight">User Details</h1>
+                    <h1 className="text-3xl font-bold tracking-tight">Chi tiết người dùng</h1>
                 </div>
                 <div className="flex items-center gap-2">
                     <Button
@@ -167,7 +167,7 @@ export default function UserDetailPage({
                         onClick={() => setEditDialogOpen(true)}
                     >
                         <Edit className="mr-2 size-4" />
-                        Edit User
+                        Chỉnh sửa
                     </Button>
                     {user.isActive && user.role !== UserRole.ADMIN && (
                         <Button
@@ -175,7 +175,7 @@ export default function UserDetailPage({
                             onClick={() => setDeactivateDialogOpen(true)}
                         >
                             <UserX className="mr-2 size-4" />
-                            Deactivate
+                            Vô hiệu hóa
                         </Button>
                     )}
                 </div>
@@ -203,11 +203,11 @@ export default function UserDetailPage({
                             <p className="text-sm">{user.email}</p>
                         </div>
                         <div>
-                            <p className="text-sm font-medium text-muted-foreground">Phone</p>
+                            <p className="text-sm font-medium text-muted-foreground">Số điện thoại</p>
                             <p className="text-sm">{user.phone ?? "-"}</p>
                         </div>
                         <div>
-                            <p className="text-sm font-medium text-muted-foreground">Role</p>
+                            <p className="text-sm font-medium text-muted-foreground">Vai trò</p>
                             <Badge
                                 variant={user.role === UserRole.ADMIN ? "default" : "secondary"}
                             >
@@ -216,15 +216,15 @@ export default function UserDetailPage({
                         </div>
                         <div>
                             <p className="text-sm font-medium text-muted-foreground">
-                                Status
+                                Trạng thái
                             </p>
                             <Badge variant={user.isActive ? "default" : "destructive"}>
-                                {user.isActive ? "Active" : "Inactive"}
+                                {user.isActive ? "Hoạt động" : "Không hoạt động"}
                             </Badge>
                         </div>
                         <div>
                             <p className="text-sm font-medium text-muted-foreground">
-                                Created At
+                                Ngày tạo
                             </p>
                             <p className="text-sm">
                                 {new Date(user.createdAt).toLocaleDateString()}
@@ -232,7 +232,7 @@ export default function UserDetailPage({
                         </div>
                         <div>
                             <p className="text-sm font-medium text-muted-foreground">
-                                Updated At
+                                Ngày cập nhật
                             </p>
                             <p className="text-sm">
                                 {new Date(user.updatedAt).toLocaleDateString()}

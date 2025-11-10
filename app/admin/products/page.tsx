@@ -92,11 +92,11 @@ export default function AdminProductsPage(): React.ReactElement {
             {/* Products List */}
             <ProductsListCard
                 data={data}
-                isLoading={isLoading}
+                            isLoading={isLoading}
                 error={error}
-                onPageChange={handlePageChange}
-                onDelete={handleDeleteClick}
-            />
+                            onPageChange={handlePageChange}
+                            onDelete={handleDeleteClick}
+                        />
 
             {/* Delete Confirmation Dialog */}
             <DeleteProductDialog

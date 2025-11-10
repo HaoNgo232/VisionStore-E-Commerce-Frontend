@@ -1,0 +1,33 @@
+{
+  "tasks": [
+    {
+      "label": "dev:frontend",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["dev"],
+      "cwd": "${workspaceFolder}/frontend-luan-van",
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^.*$",
+          "file": 1,
+          "location": 2,
+          "message": 3
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^.*",
+          "endsPattern": "ready on"
+        }
+      }
+    },
+    {
+      "label": "test:e2e:debug",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["test:e2e:debug"],
+      "cwd": "${workspaceFolder}/frontend-luan-van",
+      "isBackground": false
+    }
+  ]
+}

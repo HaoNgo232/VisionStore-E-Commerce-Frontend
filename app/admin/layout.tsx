@@ -67,12 +67,12 @@ export default function AdminLayout({
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
                   <BreadcrumbLink asChild>
-                    <Link href="/admin">Admin</Link>
+                    <Link href="/admin">Quản trị viên</Link>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
                 <BreadcrumbItem>
-                  <BreadcrumbPage>Dashboard</BreadcrumbPage>
+                  <BreadcrumbPage>Bảng điều khiển</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
@@ -89,7 +89,7 @@ export default function AdminLayout({
                 <DropdownMenuContent className="w-56" align="end" forceMount>
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">Admin</p>
+                      <p className="text-sm font-medium leading-none">Quản trị viên</p>
                       <p className="text-xs leading-none text-muted-foreground">
                         {userRole}
                       </p>
@@ -99,13 +99,13 @@ export default function AdminLayout({
                   <DropdownMenuItem asChild>
                     <Link href="/admin/profile" className="flex items-center">
                       <User className="mr-2 size-4" />
-                      Profile
+                      Hồ sơ
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="mr-2 size-4" />
-                    Log out
+                    Đăng xuất
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

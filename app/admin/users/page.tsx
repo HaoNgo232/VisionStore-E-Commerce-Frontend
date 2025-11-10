@@ -85,14 +85,14 @@ export default function AdminUsersPage(): React.ReactElement {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>Users</BreadcrumbPage>
+              <BreadcrumbPage>Người dùng</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
         <div className="mt-4">
-          <h1 className="text-3xl font-bold tracking-tight">User Management</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Quản lý người dùng</h1>
           <p className="text-muted-foreground mt-2">
-            Manage user accounts, roles, and permissions
+            Quản lý tài khoản người dùng, vai trò và quyền
           </p>
         </div>
       </div>
@@ -106,7 +106,7 @@ export default function AdminUsersPage(): React.ReactElement {
       {error ? (
         <div className="rounded-lg border border-destructive bg-destructive/10 p-4">
           <p className="text-sm text-destructive">
-            Error loading users: {error.message}
+            Lỗi khi tải danh sách người dùng: {error.message}
           </p>
         </div>
       ) : (

@@ -91,14 +91,14 @@ export default function AdminOrdersPage(): React.ReactElement {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>Orders</BreadcrumbPage>
+              <BreadcrumbPage>Đơn hàng</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
         <div className="mt-4">
-          <h1 className="text-3xl font-bold tracking-tight">Order Management</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Quản lý đơn hàng</h1>
           <p className="text-muted-foreground mt-2">
-            Manage orders, track status, and update payment information
+            Quản lý đơn hàng, theo dõi trạng thái và cập nhật thông tin thanh toán
           </p>
         </div>
       </div>
@@ -108,7 +108,7 @@ export default function AdminOrdersPage(): React.ReactElement {
       {error ? (
         <div className="rounded-lg border border-destructive bg-destructive/10 p-4">
           <p className="text-sm text-destructive">
-            Error loading orders: {error.message}
+            Lỗi khi tải danh sách đơn hàng: {error.message}
           </p>
         </div>
       ) : (
@@ -126,10 +126,10 @@ export default function AdminOrdersPage(): React.ReactElement {
                 onClick={() => handlePageChange(Math.max(1, data.page - 1))}
                 disabled={data.page <= 1}
               >
-                Previous
+                Trước
               </Button>
               <span className="text-sm text-muted-foreground">
-                Page {data.page} of {data.totalPages}
+                Trang {data.page} / {data.totalPages}
               </span>
               <Button
                 variant="outline"
@@ -138,7 +138,7 @@ export default function AdminOrdersPage(): React.ReactElement {
                 }
                 disabled={data.page >= (data.totalPages ?? 1)}
               >
-                Next
+                Sau
               </Button>
             </div>
           )}

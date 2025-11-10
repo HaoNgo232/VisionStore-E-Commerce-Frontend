@@ -86,21 +86,21 @@ export default function OrderDetailPage({
             <BreadcrumbSeparator />
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link href="/admin/orders">Orders</Link>
+                <Link href="/admin/orders">Đơn hàng</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>Order Detail</BreadcrumbPage>
+              <BreadcrumbPage>Chi tiết đơn hàng</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
         <div className="rounded-lg border border-destructive bg-destructive/10 p-4">
           <p className="text-destructive">
-            {error instanceof Error ? error.message : "Order not found"}
+            {error instanceof Error ? error.message : "Không tìm thấy đơn hàng"}
           </p>
           <Button asChild className="mt-4">
-            <Link href="/admin/orders">Back to Orders</Link>
+            <Link href="/admin/orders">Quay lại danh sách đơn hàng</Link>
           </Button>
         </div>
       </div>
@@ -120,12 +120,12 @@ export default function OrderDetailPage({
             <BreadcrumbSeparator />
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link href="/admin/orders">Orders</Link>
+                <Link href="/admin/orders">Đơn hàng</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>Order {order.id.slice(0, 8)}...</BreadcrumbPage>
+              <BreadcrumbPage>Đơn hàng {order.id.slice(0, 8)}...</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
@@ -136,10 +136,10 @@ export default function OrderDetailPage({
           <Button variant="ghost" size="icon" asChild>
             <Link href="/admin/orders">
               <ArrowLeft className="size-4" />
-              <span className="sr-only">Back to orders</span>
+              <span className="sr-only">Quay lại danh sách đơn hàng</span>
             </Link>
           </Button>
-          <h1 className="text-3xl font-bold tracking-tight">Order Details</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Chi tiết đơn hàng</h1>
         </div>
       </div>
 

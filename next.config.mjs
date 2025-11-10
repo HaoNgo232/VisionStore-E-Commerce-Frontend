@@ -6,6 +6,8 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  // Bật source maps để debug dễ dàng hơn
+  productionBrowserSourceMaps: true,
 };
 
 export default nextConfig;

@@ -56,6 +56,8 @@ export function HeroSection(): JSX.Element {
               src="/hero-eyewear-collection.jpg"
               alt="Bộ sưu tập kính mắt cao cấp"
               fill
+              priority
+              loading="eager"
               className="relative object-cover rounded-2xl"
             />
           </div>
