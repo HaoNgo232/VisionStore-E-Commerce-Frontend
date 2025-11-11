@@ -8,6 +8,8 @@
 import { useRef, useEffect, useCallback } from "react";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import type { FaceLandmarks } from "../types/try-on.types";
+import { calculateGlassesTransform } from "../utils/face-utils";
 
 /**
  * Type guard to check if object is a THREE.Mesh
@@ -38,6 +40,7 @@ export interface TryOnRenderer {
     scale: number,
     rotation: { x: number; y: number; z: number },
   ) => void;
+  positionGlassesFromLandmarks: (landmarks: FaceLandmarks) => void;
   render: () => void;
   getCanvas: () => HTMLCanvasElement | null;
   dispose: () => void;
@@ -204,6 +207,15 @@ export function useTryOnRenderer(
     [],
   );
 
+  // Position glasses from face landmarks (convenience method)
+  const positionGlassesFromLandmarks = useCallback(
+    (landmarks: FaceLandmarks): void => {
+      const transform = calculateGlassesTransform(landmarks);
+      positionGlasses(transform.position, transform.scale, transform.rotation);
+    },
+    [positionGlasses],
+  );
+
   // Render scene
   const render = useCallback((): void => {
     if (!rendererRef.current || !sceneRef.current || !cameraRef.current) {
@@ -243,6 +255,7 @@ export function useTryOnRenderer(
   return {
     loadGlasses,
     positionGlasses,
+    positionGlassesFromLandmarks,
     render,
     getCanvas,
     dispose,
