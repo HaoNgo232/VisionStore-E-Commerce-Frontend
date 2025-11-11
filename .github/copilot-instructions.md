@@ -28,7 +28,6 @@
 ### **4. Next.js Best Practices**
 
 - Ưu tiên Server Components, chỉ dùng Client Components khi cần
-- Dynamic route params: `{ params }: { params: { slug: string } }` (không Promise)
 - Proper error boundaries và loading states
 - Type-safe API routes và data fetching
 
