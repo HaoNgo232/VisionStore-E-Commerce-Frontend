@@ -2,626 +2,431 @@
 phase: design
 title: System Design & Architecture
 description: Define the technical architecture, components, and data models
-feature: virtual-glasses-try-on
 ---
 
-# System Design & Architecture - Virtual Glasses Try-On
+# System Design & Architecture
 
 ## Architecture Overview
 
+**What is the high-level system structure?**
+
 ```mermaid
 graph TD
-    subgraph "Frontend - Next.js App Router"
-        A[Product Detail Page] -->|Click Try On| B[Virtual Try-On Modal]
-        B --> C[WebcamManager]
-        B --> D[FacemeshDetector]
-        B --> E[ThreeJS Renderer]
-        C -->|Video Stream| D
-        D -->|Face Landmarks| E
-        E -->|Load| F[GLTF Model Loader]
-        B --> G[TryOnHistory UI]
-    end
+    User[User Browser] -->|1. Upload Image| Frontend[Frontend - Try-on Page]
+    Frontend -->|2. Detect Face| MediaPipe[MediaPipe Face Landmarker]
+    MediaPipe -->|3. Face Landmarks| Frontend
+    Frontend -->|4. Load GLB Model| MinIO[MinIO S3 Storage]
+    Frontend -->|5. Render 3D Overlay| ThreeJS[Three.js Renderer]
+    ThreeJS -->|6. Display Result| User
 
-    subgraph "Backend - NestJS"
-        H[ProductsController] --> I[ProductsService]
-        J[TryOnController] --> K[TryOnHistoryService]
-        I --> L[(PostgreSQL)]
-        K --> L
-        I --> M[MinIO Service]
-    end
+    Frontend -->|7. Get Product List| Backend[Backend API]
+    Backend -->|8. Query Products| DB[(PostgreSQL)]
 
-    subgraph "Storage - MinIO S3"
-        M --> N[3D Models Bucket]
-        N --> O[glasses-01/scene.gltf]
-        N --> P[glasses-01/textures/*]
-    end
+    Frontend -->|9. Save Result Optional| Backend
+    Backend -->|10. Store Image| MinIO
 
-    subgraph "External CDN"
-        Q[TensorFlow.js]
-        R[Three.js]
-    end
+    Frontend -->|11. Add to Cart| Backend
+    Backend -->|12. Update Cart| DB
 
-    F -->|Fetch| M
-    D -->|Load Model| Q
-    E -->|Import| R
-    B -->|API Call| H
-    B -->|API Call| J
-
-    style B fill:#ffd700
-    style E fill:#87ceeb
-    style N fill:#90ee90
+    style Frontend fill:#a8dadc
+    style MediaPipe fill:#457b9d
+    style ThreeJS fill:#457b9d
+    style Backend fill:#1d3557
+    style MinIO fill:#f1faee
+    style DB fill:#f1faee
 ```
 
-### Key Components Responsibilities
+### Key Components:
 
-1. **Frontend - Virtual Try-On Module**
+1. **Frontend (Client-Side Processing)**
 
-   - Manage webcam lifecycle (start/stop/permissions)
-   - Integrate TensorFlow.js Facemesh for face detection
-   - Render 3D glasses using Three.js + WebGL
-   - Handle user interactions (model selection, screenshot)
-   - Track try-on history
+   - Next.js page/component
+   - MediaPipe Face Landmarker (WASM)
+   - Three.js for 3D rendering
+   - Canvas API for image overlay
 
-2. **Backend - Products & Try-On Services**
+2. **Backend API**
 
-   - Serve product data with 3D model metadata
-   - Manage try-on history records
-   - Generate pre-signed URLs for MinIO assets
-   - Seed data script for 7 glasses models
+   - GET `/api/glasses/models` - List 3D models
+   - GET `/api/glasses/models/:id/download` - Serve GLB files
+   - POST `/api/glasses/try-on/save` - Save result (optional)
+   - POST `/api/cart/add` - Add to cart
 
-3. **Storage - MinIO S3**
-   - Store GLTF files + textures
-   - Serve assets with proper CORS headers
-   - Organize by product ID
+3. **Storage (MinIO S3)**
 
-### Technology Stack Choices
+   - 3D models (GLB files) in `glasses-models/` bucket
+   - User uploaded images in `try-on-uploads/` bucket (optional, with TTL)
+   - Result images in `try-on-results/` bucket (optional)
 
-| Component      | Technology                         | Rationale                                              |
-| -------------- | ---------------------------------- | ------------------------------------------------------ |
-| Face Detection | TensorFlow.js + MediaPipe Facemesh | Industry standard, 486 facial landmarks, browser-based |
-| 3D Rendering   | Three.js r116+                     | Reference code proven, WebGL support, GLTF loader      |
-| Webcam Access  | WebRTC getUserMedia API            | Native browser API, no extra lib needed                |
-| 3D Format      | GLTF 2.0                           | Standard format, PBR materials, small file size        |
-| Backend        | NestJS                             | Already in stack, TypeScript, modular                  |
-| Database       | PostgreSQL + JSON                  | Already in stack, JSON for flexible 3D config          |
-| Storage        | MinIO S3                           | Already setup in Docker, S3-compatible API             |
+4. **Database (PostgreSQL)**
+   - Products table (với reference đến 3D model)
+   - Try-on results metadata (optional)
+
+### Technology Stack Rationale:
+
+| Technology                    | Reason                                                               |
+| ----------------------------- | -------------------------------------------------------------------- |
+| **MediaPipe Face Landmarker** | Industry-standard, accurate, client-side processing (no server cost) |
+| **Three.js**                  | De-facto 3D rendering library for web, supports GLB/GLTF             |
+| **Canvas API**                | Composite 2D image + 3D overlay for final output                     |
+| **MinIO S3**                  | Already in use, cost-effective object storage                        |
+| **Client-side processing**    | Reduce server load, faster response, better privacy                  |
 
 ## Data Models
 
-### 1. Product Entity Extension (Backend)
+**What data do we need to manage?**
+
+### Backend Data Models
+
+#### GlassesModel (New Table)
 
 ```typescript
-// backend/src/products/entities/product.entity.ts
-
-@Entity("products")
-export class Product {
-  @PrimaryGeneratedColumn("uuid") // Note: Backend uses CUID, not UUID - TypeORM example shows UUID but actual backend uses @default(cuid())
-  id: string;
-
-  @Column({ type: "varchar", length: 255 })
-  name: string;
-
-  @Column({ type: "text", nullable: true })
+interface GlassesModel {
+  id: string; // CUID
+  name: string; // "Aviator Classic"
   description?: string;
-
-  @Column({ type: "integer" })
-  priceInt: number; // Giá theo cent
-
-  @Column({ type: "varchar", length: 25 }) // CUID format, not UUID
-  categoryId: string;
-
-  @Column({ type: "jsonb", nullable: true, default: [] })
-  imageUrls: string[];
-
-  // === NEW FIELDS FOR VIRTUAL TRY-ON ===
-  @Column({ type: "boolean", default: false })
-  hasVirtualTryOn: boolean;
-
-  @Column({ type: "jsonb", nullable: true })
-  virtualTryOnConfig?: VirtualTryOnConfig;
-
-  @CreateDateColumn()
+  modelUrl: string; // MinIO S3 URL to GLB file
+  thumbnailUrl: string; // Preview image
+  fileSize: number; // bytes
   createdAt: Date;
-
-  @UpdateDateColumn()
   updatedAt: Date;
 }
-
-// DTO Type
-export interface VirtualTryOnConfig {
-  modelType: "gltf"; // Support thêm 'glb' sau
-  modelPath: string; // MinIO S3 path: "3d-models/glasses-01/scene.gltf"
-  texturePaths?: string[]; // Array paths to textures
-  position: { x: number; y: number; z: number };
-  rotation: { x: number; y: number; z: number };
-  scale: number;
-  upOffset: number; // Offset để điều chỉnh vị trí lên/xuống
-}
 ```
 
-### 2. TryOnHistory Entity (NEW)
+#### Product (Extended)
 
 ```typescript
-// backend/src/try-on-history/entities/try-on-history.entity.ts
-
-@Entity('try_on_history')
-export class TryOnHistory {
-  @PrimaryGeneratedColumn('uuid') // Note: Backend uses CUID, not UUID - TypeORM example shows UUID but actual backend uses @default(cuid())
-  id: string;
-
-  @Column({ type: 'varchar', length: 25 }) // CUID format, not UUID
-  userId: string;
-
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'userId' })
-  user: User;
-
-  @Column({ type: 'varchar', length: 25 }) // CUID format, not UUID
-  productId: string;
-
-  @ManyToOne(() => Product)
-  @JoinColumn({ name: 'productId' })
-  product: Product;
-
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  triedAt: Date;
-
-  @Column({ type: 'integer', default: 1 })
-  tryCount: number; // Đếm số lần thử lại cùng sản phẩm
-
-  @CreateDateColumn()
-  createdAt: Date;
-}
-
-// Index for fast query
-@Index(['userId', 'triedAt'])
-@Index(['productId'])
-```
-
-### 3. Frontend Types (Type-Safe)
-
-```typescript
-// frontend/src/types/virtual-try-on.types.ts
-
-import { z } from "zod";
-
-// Zod Schema for runtime validation
-export const VirtualTryOnConfigSchema = z.object({
-  modelType: z.literal("gltf"),
-  modelPath: z.string().url(),
-  texturePaths: z.array(z.string().url()).optional(),
-  position: z.object({
-    x: z.number(),
-    y: z.number(),
-    z: z.number(),
-  }),
-  rotation: z.object({
-    x: z.number(),
-    y: z.number(),
-    z: z.number(),
-  }),
-  scale: z.number().positive(),
-  upOffset: z.number(),
-});
-
-export type VirtualTryOnConfig = z.infer<typeof VirtualTryOnConfigSchema>;
-
-import { cuidSchema } from '@/types'
-
-// Product with try-on support
-export const ProductWithTryOnSchema = z.object({
-  id: cuidSchema(), // Backend uses CUID, not UUID
-  name: z.string(),
-  priceInt: z.number().int(),
-  imageUrls: z.array(z.string().url()),
-  hasVirtualTryOn: z.boolean(),
-  virtualTryOnConfig: VirtualTryOnConfigSchema.nullable(),
-});
-
-export type ProductWithTryOn = z.infer<typeof ProductWithTryOnSchema>;
-
-// Try-on history item
-export const TryOnHistoryItemSchema = z.object({
-  id: cuidSchema(), // Backend uses CUID, not UUID
-  productId: cuidSchema(), // Backend uses CUID, not UUID
-  triedAt: z.string().datetime(),
-  product: z.object({
-    id: cuidSchema(), // Backend uses CUID, not UUID
-    name: z.string(),
-    imageUrls: z.array(z.string().url()),
-  }),
-});
-
-export type TryOnHistoryItem = z.infer<typeof TryOnHistoryItemSchema>;
-```
-
-### 4. Database Migration
-
-```sql
--- backend/migrations/YYYYMMDDHHMMSS-add-virtual-try-on.sql
-
--- Add columns to products table
-ALTER TABLE products
-ADD COLUMN has_virtual_try_on BOOLEAN DEFAULT FALSE,
-ADD COLUMN virtual_try_on_config JSONB DEFAULT NULL;
-
--- Create index for filtering
-CREATE INDEX idx_products_has_virtual_try_on
-ON products(has_virtual_try_on)
-WHERE has_virtual_try_on = TRUE;
-
--- Create try_on_history table
--- Note: Backend uses CUID (VARCHAR), not UUID - SQL example shows UUID but actual backend uses @default(cuid())
-CREATE TABLE try_on_history (
-  id VARCHAR(25) PRIMARY KEY, -- CUID format, not UUID
-  user_id VARCHAR(25) NOT NULL REFERENCES users(id) ON DELETE CASCADE, -- CUID format
-  product_id VARCHAR(25) NOT NULL REFERENCES products(id) ON DELETE CASCADE, -- CUID format
-  tried_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  try_count INTEGER DEFAULT 1,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Indexes for performance
-CREATE INDEX idx_try_on_history_user_tried
-ON try_on_history(user_id, tried_at DESC);
-
-CREATE INDEX idx_try_on_history_product
-ON try_on_history(product_id);
-
--- Unique constraint to prevent duplicate entries in same second
-CREATE UNIQUE INDEX idx_try_on_history_unique
-ON try_on_history(user_id, product_id, tried_at);
-```
-
-## API Design
-
-### REST API Endpoints
-
-#### 1. Get Product with Try-On Config
-
-```typescript
-GET /api/products/:id
-
-Response: {
+interface Product {
   id: string;
   name: string;
   priceInt: number;
   categoryId: string;
   imageUrls: string[];
-  hasVirtualTryOn: boolean;
-  virtualTryOnConfig: VirtualTryOnConfig | null;
-  ...
+  isActive: boolean;
+
+  // NEW FIELDS for glasses
+  glassesModelId?: string; // Foreign key to GlassesModel
+  glassesModel?: GlassesModel; // Relation
+
+  createdAt: Date;
+  updatedAt: Date;
 }
 ```
 
-#### 2. Get Products with Try-On Support
+#### TryOnResult (Optional, for save/share feature)
 
 ```typescript
-GET /api/products?hasVirtualTryOn=true&page=1&limit=20
+interface TryOnResult {
+  id: string; // CUID
+  userId?: string; // If user is logged in
+  productId: string; // Which glasses
+  uploadedImageUrl: string; // Original image
+  resultImageUrl: string; // Image with glasses overlay
+  shareToken?: string; // For public sharing
+  expiresAt: Date; // TTL for cleanup
+  createdAt: Date;
+}
+```
+
+### Frontend Data Models
+
+#### FaceLandmarks
+
+```typescript
+interface FaceLandmarks {
+  nose: { x: number; y: number }; // Bridge of nose
+  leftEye: { x: number; y: number };
+  rightEye: { x: number; y: number };
+  leftEar: { x: number; y: number };
+  rightEar: { x: number; y: number };
+  faceWidth: number;
+  faceAngle: number; // Rotation in degrees
+}
+```
+
+#### TryOnState
+
+```typescript
+interface TryOnState {
+  uploadedImage: File | null;
+  imagePreviewUrl: string | null;
+  faceLandmarks: FaceLandmarks | null;
+  selectedGlassesId: string | null;
+  isProcessing: boolean;
+  error: string | null;
+  resultCanvas: HTMLCanvasElement | null;
+}
+```
+
+### Data Flow:
+
+1. **User uploads image** → Stored in memory (File object)
+2. **MediaPipe detects face** → FaceLandmarks extracted
+3. **User selects glasses** → Load GLB from MinIO via backend API
+4. **Three.js renders 3D** → Positioned based on FaceLandmarks
+5. **Composite on Canvas** → Original image + 3D overlay
+6. **User downloads** → Canvas.toBlob() → Download file
+7. **User saves (optional)** → POST to backend → Store in MinIO + DB
+
+## API Design
+
+**How do components communicate?**
+
+### Backend API Endpoints
+
+#### 1. List Glasses Models
+
+```typescript
+GET /api/glasses/models
 
 Response: {
-  data: ProductWithTryOn[];
+  data: GlassesModel[];
   total: number;
-  page: number;
-  limit: number;
 }
 ```
 
-#### 3. Save Try-On History
+#### 2. Download GLB Model
 
 ```typescript
-POST /api/try-on-history
-Authorization: Bearer <token>
+GET /api/glasses/models/:id/download
+
+Response: Binary GLB file (Content-Type: model/gltf-binary)
+```
+
+#### 3. Save Try-On Result (Optional)
+
+```typescript
+POST /api/glasses/try-on/save
 
 Request: {
   productId: string;
+  uploadedImage: File; // multipart/form-data
+  resultImage: Blob; // Canvas output
+  shareToken?: string;
 }
 
 Response: {
   id: string;
-  userId: string;
-  productId: string;
-  triedAt: string;
-  tryCount: number;
+  shareUrl: string; // If shareable
+  expiresAt: string;
 }
-
-// Logic: Upsert - nếu đã thử trong cùng ngày thì tăng tryCount
 ```
 
-#### 4. Get User Try-On History
+#### 4. Get Shared Try-On (Optional)
 
 ```typescript
-GET /api/try-on-history?limit=50&offset=0
-Authorization: Bearer <token>
+GET /api/glasses/try-on/share/:token
 
 Response: {
-  data: TryOnHistoryItem[];
-  total: number;
+  resultImageUrl: string;
+  product: Product;
+  createdAt: string;
 }
 ```
 
-#### 5. MinIO Pre-Signed URL (Internal)
+#### 5. Add to Cart
 
 ```typescript
-// Internal service method
-async getModelUrl(modelPath: string): Promise<string> {
-  // Generate pre-signed URL với expiry 1 hour
-  return minioClient.presignedGetObject('3d-models', modelPath, 3600);
+POST / api / cart / add;
+
+Request: {
+  productId: string;
+  quantity: number;
+}
+
+Response: {
+  cartId: string;
+  itemCount: number;
 }
 ```
 
-### API Service Pattern (Frontend)
+### Authentication/Authorization:
 
-```typescript
-// frontend/src/services/virtual-try-on.service.ts
-
-class VirtualTryOnApiService extends BaseApiService {
-  async getProductForTryOn(productId: string): Promise<ProductWithTryOn> {
-    const response = await this.get<ProductWithTryOn>(`/products/${productId}`);
-    return ProductWithTryOnSchema.parse(response);
-  }
-
-  async saveTryOnHistory(productId: string): Promise<void> {
-    await this.post("/try-on-history", { productId });
-  }
-
-  async getTryOnHistory(limit = 50): Promise<TryOnHistoryItem[]> {
-    const response = await this.get<{ data: TryOnHistoryItem[] }>(
-      `/try-on-history?limit=${limit}`,
-    );
-    return z.array(TryOnHistoryItemSchema).parse(response.data);
-  }
-}
-
-export const virtualTryOnApi = new VirtualTryOnApiService();
-```
+- **Public endpoints:** `/api/glasses/models/*`, `/api/glasses/try-on/share/:token`
+- **Optional auth:** `/api/glasses/try-on/save` (can work without login)
+- **Required auth:** `/api/cart/add` (if user has account; guest checkout TBD)
 
 ## Component Breakdown
 
-### Frontend Components Structure
+**What are the major building blocks?**
+
+### Frontend Components
 
 ```
-frontend/src/
-├── app/
-│   └── products/
-│       └── [id]/
-│           ├── page.tsx                    # Product detail page
-│           └── try-on/
-│               └── page.tsx                # Try-on page (modal alternative)
-│
-├── features/
-│   └── virtual-try-on/
-│       ├── components/
-│       │   ├── VirtualTryOnModal.tsx       # Main modal container
-│       │   ├── WebcamView.tsx              # Webcam + canvas overlay
-│       │   ├── GlassesSelector.tsx         # Horizontal slider
-│       │   ├── TryOnControls.tsx           # Capture/flip/exit buttons
-│       │   └── TryOnHistory.tsx            # History list component
-│       │
-│       ├── hooks/
-│       │   ├── useWebcam.ts                # Webcam lifecycle management
-│       │   ├── useFacemesh.ts              # TensorFlow face detection
-│       │   ├── useThreeScene.ts            # Three.js scene setup
-│       │   ├── useGlassesRenderer.ts       # Render loop + tracking
-│       │   └── useTryOnHistory.ts          # React Query wrapper
-│       │
-│       ├── lib/
-│       │   ├── webcam-manager.ts           # WebRTC wrapper
-│       │   ├── facemesh-detector.ts        # TF.js detector class
-│       │   ├── three-scene-manager.ts      # Three.js scene + camera
-│       │   ├── gltf-loader.ts              # Model loading utility
-│       │   └── screenshot-capture.ts       # Canvas to image
-│       │
-│       ├── services/
-│       │   └── virtual-try-on.service.ts   # API client
-│       │
-│       └── types/
-│           └── virtual-try-on.types.ts     # Zod schemas + types
-│
-└── scripts/
-    └── seed-data/
-        └── virtual-try-on-seed.ts          # Seed 7 glasses models
+app/
+└── (public)/
+    └── try-on/
+        ├── page.tsx                 # Main try-on page
+        └── components/
+            ├── ImageUploader.tsx    # Upload & preview
+            ├── FaceDetector.tsx     # MediaPipe integration
+            ├── GlassesPicker.tsx    # List of glasses models
+            ├── TryOnCanvas.tsx      # Three.js + Canvas rendering
+            ├── ResultActions.tsx    # Download, Save, Add to Cart
+            └── ErrorDisplay.tsx     # Error messages
+
+features/
+└── try-on/
+    ├── hooks/
+    │   ├── useFaceDetection.ts      # MediaPipe logic
+    │   ├── useGlassesLoader.ts      # Load GLB models
+    │   ├── useTryOnRenderer.ts      # Three.js rendering
+    │   └── useTryOnState.ts         # State management
+    ├── services/
+    │   ├── glasses.service.ts       # API calls
+    │   └── image.service.ts         # Image processing utils
+    ├── types/
+    │   └── try-on.types.ts          # TypeScript definitions
+    └── utils/
+        ├── face-utils.ts            # Landmark calculations
+        └── canvas-utils.ts          # Canvas helpers
 ```
 
-### Backend Services Structure
+### Backend Components
 
 ```
-backend/src/
-├── products/
-│   ├── products.controller.ts              # Extend với try-on query
-│   ├── products.service.ts                 # Add hasVirtualTryOn filter
-│   └── entities/
-│       └── product.entity.ts               # Add new fields
-│
-├── try-on-history/                         # NEW MODULE
-│   ├── try-on-history.module.ts
-│   ├── try-on-history.controller.ts
-│   ├── try-on-history.service.ts
-│   ├── entities/
-│   │   └── try-on-history.entity.ts
-│   └── dto/
-│       ├── create-try-on-history.dto.ts
-│       └── try-on-history-response.dto.ts
-│
-├── minio/
-│   ├── minio.service.ts                    # Extend với GLTF upload
-│   └── minio.config.ts
-│
-└── scripts/
-    └── seed-data/
-        ├── glasses-models.seed.ts          # Seed products + models
-        └── upload-3d-models.ts             # Upload to MinIO
+src/
+└── modules/
+    └── glasses/
+        ├── glasses.controller.ts    # API endpoints
+        ├── glasses.service.ts       # Business logic
+        ├── glasses.repository.ts    # Database access
+        ├── dto/
+        │   ├── create-glasses-model.dto.ts
+        │   └── save-try-on.dto.ts
+        └── entities/
+            ├── glasses-model.entity.ts
+            └── try-on-result.entity.ts
 ```
+
+### Third-Party Integrations:
+
+1. **MediaPipe Face Landmarker**
+
+   - Client-side WASM module
+   - Loaded from CDN or bundled
+   - ~5MB download size
+
+2. **Three.js**
+
+   - GLTFLoader for loading GLB files
+   - PerspectiveCamera for 3D projection
+   - WebGLRenderer for rendering
+
+3. **MinIO S3**
+   - SDK: `minio` (Node.js) or `@aws-sdk/client-s3`
+   - Presigned URLs for direct download (avoid proxy)
 
 ## Design Decisions
 
-### Decision 1: Client-Side Face Detection vs Backend Processing
+**Why did we choose this approach?**
 
-**Choice**: Client-side với TensorFlow.js
+### Decision 1: Client-Side Face Detection
 
-**Rationale**:
+**Chosen:** MediaPipe Face Landmarker (client-side WASM)
 
-- ✅ Real-time performance (24+ FPS), không có network latency
-- ✅ Privacy-friendly: video stream không gửi lên server
-- ✅ Giảm tải backend
-- ❌ Trade-off: Tăng bundle size (~2MB cho TF.js model)
+**Alternatives Considered:**
 
-**Alternatives Considered**:
+- Server-side OpenCV/dlib
+- Cloud APIs (AWS Rekognition, Google Vision)
 
-- Backend processing: Latency cao (200-500ms), privacy concerns
-- Native mobile SDK: Out of scope cho phase 1
+**Rationale:**
 
----
+- ✅ No server cost per request
+- ✅ Faster (no upload/download latency)
+- ✅ Better privacy (images stay on client)
+- ✅ MediaPipe is highly accurate and optimized
+- ❌ Requires modern browser (Chrome OK)
+- ❌ Initial WASM download (~5MB)
 
-### Decision 2: Modal vs Dedicated Page
+### Decision 2: Static Image Only (No Real-Time)
 
-**Choice**: Modal Component (có thể toggle sang dedicated page)
+**Chosen:** Upload image, process once
 
-**Rationale**:
+**Alternatives Considered:**
 
-- ✅ UX tốt hơn: không rời khỏi product page
-- ✅ Giữ context của sản phẩm
-- ✅ Có thể có dedicated URL `/products/:id/try-on` cho deep linking
+- Real-time webcam with live tracking
 
----
+**Rationale:**
 
-### Decision 3: Three.js Scene Management
+- ✅ Simpler implementation
+- ✅ Better quality control (user picks best photo)
+- ✅ Lower resource consumption
+- ✅ Phù hợp với constraint (Chrome desktop only)
+- ❌ Less interactive/engaging
+- ❌ No "wow factor" of real-time AR
 
-**Choice**: Hook-based architecture (`useThreeScene`, `useGlassesRenderer`)
+### Decision 3: GLB Format for 3D Models
 
-**Rationale**:
+**Chosen:** GLB (binary GLTF)
 
-- ✅ Tách biệt concerns (webcam, detection, rendering)
-- ✅ Reusable hooks, dễ test
-- ✅ Clean up tự động với React useEffect
-- ✅ Type-safe với TypeScript
+**Alternatives Considered:**
 
-**Pattern**:
+- OBJ + MTL
+- FBX
+- USD/USDZ
 
-```typescript
-function VirtualTryOnModal({ productId }: Props) {
-  const { videoRef, isReady } = useWebcam();
-  const { landmarks } = useFacemesh(videoRef);
-  const { scene, camera, renderer } = useThreeScene();
-  const { selectModel } = useGlassesRenderer({ scene, camera, landmarks });
+**Rationale:**
 
-  // ...
-}
-```
+- ✅ Industry standard for web 3D
+- ✅ Compact binary format
+- ✅ Excellent Three.js support
+- ✅ Có sẵn models trong `3dmodel/` folder
+- ✅ Includes materials, textures in single file
 
----
+### Decision 4: Canvas Composite for Output
 
-### Decision 4: Try-On History Storage
+**Chosen:** Canvas 2D API để overlay 3D render on 2D image
 
-**Choice**: Database với upsert logic (increment tryCount nếu duplicate)
+**Alternatives Considered:**
 
-**Rationale**:
+- Pure WebGL texture rendering
+- CSS overlay (không downloadable)
 
-- ✅ Persistent across devices
-- ✅ Có thể analyze user behavior
-- ✅ Support recommendations trong tương lai
-- ❌ Requires auth (acceptable trade-off)
+**Rationale:**
 
-**Alternative**: LocalStorage
-
-- ✅ No auth needed
-- ❌ Lost on device change
-- ❌ No analytics
-
----
-
-### Decision 5: Model Loading Strategy
-
-**Choice**: Lazy load + caching
-
-**Implementation**:
-
-- Load model khi user click "Try On" button (không preload)
-- Cache loaded models trong memory (Three.js scene)
-- Pre-signed URLs với expiry 1 hour
-- CDN caching headers cho GLTF files
-
----
-
-### Decision 6: Seed Data Naming Convention
-
-**Choice**: Descriptive product names với prefix "Kính 3D -"
-
-**Examples**:
-
-- "Kính 3D - Sport Glasses B307"
-- "Kính 3D - Aviator Sunglasses"
-- "Kính 3D - Cartoon Glasses"
-
-**Rationale**:
-
-- ✅ Dễ tìm kiếm trong admin/test
-- ✅ Clear distinction từ sản phẩm thật
-- ✅ SEO-friendly
+- ✅ Easy to export (canvas.toBlob())
+- ✅ Simple compositing
+- ✅ Good quality control
+- ❌ Slight quality loss if not careful with resolution
 
 ## Non-Functional Requirements
 
-### Performance Targets
+**How should the system perform?**
 
-| Metric             | Target                          | Measurement                  |
-| ------------------ | ------------------------------- | ---------------------------- |
-| Facemesh load time | < 3s                            | Time to first detection      |
-| GLTF model load    | < 2s per model                  | Time to scene.add()          |
-| Render FPS         | >= 24 (desktop), >= 20 (mobile) | requestAnimationFrame timing |
-| Webcam start       | < 1s                            | getUserMedia resolution      |
-| API response time  | < 200ms                         | P95 latency                  |
+### Performance Targets:
 
-### Scalability Considerations
+- **Initial page load:** < 3s (excluding 3D models)
+- **Face detection:** < 2s per image
+- **3D model load:** < 2s per model (with caching)
+- **Render update:** < 500ms when switching glasses
+- **Download generation:** < 2s for full resolution image
 
-- **Concurrent Users**: MinIO S3 có thể serve 1000+ concurrent requests
-- **Model Storage**: Mỗi model ~2-5MB, 7 models = ~30MB total
-- **Database**: Try-on history có thể grow large → partition by month nếu cần
-- **CDN**: Có thể add Cloudflare caching trước MinIO sau này
+### Scalability Considerations:
 
-### Security Requirements
+- Client-side processing scales naturally (no server bottleneck)
+- MinIO S3 can handle high concurrent downloads
+- CDN for 3D models to reduce latency (future optimization)
+- Database queries minimal (just product list)
 
-1. **Webcam Access**:
+### Security Requirements:
 
-   - HTTPS required (development: localhost exception)
-   - Clear permission prompt
-   - Indicator khi camera đang bật
+- **Input validation:** Check file type, size before upload
+- **XSS prevention:** Sanitize file names, no eval() on user input
+- **Rate limiting:** Limit try-on save requests (if implemented)
+- **CORS:** Restrict origins for API endpoints
+- **Content Security Policy:** Restrict script sources
 
-2. **API Authentication**:
+### Reliability/Availability:
 
-   - Try-on history endpoints require JWT token
-   - Public endpoints: product data, model URLs
+- **Graceful degradation:** Show error if MediaPipe fails to load
+- **Offline support:** Cache 3D models in browser (future)
+- **Error recovery:** Retry failed 3D model downloads
+- **Monitoring:** Track face detection success rate, render errors
 
-3. **MinIO S3**:
+### Accessibility:
 
-   - Pre-signed URLs với expiry
-   - CORS whitelist chỉ frontend domain
-   - Bucket policy: read-only public cho 3d-models bucket
-
-4. **Input Validation**:
-   - Zod schema validation cho mọi API response
-   - Product ID validation (CUID format - backend uses CUID, not UUID)
-
-### Reliability/Availability Needs
-
-- **Graceful Degradation**:
-
-  - Nếu TF.js load fail → show error + fallback to image gallery
-  - Nếu webcam denied → clear instruction + link to settings
-  - Nếu model load fail → retry 3 times, then show error
-
-- **Error Boundaries**:
-
-  - React Error Boundary wrap VirtualTryOnModal
-  - Sentry logging cho production errors
-
-- **Browser Compatibility**:
-  - Feature detection cho WebRTC, WebGL
-  - Polyfill cho Safari < 14 (nếu cần)
-
----
-
-**Next Steps**:
-
-1. Review design với tech lead
-2. Validate data model với DBA
-3. Proceed to Planning phase → `feature-virtual-glasses-try-on-planning.md`
+- Keyboard navigation for glasses picker
+- Alt text for all images
+- Screen reader support for try-on results
+- High contrast mode compatibility (if possible)

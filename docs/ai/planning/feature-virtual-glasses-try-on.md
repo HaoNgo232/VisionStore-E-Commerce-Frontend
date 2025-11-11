@@ -2,840 +2,445 @@
 phase: planning
 title: Project Planning & Task Breakdown
 description: Break down work into actionable tasks and estimate timeline
-feature: virtual-glasses-try-on
 ---
 
-# Project Planning & Task Breakdown - Virtual Glasses Try-On
+# Project Planning & Task Breakdown
 
 ## Milestones
+**What are the major checkpoints?**
 
-- [ ] **Milestone 1**: Backend Foundation (Days 1-3)
+- [ ] **Milestone 1: Foundation Setup** (Week 1)
+  - MediaPipe + Three.js integration working
+  - Basic face detection on uploaded image
+  - Load and display one 3D model
 
-  - Database schema + migrations
-  - API endpoints
-  - Seed data với 7 models
+- [ ] **Milestone 2: Core Try-On Feature** (Week 2)
+  - Glasses overlay aligned with face landmarks
+  - Switch between multiple glasses models
+  - Basic UI for upload, select, and preview
 
-- [ ] **Milestone 2**: Frontend Core (Days 4-7)
+- [ ] **Milestone 3: Backend Integration** (Week 3)
+  - API endpoints for glasses models
+  - MinIO S3 integration for 3D files
+  - Product-to-model linking in database
 
-  - Webcam + Facemesh integration
-  - Three.js rendering setup
-  - Basic try-on modal
+- [ ] **Milestone 4: Polish & Integration** (Week 4)
+  - Download result image
+  - Add to cart integration
+  - Error handling and edge cases
+  - UI/UX polish
 
-- [ ] **Milestone 3**: Feature Complete (Days 8-10)
-
-  - Model selection UI
-  - Screenshot capture
-  - Try-on history
-
-- [ ] **Milestone 4**: Polish & Testing (Days 11-14)
-  - Error handling
-  - Performance optimization
-  - Cross-browser testing
-  - Documentation
+- [ ] **Milestone 5: Testing & Deployment** (Week 5)
+  - Unit tests (hooks, services, utils)
+  - Integration tests (API, end-to-end flows)
+  - Manual testing (various images, browsers)
+  - Production deployment
 
 ## Task Breakdown
-
-### Phase 1: Backend Foundation (Days 1-3, ~24h effort)
-
-#### Task 1.1: Database Schema & Migration
-
-**Priority**: CRITICAL | **Effort**: 3h | **Owner**: Backend
-
-- [ ] Tạo migration file `add-virtual-try-on.sql`
-- [ ] Add `hasVirtualTryOn`, `virtualTryOnConfig` columns to `products` table
-- [ ] Create `try_on_history` table với relationships
-- [ ] Add indexes cho performance
-- [ ] Run migration trên local database
-- [ ] Verify schema với `psql` hoặc TablePlus
-
-**Acceptance Criteria**:
-
-- Migration chạy thành công không lỗi
-- Foreign keys đúng với `users` và `products`
-- Indexes được tạo đúng
-
----
-
-#### Task 1.2: Backend Entity & DTOs
-
-**Priority**: CRITICAL | **Effort**: 2h | **Owner**: Backend
-
-- [ ] Extend `Product` entity với new fields
-- [ ] Create `TryOnHistory` entity với relations
-- [ ] Create DTOs:
-  - `VirtualTryOnConfigDto`
-  - `CreateTryOnHistoryDto`
-  - `TryOnHistoryResponseDto`
-- [ ] Add Zod validation schemas (sync với frontend)
-
-**Files to Create/Modify**:
-
-- `backend/src/products/entities/product.entity.ts`
-- `backend/src/try-on-history/entities/try-on-history.entity.ts`
-- `backend/src/try-on-history/dto/*.dto.ts`
-
----
-
-#### Task 1.3: MinIO Service Extension
-
-**Priority**: HIGH | **Effort**: 2h | **Owner**: Backend
-
-- [ ] Add method `uploadGLTFModel(file, productId)`
-- [ ] Add method `getModelPresignedUrl(modelPath, expiry)`
-- [ ] Configure CORS cho MinIO bucket `3d-models`
-- [ ] Test upload/download GLTF file manually
-
-**CORS Config**:
-
-```json
-{
-  "CORSRules": [
-    {
-      "AllowedOrigins": ["http://localhost:3000", "https://yourdomain.com"],
-      "AllowedMethods": ["GET", "HEAD"],
-      "AllowedHeaders": ["*"]
-    }
-  ]
-}
-```
-
----
-
-#### Task 1.4: Products API Extension
-
-**Priority**: HIGH | **Effort**: 3h | **Owner**: Backend
-
-- [ ] Modify `GET /products/:id` để include `virtualTryOnConfig`
-- [ ] Add query param `GET /products?hasVirtualTryOn=true`
-- [ ] Update `ProductsService` với filter logic
-- [ ] Transform `virtualTryOnConfig.modelPath` thành pre-signed URL
-- [ ] Write unit tests cho filter logic
-
-**Example Response**:
-
-```typescript
-{
-  id: "clx123abc456def789ghi012", // CUID format
-  name: "Kính 3D - Sport Glasses B307",
-  hasVirtualTryOn: true,
-  virtualTryOnConfig: {
-    modelType: "gltf",
-    modelPath: "https://minio:9000/3d-models/...", // Pre-signed URL
-    position: { x: 0, y: 0.5, z: 0 },
-    scale: 0.01,
-    upOffset: 10
-  }
-}
-```
-
----
-
-#### Task 1.5: Try-On History API
-
-**Priority**: MEDIUM | **Effort**: 4h | **Owner**: Backend
-
-- [ ] Create `TryOnHistoryModule`, Controller, Service
-- [ ] Implement `POST /try-on-history` với upsert logic:
-  - Nếu user đã thử sản phẩm trong cùng ngày → increment `tryCount`
-  - Nếu chưa → insert new record
-- [ ] Implement `GET /try-on-history` với pagination
-- [ ] Add auth guard (JWT required)
-- [ ] Write unit tests cho service logic
-
-**Upsert Logic**:
-
-```typescript
-async saveTryOn(userId: string, productId: string) {
-  const today = startOfDay(new Date());
-  const existing = await this.repo.findOne({
-    where: { userId, productId, triedAt: MoreThanOrEqual(today) }
-  });
-
-  if (existing) {
-    existing.tryCount++;
-    return this.repo.save(existing);
-  }
-
-  return this.repo.save({ userId, productId, tryCount: 1 });
-}
-```
-
----
-
-#### Task 1.6: Seed Data Script
-
-**Priority**: CRITICAL | **Effort**: 6h | **Owner**: Backend
-
-- [ ] Copy 7 folders từ `Virtual-Glasses-Try-on-main/3dmodel/` vào `backend/scripts/seed-data/3d-models/`
-- [ ] Write script `upload-3d-models.ts`:
-  - Upload GLTF + textures lên MinIO cho mỗi model
-  - Store paths trong array
-- [ ] Write script `glasses-products.seed.ts`:
-  - Create 7 products với tên rõ ràng
-  - Set `hasVirtualTryOn = true`
-  - Populate `virtualTryOnConfig` từ HTML attributes (data-3d-x, data-3d-y, etc.)
-- [ ] Add seed script vào `package.json` scripts
-- [ ] Run seed: `npm run seed:glasses`
-- [ ] Verify trong database + MinIO console
-
-**Product Names**:
-
-1. "Kính 3D - Sport Glasses B307" (glasses-01)
-2. "Kính 3D - Glasses 07 Classic" (glasses-02)
-3. "Kính 3D - Cartoon Glasses Fun" (glasses-03)
-4. "Kính 3D - Plastic Sunglasses" (glasses-04)
-5. "Kính 3D - Aviator Sunglasses" (glasses-05)
-6. "Kính 3D - EyeGlasses Modern" (glasses-06)
-7. "Kính 3D - 3D Frames Quick" (glasses-07)
-
-**Config Mapping** (from HTML data attributes):
-
-```typescript
-const glassesConfigs = [
-  {
-    folder: "glasses-01",
-    position: { x: 0, y: 0.5, z: 0 },
-    scale: 0.01,
-    upOffset: 10,
-  },
-  {
-    folder: "glasses-02",
-    position: { x: 0, y: 0.3, z: 0 },
-    scale: 0.4,
-    upOffset: 0,
-  },
-  // ... map all 7
-];
-```
-
----
-
-#### Task 1.7: Backend Testing
-
-**Priority**: HIGH | **Effort**: 4h | **Owner**: Backend
-
-- [ ] Unit tests cho `TryOnHistoryService`
-- [ ] Integration tests cho API endpoints
-- [ ] Test filter `?hasVirtualTryOn=true`
-- [ ] Test pre-signed URL generation
-- [ ] Aim for 80%+ coverage
-
----
-
-### Phase 2: Frontend Core (Days 4-7, ~32h effort)
-
-#### Task 2.1: Project Setup & Dependencies
-
-**Priority**: CRITICAL | **Effort**: 2h | **Owner**: Frontend
-
-- [ ] Install dependencies:
-  ```bash
-  npm install three @types/three
-  npm install @tensorflow/tfjs @tensorflow/tfjs-backend-webgl
-  npm install @tensorflow-models/face-landmarks-detection
-  ```
-- [ ] Add TypeScript types cho Three.js modules
-- [ ] Setup ESLint rules để allow dynamic imports (for Three.js)
-- [ ] Create feature folder structure (đã design ở trên)
-
----
-
-#### Task 2.2: Type Definitions & Zod Schemas
-
-**Priority**: HIGH | **Effort**: 2h | **Owner**: Frontend
-
-- [ ] Create `virtual-try-on.types.ts` với Zod schemas:
-  - `VirtualTryOnConfigSchema`
-  - `ProductWithTryOnSchema`
-  - `TryOnHistoryItemSchema`
-- [ ] Export inferred types
-- [ ] Sync với backend DTOs (compare schemas)
-
----
-
-#### Task 2.3: API Service Layer
-
-**Priority**: HIGH | **Effort**: 2h | **Owner**: Frontend
-
-- [ ] Create `virtual-try-on.service.ts` extends `BaseApiService`
-- [ ] Implement methods:
-  - `getProductForTryOn(id)`
-  - `saveTryOnHistory(productId)`
-  - `getTryOnHistory()`
-- [ ] Add Zod validation cho responses
-- [ ] Error handling với `ApiError`
-
----
-
-#### Task 2.4: Webcam Management Hook
-
-**Priority**: CRITICAL | **Effort**: 4h | **Owner**: Frontend
-
-- [ ] Create `lib/webcam-manager.ts` class:
-  - `start()` - Request webcam access
-  - `stop()` - Release webcam
-  - `flip()` - Switch front/back camera (mobile)
-  - Error handling cho permission denied
-- [ ] Create `hooks/useWebcam.ts`:
-  - Manage videoRef
-  - Lifecycle (cleanup on unmount)
-  - State: `isReady`, `isLoading`, `error`
-- [ ] Test trên Chrome, Safari, Firefox
-
-**API Usage**:
-
-```typescript
-const { videoRef, isReady, error, start, stop } = useWebcam();
-
-useEffect(() => {
-  start();
-  return () => stop();
-}, []);
-```
-
----
-
-#### Task 2.5: Facemesh Detection Hook
-
-**Priority**: CRITICAL | **Effort**: 6h | **Owner**: Frontend
-
-- [ ] Create `lib/facemesh-detector.ts`:
-  - Load TensorFlow.js + Facemesh model
-  - `detectFaces(videoElement)` → returns landmarks
-  - Extract keypoints: `midEye: 168, leftEye: 143, noseBottom: 2, rightEye: 372`
-- [ ] Create `hooks/useFacemesh.ts`:
-  - Load model on mount (with loading state)
-  - Start detection loop khi video ready
-  - Return landmarks array
-  - Cleanup on unmount
-- [ ] Optimize: throttle detection to 24 FPS
-- [ ] Error handling: model load fail
-
-**Keypoints Reference** (from README):
-
-```typescript
-const FACE_KEYPOINTS = {
-  midEye: 168,
-  leftEye: 143,
-  noseBottom: 2,
-  rightEye: 372,
-};
-```
-
----
-
-#### Task 2.6: Three.js Scene Setup Hook
-
-**Priority**: CRITICAL | **Effort**: 5h | **Owner**: Frontend
-
-- [ ] Create `lib/three-scene-manager.ts`:
-  - Setup scene, camera, renderer
-  - Add lights (front + back SpotLight)
-  - Setup camera for video overlay (match video dimensions)
-- [ ] Create `hooks/useThreeScene.ts`:
-  - Initialize scene on mount
-  - Return `{ scene, camera, renderer, canvasRef }`
-  - Cleanup: dispose geometries, materials, renderer
-- [ ] Test rendering với dummy cube
-
-**Camera Setup** (match video dimensions):
-
-```typescript
-camera = new THREE.PerspectiveCamera(45, 1, 0.1, 2000);
-camera.position.x = videoWidth / 2;
-camera.position.y = -videoHeight / 2;
-camera.position.z = -(videoHeight / 2) / Math.tan(45 / 2);
-camera.lookAt(videoWidth / 2, -videoHeight / 2, 0);
-```
-
----
-
-#### Task 2.7: GLTF Model Loader
-
-**Priority**: HIGH | **Effort**: 4h | **Owner**: Frontend
-
-- [ ] Create `lib/gltf-loader.ts`:
-  - Use `GLTFLoader` from Three.js
-  - Load model from URL
-  - Return loaded scene object
-  - Cache loaded models (Map<url, scene>)
-- [ ] Handle loading states
-- [ ] Error handling: retry logic (3 attempts)
-- [ ] Progress tracking (optional)
-
----
-
-#### Task 2.8: Glasses Renderer Hook
-
-**Priority**: CRITICAL | **Effort**: 6h | **Owner**: Frontend
-
-- [ ] Create `hooks/useGlassesRenderer.ts`:
-  - Load GLTF model dựa vào config
-  - Add model vào scene
-  - Render loop với `requestAnimationFrame`
-  - Update position/rotation based on face landmarks
-  - Calculate scale based on eye distance
-- [ ] Implement tracking logic:
-  - Position: `midEye` landmark
-  - Rotation: vector từ `midEye` → `noseBottom`
-  - Scale: distance giữa `leftEye` và `rightEye`
-- [ ] Optimize: only render when landmarks change
-
-**Tracking Algorithm** (from reference code):
-
-```typescript
-// Position
-glasses.position.x = midEye[0];
-glasses.position.y = -midEye[1] + upOffset;
-glasses.position.z = -camera.position.z + midEye[2];
-
-// Up vector (rotation)
-glasses.up.x = midEye[0] - noseBottom[0];
-glasses.up.y = -(midEye[1] - noseBottom[1]);
-glasses.up.z = midEye[2] - noseBottom[2];
-// Normalize up vector
-
-// Scale based on eye distance
-const eyeDist = Math.sqrt(
-  (leftEye[0] - rightEye[0]) ** 2 +
-    (leftEye[1] - rightEye[1]) ** 2 +
-    (leftEye[2] - rightEye[2]) ** 2,
-);
-glasses.scale.set(eyeDist * scale, eyeDist * scale, eyeDist * scale);
-
-// Final rotation adjustments
-glasses.rotation.y = Math.PI;
-glasses.rotation.z = Math.PI / 2 - Math.acos(glasses.up.x);
-```
-
----
-
-#### Task 2.9: Virtual Try-On Modal Component
-
-**Priority**: HIGH | **Effort**: 5h | **Owner**: Frontend
-
-- [ ] Create `VirtualTryOnModal.tsx`:
-  - Modal overlay (full screen hoặc dialog)
-  - Video element + Canvas overlay
-  - Loading state: "Loading Model..."
-  - Error state: permission denied, model load fail
-  - Close button
-- [ ] Integrate hooks: `useWebcam`, `useFacemesh`, `useThreeScene`, `useGlassesRenderer`
-- [ ] Responsive design (mobile + desktop)
-- [ ] Accessibility: ESC key to close, focus trap
-
-**Component Structure**:
-
-```tsx
-<Modal open={isOpen} onClose={onClose}>
-  <ModalOverlay>
-    <VideoContainer>
-      <video ref={videoRef} />
-      <canvas ref={canvasRef} />
-      {isLoading && <LoadingSpinner />}
-      {error && <ErrorMessage />}
-    </VideoContainer>
-    <GlassesSelector models={models} onSelect={onSelectModel} />
-    <TryOnControls onCapture={onCapture} onClose={onClose} />
-  </ModalOverlay>
-</Modal>
-```
-
----
-
-### Phase 3: Feature Complete (Days 8-10, ~24h effort)
-
-#### Task 3.1: Glasses Selector UI
-
-**Priority**: HIGH | **Effort**: 4h | **Owner**: Frontend
-
-- [ ] Create `GlassesSelector.tsx`:
-  - Horizontal scrollable list (carousel)
-  - Thumbnail images cho mỗi model
-  - Highlight selected model
-  - Arrow buttons (left/right)
-  - Swipe gesture support (mobile)
-- [ ] Integrate với API: fetch products có `hasVirtualTryOn=true`
-- [ ] On select: call `onSelectModel(productId)`
-- [ ] Show product name + price dưới thumbnail
-
-**Design Reference**: Reference code có `#glasses-slider` với arrows
-
----
-
-#### Task 3.2: Screenshot Capture Feature
-
-**Priority**: MEDIUM | **Effort**: 4h | **Owner**: Frontend
-
-- [ ] Create `lib/screenshot-capture.ts`:
-  - Capture canvas + video element thành image
-  - Merge video frame + 3D overlay
-  - Return Blob (PNG format)
-- [ ] Add "Chụp Ảnh" button trong `TryOnControls`
-- [ ] On capture:
-  - Freeze frame (pause detection)
-  - Show preview modal
-  - Options: Download, Retake, Continue
-- [ ] Download logic: trigger browser download với filename `tryon-{timestamp}.png`
-
-**Implementation**:
-
-```typescript
-function captureScreenshot(videoEl, canvasEl) {
-  const tempCanvas = document.createElement("canvas");
-  const ctx = tempCanvas.getContext("2d");
-
-  // Draw video frame
-  ctx.drawImage(videoEl, 0, 0);
-
-  // Draw 3D overlay
-  ctx.drawImage(canvasEl, 0, 0);
-
-  return tempCanvas.toBlob((blob) => {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `tryon-${Date.now()}.png`;
-    a.click();
-  }, "image/png");
-}
-```
-
----
-
-#### Task 3.3: Try-On History Integration
-
-**Priority**: MEDIUM | **Effort**: 4h | **Owner**: Frontend
-
-- [ ] Create `hooks/useTryOnHistory.ts` (React Query wrapper):
-  - `useSaveTryOnHistory` mutation
-  - `useGetTryOnHistory` query
-- [ ] Auto-save history khi user thử model (debounced, 3s delay)
-- [ ] Create `TryOnHistory.tsx` component:
-  - List recent tried models
-  - Thumbnail + product name
-  - Click to navigate to product page
-  - Show in user profile page hoặc modal sidebar
-- [ ] Handle auth: nếu chưa login, skip save (optional: toast "Đăng nhập để lưu lịch sử")
-
----
-
-#### Task 3.4: Product Page Integration
-
-**Priority**: HIGH | **Effort**: 3h | **Owner**: Frontend
-
-- [ ] Modify `app/products/[id]/page.tsx`:
-  - Check if `product.hasVirtualTryOn === true`
-  - Show "🥽 Thử Kính Ảo" button (prominent position)
-  - On click: open `VirtualTryOnModal`
-- [ ] Pass `product.virtualTryOnConfig` to modal
-- [ ] State management: modal open/close
-
----
-
-#### Task 3.5: Product List Badge & Filter
-
-**Priority**: MEDIUM | **Effort**: 3h | **Owner**: Frontend
-
-- [ ] Add badge "🥽 Thử Ảo" trên `ProductCard` nếu `hasVirtualTryOn`
-- [ ] Add filter checkbox "Hỗ Trợ Thử Ảo" trong product list page
-- [ ] Update API call: append `?hasVirtualTryOn=true` khi filter active
-- [ ] Update URL query params for deep linking
-
----
-
-#### Task 3.6: Loading States & Error Handling
-
-**Priority**: HIGH | **Effort**: 4h | **Owner**: Frontend
-
-- [ ] Loading states:
-  - Webcam initializing
-  - Facemesh model loading (progress %)
-  - GLTF model loading
-- [ ] Error states:
-  - Webcam permission denied → show instruction + browser settings link
-  - Face not detected → hint "Hãy nhìn thẳng vào camera"
-  - Model load failed → retry button
-  - Network error → retry/offline message
-- [ ] Toast notifications cho success actions
-- [ ] React Error Boundary wrap modal
-
----
-
-### Phase 4: Polish & Testing (Days 11-14, ~32h effort)
-
-#### Task 4.1: Performance Optimization
-
-**Priority**: HIGH | **Effort**: 6h | **Owner**: Frontend
-
-- [ ] Optimize render loop:
-  - Only render when landmarks change (compare previous frame)
-  - Throttle detection to 24 FPS (không cần 60 FPS)
-- [ ] Lazy load Three.js và TF.js (dynamic imports)
-- [ ] Code splitting: `VirtualTryOnModal` trong separate chunk
-- [ ] Optimize GLTF models:
-  - Check file sizes (should be < 2MB each)
-  - Compress textures nếu cần (use tinypng.com)
-- [ ] Measure với Lighthouse: Performance score > 80
-
----
-
-#### Task 4.2: Mobile Responsive Design
-
-**Priority**: HIGH | **Effort**: 4h | **Owner**: Frontend
-
-- [ ] Test trên iPhone Safari, Android Chrome
-- [ ] Adjust canvas size cho mobile screens
-- [ ] Touch gestures: swipe to change models
-- [ ] Camera flip button (front/back) cho mobile
-- [ ] Handle orientation change (portrait/landscape)
-
----
-
-#### Task 4.3: Cross-Browser Testing
-
-**Priority**: HIGH | **Effort**: 4h | **Owner**: QA
-
-- [ ] Test trên:
-  - Chrome 120+ (desktop + mobile)
-  - Safari 17+ (macOS + iOS)
-  - Firefox 120+
-  - Edge 120+
-- [ ] Document known issues (e.g., Safari iOS permissions)
-- [ ] Create compatibility matrix
-
----
-
-#### Task 4.4: Accessibility (A11y)
-
-**Priority**: MEDIUM | **Effort**: 3h | **Owner**: Frontend
-
-- [ ] Keyboard navigation:
-  - ESC to close modal
-  - Tab through controls
-  - Arrow keys to select models
-- [ ] Screen reader support:
-  - ARIA labels cho buttons
-  - Announce loading states
-  - Describe current selected model
-- [ ] Focus management: trap focus trong modal
-- [ ] Color contrast check (WCAG AA)
-
----
-
-#### Task 4.5: Unit & Integration Tests
-
-**Priority**: HIGH | **Effort**: 8h | **Owner**: Frontend
-
-- [ ] Unit tests:
-  - `webcam-manager.ts` - mock getUserMedia
-  - `facemesh-detector.ts` - mock TF.js
-  - `gltf-loader.ts` - mock fetch
-  - API service methods
-- [ ] Integration tests:
-  - Full try-on flow (with MSW mocks)
-  - Model selection + rendering
-  - Screenshot capture
-- [ ] Use `/writing-test` command để generate tests
-- [ ] Aim for 80%+ coverage
-
----
-
-#### Task 4.6: E2E Tests (Optional)
-
-**Priority**: LOW | **Effort**: 4h | **Owner**: QA
-
-- [ ] Playwright tests:
-  - Open product page → click "Thử Ảo" → grant webcam → model loads
-  - Select different models
-  - Capture screenshot
-  - Close modal
-- [ ] Mock webcam stream với fake video file
-
----
-
-#### Task 4.7: Documentation
-
-**Priority**: MEDIUM | **Effort**: 3h | **Owner**: All
-
-- [ ] Update `README.md` với feature description
-- [ ] Add screenshots/GIFs của feature
-- [ ] Developer guide:
-  - How to add new models
-  - How to configure position/scale
-  - Troubleshooting common issues
-- [ ] User guide (optional):
-  - How to use virtual try-on
-  - Browser requirements
-  - FAQ
-
----
+**What specific work needs to be done?**
+
+### Phase 1: Foundation Setup (Week 1)
+
+#### Frontend Setup
+- [ ] **Task 1.1:** Install dependencies
+  - `@mediapipe/tasks-vision`
+  - `three` + `@types/three`
+  - `@react-three/fiber` (optional, if using React wrapper)
+  
+- [ ] **Task 1.2:** Create try-on page structure
+  - Create `/app/(public)/try-on/page.tsx`
+  - Create folder structure: `features/try-on/`
+  - Setup types in `features/try-on/types/try-on.types.ts`
+
+- [ ] **Task 1.3:** Implement MediaPipe face detection
+  - Create `useFaceDetection.ts` hook
+  - Load MediaPipe WASM model
+  - Extract face landmarks from uploaded image
+  - Handle errors (no face, multiple faces)
+
+- [ ] **Task 1.4:** Test face detection with sample images
+  - Upload image → Get landmarks
+  - Visualize landmarks on canvas (debug mode)
+  - Test edge cases (profile, poor lighting, etc.)
+
+#### Three.js Setup
+- [ ] **Task 1.5:** Setup Three.js scene
+  - Create `useTryOnRenderer.ts` hook
+  - Initialize WebGLRenderer, Scene, Camera
+  - Test render with basic geometry (cube)
+
+- [ ] **Task 1.6:** Load GLB model
+  - Create `useGlassesLoader.ts` hook
+  - Use GLTFLoader to load one sample GLB from `3dmodel/`
+  - Display model in Three.js scene
+  - Debug: Check model scale, rotation, position
+
+### Phase 2: Core Try-On Feature (Week 2)
+
+#### Glasses Overlay Logic
+- [ ] **Task 2.1:** Calculate glasses position from face landmarks
+  - Create `face-utils.ts` with functions:
+    - `calculateGlassesPosition(landmarks)` → x, y, z
+    - `calculateGlassesScale(landmarks)` → scale factor
+    - `calculateGlassesRotation(landmarks)` → rotation angles
+  - Unit tests for these calculations
+
+- [ ] **Task 2.2:** Position 3D model on face
+  - Apply calculated position/scale/rotation to 3D model
+  - Test with different face sizes and angles
+  - Fine-tune alignment (may need manual offsets)
+
+- [ ] **Task 2.3:** Composite 3D render on 2D image
+  - Create `canvas-utils.ts` with `compositeImageAndModel()`
+  - Render Three.js scene to offscreen canvas
+  - Overlay on original uploaded image
+  - Display result in main canvas
+
+#### UI Components
+- [ ] **Task 2.4:** Build ImageUploader component
+  - File input + drag-and-drop
+  - Image preview
+  - Validation (file type, size < 10MB)
+  - Loading state during upload
+
+- [ ] **Task 2.5:** Build GlassesPicker component
+  - Grid layout of glasses thumbnails
+  - Click to select
+  - Show active selection
+  - Load glasses list from API (mock data first)
+
+- [ ] **Task 2.6:** Build TryOnCanvas component
+  - Display composite result
+  - Loading spinner during processing
+  - Placeholder when no image uploaded
+
+- [ ] **Task 2.7:** Build ResultActions component
+  - Download button (canvas.toBlob → download)
+  - Save button (optional, for share feature)
+  - Add to Cart button (link to product)
+
+- [ ] **Task 2.8:** Integrate components in try-on page
+  - Layout: Upload → Pick → Preview → Actions
+  - State management with `useTryOnState.ts`
+  - Handle user flow (upload → detect → select → render)
+
+### Phase 3: Backend Integration (Week 3)
+
+#### Backend API Development
+- [ ] **Task 3.1:** Create GlassesModel entity (Prisma/TypeORM)
+  - Define schema in `prisma/schema.prisma` or entity file
+  - Run migration to create table
+  - Seed with 7 sample models from `3dmodel/`
+
+- [ ] **Task 3.2:** Extend Product model
+  - Add `glassesModelId` field (optional foreign key)
+  - Add relation to GlassesModel
+  - Run migration
+
+- [ ] **Task 3.3:** Upload 3D models to MinIO S3
+  - Script to upload all GLB files from `3dmodel/` to MinIO
+  - Bucket: `glasses-models`
+  - Update database records with S3 URLs
+
+- [ ] **Task 3.4:** Implement API endpoint: List glasses models
+  - `GET /api/glasses/models`
+  - Return list of GlassesModel with thumbnails
+  - Include product info if linked
+
+- [ ] **Task 3.5:** Implement API endpoint: Download GLB model
+  - `GET /api/glasses/models/:id/download`
+  - Stream file from MinIO S3
+  - Or return presigned URL for direct download
+  - Set proper Content-Type headers
+
+- [ ] **Task 3.6 (Optional):** Implement save try-on result
+  - `POST /api/glasses/try-on/save`
+  - Accept uploaded image + result image
+  - Store in MinIO S3 with TTL (e.g., 7 days)
+  - Save metadata in TryOnResult table
+  - Return shareable URL
+
+#### Frontend API Integration
+- [ ] **Task 3.7:** Create glasses API service
+  - `features/try-on/services/glasses.service.ts`
+  - Methods: `listModels()`, `downloadModel(id)`
+  - Type-safe with Zod schemas
+
+- [ ] **Task 3.8:** Create React Query hooks
+  - `useGlassesModels()` - Fetch list
+  - `useGlassesModel(id)` - Fetch single model
+  - Handle loading, error states
+
+- [ ] **Task 3.9:** Integrate with GlassesPicker
+  - Replace mock data with API call
+  - Display real thumbnails from backend
+  - Handle loading and error states
+
+- [ ] **Task 3.10:** Load GLB from MinIO S3
+  - Update `useGlassesLoader` to fetch from API endpoint
+  - Cache loaded models to avoid re-download
+  - Handle download errors gracefully
+
+### Phase 4: Admin Features (Week 3-4)
+
+#### Admin: Upload 3D Model for Product
+- [ ] **Task 4.1:** Add GLB upload field in admin product form
+  - File input for GLB file
+  - Preview 3D model before save (optional)
+  - Validation (file type = `.glb`, size < 50MB)
+
+- [ ] **Task 4.2:** Backend: Handle GLB upload
+  - `POST /api/admin/glasses/models`
+  - Upload file to MinIO S3
+  - Create GlassesModel record
+  - Generate thumbnail (optional, can be manual)
+
+- [ ] **Task 4.3:** Link GlassesModel to Product
+  - Dropdown in product form to select existing model
+  - Or upload new model during product creation
+  - Update Product.glassesModelId
+
+- [ ] **Task 4.4:** Admin: Manage glasses models
+  - List all uploaded models
+  - Edit metadata (name, description)
+  - Delete model (soft delete, check if used by products)
+
+### Phase 5: Polish & Edge Cases (Week 4)
+
+#### Error Handling
+- [ ] **Task 5.1:** Handle "no face detected"
+  - Clear error message
+  - Suggestions (use frontal face, good lighting)
+  - Option to try another image
+
+- [ ] **Task 5.2:** Handle "multiple faces detected"
+  - Error message
+  - Option to crop image to single face (future)
+
+- [ ] **Task 5.3:** Handle "model load failed"
+  - Retry mechanism
+  - Fallback to default model or skip
+  - Error notification
+
+- [ ] **Task 5.4:** Handle "face too small/large"
+  - Warning if face confidence is low
+  - Suggest better quality image
+
+#### UX Polish
+- [ ] **Task 5.5:** Add loading states
+  - Skeleton loaders for glasses picker
+  - Spinner during face detection
+  - Progress bar for model loading (if possible)
+
+- [ ] **Task 5.6:** Add success feedback
+  - Toast notification after download
+  - Confirmation modal after add to cart
+  - Visual feedback on hover/click
+
+- [ ] **Task 5.7:** Responsive design
+  - Mobile-friendly layout (if scope allows)
+  - Touch-friendly buttons
+  - Image zoom/pan controls (optional)
+
+- [ ] **Task 5.8:** Performance optimization
+  - Lazy load Three.js and MediaPipe (code splitting)
+  - Compress uploaded images before processing
+  - Use lower resolution for preview, full res for download
+
+#### Cart Integration
+- [ ] **Task 5.9:** Add "Add to Cart" button
+  - Button appears after try-on complete
+  - Click → Call `/api/cart/add` with productId
+  - Show confirmation message
+  - Link to cart page
+
+- [ ] **Task 5.10:** Pre-fill cart with try-on context
+  - Pass try-on result image to cart (optional)
+  - Show "You tried this model" badge in cart
+
+### Phase 6: Testing (Week 5)
+
+#### Unit Tests
+- [ ] **Task 6.1:** Test face detection utils
+  - `face-utils.ts` functions
+  - Mock landmarks input
+  - Verify calculations
+
+- [ ] **Task 6.2:** Test canvas utils
+  - `canvas-utils.ts` functions
+  - Mock canvas and image data
+  - Verify compositing logic
+
+- [ ] **Task 6.3:** Test API service
+  - `glasses.service.ts`
+  - Mock fetch responses
+  - Test error handling
+
+- [ ] **Task 6.4:** Test custom hooks
+  - `useFaceDetection`, `useGlassesLoader`, etc.
+  - Use React Testing Library
+  - Mock external dependencies (MediaPipe, Three.js)
+
+#### Integration Tests
+- [ ] **Task 6.5:** Test try-on flow end-to-end
+  - Upload image → Detect face → Select glasses → Render → Download
+  - Use Playwright or Cypress
+  - Mock backend API responses
+
+- [ ] **Task 6.6:** Test API endpoints
+  - `GET /api/glasses/models` returns data
+  - `GET /api/glasses/models/:id/download` serves GLB
+  - Error cases (404, 500)
+
+- [ ] **Task 6.7:** Test admin upload flow
+  - Upload GLB → Save to MinIO → Link to product
+  - Verify database records
+
+#### Manual Testing
+- [ ] **Task 6.8:** Test with various images
+  - Frontal faces, profiles, groups
+  - Different lighting conditions
+  - Different face sizes and angles
+  - Edge cases (glasses, masks, beards)
+
+- [ ] **Task 6.9:** Test with all 7 glasses models
+  - Verify each model loads correctly
+  - Check alignment and scale
+  - Identify any problematic models
+
+- [ ] **Task 6.10:** Browser compatibility
+  - Chrome desktop (primary)
+  - Firefox, Safari (nice to have)
+  - Mobile browsers (future)
+
+- [ ] **Task 6.11:** Performance testing
+  - Measure load times (page, models, detection)
+  - Test with slow network (throttling)
+  - Check memory usage (no leaks)
+
+### Phase 7: Deployment (Week 5)
+
+- [ ] **Task 7.1:** Deploy backend changes
+  - Run database migrations
+  - Deploy API endpoints
+  - Upload 3D models to production MinIO
+
+- [ ] **Task 7.2:** Deploy frontend
+  - Build Next.js app
+  - Deploy to production
+  - Verify all assets load (WASM, models)
+
+- [ ] **Task 7.3:** Post-deployment testing
+  - Smoke test on production
+  - Verify API endpoints work
+  - Test try-on flow end-to-end
+
+- [ ] **Task 7.4:** Monitor and iterate
+  - Setup error tracking (Sentry)
+  - Monitor face detection success rate
+  - Collect user feedback
 
 ## Dependencies
+**What needs to happen in what order?**
 
-### Critical Path
+### Critical Path:
+1. MediaPipe face detection working (Task 1.3) → Blocks all rendering work
+2. Three.js setup + GLB loading (Task 1.5, 1.6) → Blocks overlay logic
+3. Glasses positioning calculations (Task 2.1, 2.2) → Blocks composite
+4. Backend API + MinIO (Phase 3) → Blocks production deployment
 
-```
-Task 1.1 → Task 1.2 → Task 1.4, 1.5, 1.6
-                   ↓
-Task 2.1 → Task 2.2 → Task 2.3 → Task 2.4 → Task 2.5 → Task 2.6 → Task 2.8 → Task 2.9
-                                                                              ↓
-                                                                         Task 3.4
-```
+### Parallelizable Work:
+- UI components (Task 2.4-2.8) can be built with mock data while backend is in progress
+- Admin features (Phase 4) can be done in parallel with frontend polish (Phase 5)
+- Testing (Phase 6) can start early with unit tests, integration tests later
 
-### External Dependencies
+### External Dependencies:
+- **Backend team:** API endpoints for glasses models, cart integration
+- **Design team:** UI mockups for try-on page (if not self-designed)
+- **3D artists:** If need more models or model adjustments
+- **MinIO S3:** Must be set up and accessible
 
-- ✅ MinIO S3 already setup in Docker
-- ✅ PostgreSQL database available
-- ✅ User authentication already implemented
-- ⚠️ Product entity exists? (verify schema)
-- ⚠️ Frontend has auth context + API client
-
-### Team Dependencies
-
-- Backend dev: Tasks 1.x
-- Frontend dev: Tasks 2.x, 3.x
-- QA: Task 4.3, 4.6
-- Overlap: Task 1.7, 4.5 (tests)
-
----
+### Blockers:
+- MediaPipe Face Landmarker accuracy → If too low, may need alternative solution
+- GLB models quality → If models don't fit faces well, need adjustments
+- Performance issues → If client-side processing too slow, may need server-side
 
 ## Timeline & Estimates
+**When will things be done?**
 
-### Sprint 1 (Week 1)
+### Effort Estimates (Story Points / Hours):
 
-- **Days 1-3**: Backend Foundation (Milestone 1)
-- **Days 4-5**: Frontend Core Start (partial Milestone 2)
+| Phase | Tasks | Estimated Effort | Target Completion |
+|-------|-------|------------------|-------------------|
+| Phase 1: Foundation | 6 tasks | 16-20 hours | End of Week 1 |
+| Phase 2: Core Feature | 8 tasks | 24-32 hours | End of Week 2 |
+| Phase 3: Backend Integration | 10 tasks | 20-24 hours | End of Week 3 |
+| Phase 4: Admin Features | 4 tasks | 12-16 hours | Mid Week 4 |
+| Phase 5: Polish & Edge Cases | 10 tasks | 16-20 hours | End of Week 4 |
+| Phase 6: Testing | 11 tasks | 20-24 hours | End of Week 5 |
+| Phase 7: Deployment | 4 tasks | 4-8 hours | End of Week 5 |
+| **Total** | **53 tasks** | **112-144 hours** | **5 weeks** |
 
-### Sprint 2 (Week 2)
+### Milestone Dates (Assuming Start: Week 1):
+- **Week 1 (Nov 11-15):** Foundation complete
+- **Week 2 (Nov 18-22):** Core try-on working (demo-able)
+- **Week 3 (Nov 25-29):** Backend integrated, live data
+- **Week 4 (Dec 2-6):** Polish complete, admin ready
+- **Week 5 (Dec 9-13):** Testing complete, deployed to production
 
-- **Days 6-7**: Frontend Core Complete (Milestone 2)
-- **Days 8-10**: Feature Complete (Milestone 3)
-
-### Sprint 3 (Week 3)
-
-- **Days 11-14**: Polish & Testing (Milestone 4)
-
-### Total Estimate
-
-- **Effort**: ~112 hours (14 days @ 8h/day)
-- **Timeline**: 2-3 tuần (với buffer)
-- **Resources**: 1 full-stack dev (hoặc 1 BE + 1 FE parallel)
-
-### Buffer for Unknowns
-
-- +20% buffer cho:
-  - Three.js integration issues
-  - Browser compatibility bugs
-  - Model positioning tweaks
-  - Performance optimization iterations
-
----
+### Buffer:
+- Add 20% buffer for unknowns: **~6 weeks total**
+- High-risk areas: MediaPipe integration, Three.js rendering, alignment accuracy
 
 ## Risks & Mitigation
+**What could go wrong?**
 
-### Risk 1: Three.js + Next.js SSR Conflicts
+### Technical Risks:
 
-**Probability**: MEDIUM | **Impact**: HIGH
+| Risk | Likelihood | Impact | Mitigation |
+|------|------------|--------|------------|
+| **MediaPipe accuracy too low** | Medium | High | Test early (Week 1), have fallback plan (server-side detection) |
+| **Three.js performance issues** | Low | Medium | Optimize rendering, use lower poly models, test on target devices |
+| **GLB models don't fit faces well** | Medium | Medium | Adjust models or add manual alignment controls |
+| **Browser compatibility issues** | Low | Low | Focus on Chrome first, progressive enhancement for others |
+| **File size too large (WASM, models)** | Medium | Medium | Lazy load, compress models, use CDN |
 
-**Mitigation**:
+### Resource Risks:
 
-- Use dynamic imports: `const THREE = await import('three')`
-- Wrap component with `'use client'` directive
-- Test SSR build early (Day 5)
+| Risk | Likelihood | Impact | Mitigation |
+|------|------------|--------|------------|
+| **Backend API delays** | Medium | High | Frontend uses mock data first, parallel development |
+| **3D model availability** | Low | Medium | Have 7 models already, can start with those |
+| **Design mockups not ready** | Low | Low | Use reference UI from sample projects |
 
----
+### Dependency Risks:
 
-### Risk 2: Safari iOS Webcam Permissions
-
-**Probability**: HIGH | **Impact**: MEDIUM
-
-**Mitigation**:
-
-- Clear documentation + user instructions
-- Test on real iOS device early (Day 7)
-- Provide fallback: "Mở trong Safari nếu dùng in-app browser"
-
----
-
-### Risk 3: Model Positioning Inaccuracy
-
-**Probability**: MEDIUM | **Impact**: MEDIUM
-
-**Mitigation**:
-
-- Reference code đã proven, copy algorithm chính xác
-- Allow fine-tuning config per model
-- Manual testing với nhiều khuôn mặt khác nhau
-
----
-
-### Risk 4: Performance on Low-End Devices
-
-**Probability**: MEDIUM | **Impact**: MEDIUM
-
-**Mitigation**:
-
-- Test trên mid-range Android device (Day 12)
-- Reduce FPS to 20 nếu cần
-- Simplify models: lower poly count
-
----
-
-### Risk 5: Backend Product Schema Not Extensible
-
-**Probability**: LOW | **Impact**: HIGH
-
-**Mitigation**:
-
-- Verify schema ngay Day 1
-- Use JSONB field flexible, không cần nhiều columns
-- Worst case: create separate table `product_3d_models`
-
----
+| Risk | Likelihood | Impact | Mitigation |
+|------|------------|--------|------------|
+| **MinIO S3 not configured** | Low | High | Verify access early, have local file serving fallback |
+| **Cart API not available** | Low | Medium | Build try-on feature first, integrate cart later |
 
 ## Resources Needed
+**What do we need to succeed?**
 
-### Team Members
+### Team Members:
+- **Frontend Developer (You):** Full-time, 5 weeks
+- **Backend Developer:** Part-time, Week 3 (API endpoints)
+- **QA Tester (Optional):** Week 5 (manual testing)
 
-- **Backend Developer**: 40h (Tasks 1.x)
-- **Frontend Developer**: 60h (Tasks 2.x, 3.x, 4.x)
-- **QA Engineer**: 12h (Tasks 4.3, 4.6)
+### Tools & Services:
+- **MediaPipe Face Landmarker:** Free, open-source
+- **Three.js:** Free, open-source
+- **MinIO S3:** Already available
+- **Chrome DevTools:** For debugging WebGL/Canvas
 
-### Tools & Services
+### Infrastructure:
+- **Staging environment:** For testing before production
+- **CDN (Optional):** For faster 3D model delivery
+- **Error tracking:** Sentry or similar (for production monitoring)
 
-- ✅ Already available:
-  - Docker + MinIO S3
-  - PostgreSQL
-  - Next.js + NestJS
-- 🆕 New dependencies:
-  - Three.js (~600KB)
-  - TensorFlow.js (~2MB)
-  - @tensorflow-models/face-landmarks-detection (~500KB)
-
-### Infrastructure
-
-- ✅ Local development: localhost HTTPS (for webcam)
-  - Use `mkcert` to generate local SSL cert
-- ✅ Staging: HTTPS required (Let's Encrypt)
-- ✅ Production: HTTPS (already setup)
-
-### Documentation/Knowledge
-
-- ✅ Reference project: Virtual-Glasses-Try-on-main
-- ✅ Three.js docs: https://threejs.org/docs
-- ✅ TensorFlow.js Facemesh: https://github.com/tensorflow/tfjs-models/tree/master/face-landmarks-detection
-- 📚 Need to learn:
-  - GLTF format structure
-  - WebGL optimization techniques
-
----
-
-**Next Steps**:
-
-1. Review plan với team
-2. Assign tasks to team members
-3. Setup project board (Jira/Trello)
-4. Kickoff meeting
-5. Start Phase 1: Backend Foundation
-6. Proceed to Implementation phase → use `/execute-plan` command
+### Documentation/Knowledge:
+- MediaPipe Face Landmarker docs: https://developers.google.com/mediapipe/solutions/vision/face_landmarker
+- Three.js docs: https://threejs.org/docs/
+- GLTFLoader examples: https://threejs.org/examples/#webgl_loader_gltf
+- Reference projects: `Virtual-Glasses-Try-on-main`, `basic-virtual-tryon-glasses-master`

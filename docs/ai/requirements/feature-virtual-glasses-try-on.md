@@ -2,7 +2,6 @@
 phase: requirements
 title: Requirements & Problem Understanding
 description: Clarify the problem space, gather requirements, and define success criteria
-feature: virtual-glasses-try-on
 ---
 
 # Requirements & Problem Understanding
@@ -11,223 +10,225 @@ feature: virtual-glasses-try-on
 
 **What problem are we solving?**
 
-- **Core Problem**: Khách hàng không thể thử kính trước khi mua hàng online, dẫn đến do dự và tỷ lệ mua hàng thấp
-- **Who is affected**:
-  - Khách hàng muốn mua kính nhưng không chắc chắn về kiểu dáng phù hợp với khuôn mặt
-  - Doanh nghiệp mất cơ hội bán hàng do thiếu trải nghiệm thực tế
-- **Current workaround**:
-  - Khách hàng phải đến cửa hàng vật lý để thử
-  - Mua online dựa vào hình ảnh sản phẩm và mô tả, rủi ro cao về sai size/style
-  - Tỷ lệ trả hàng cao do không vừa ý
+Khách hàng online không thể thử kính trước khi mua, dẫn đến:
+
+- Tỷ lệ trả hàng cao do kính không vừa hoặc không phù hợp với khuôn mặt
+- Khách hàng do dự khi quyết định mua vì không biết kính trông như thế nào khi đeo
+- Giảm conversion rate và doanh số bán hàng online
+
+**Who is affected by this problem?**
+
+- Khách hàng cuối (end users) đang tìm mua kính online
+- Người dùng trên desktop browsers (Chrome)
+- Business: Mất cơ hội bán hàng và tăng chi phí xử lý trả hàng
+
+**What is the current situation/workaround?**
+
+- Khách hàng chỉ xem được ảnh sản phẩm trên model hoặc mannequin
+- Không có cách nào để visualize kính trên khuôn mặt của chính họ
+- Phải đến cửa hàng vật lý để thử kính (không khả thi với mua online)
 
 ## Goals & Objectives
 
 **What do we want to achieve?**
 
-### Primary Goals
+**Primary Goals:**
 
-- ✅ Cho phép khách hàng thử kính ảo (AR) trực tiếp trên khuôn mặt thông qua webcam
-- ✅ Tăng trải nghiệm mua sắm và tỷ lệ chuyển đổi (conversion rate)
-- ✅ Giảm tỷ lệ trả hàng do không vừa ý về kiểu dáng
+- Cho phép người dùng upload ảnh selfie và xem kính overlay trên ảnh của họ
+- Tăng tỷ lệ chuyển đổi mua hàng (conversion rate)
+- Giảm tỷ lệ trả hàng do không vừa/không phù hợp
 
-### Secondary Goals
+**Secondary Goals:**
 
-- ✅ Lưu lịch sử các mẫu kính đã thử để khách hàng dễ so sánh
-- ✅ Cho phép chụp ảnh khi thử kính để lưu lại hoặc chia sẻ
-- ✅ Tạo điểm khác biệt cạnh tranh cho nền tảng
+- Tạo trải nghiệm mua sắm interactive và engaging
+- Thu thập data về sở thích kính của người dùng
+- Tăng thời gian người dùng ở lại trên website
 
-### Non-Goals (Out of Scope)
+**Non-Goals (Out of Scope):**
 
-- ❌ Giao diện quản lý admin cho 3D models (để phase sau)
-- ❌ Virtual try-on cho các sản phẩm khác (mũ, khăn, v.v.)
-- ❌ Social sharing features phức tạp (chỉ cần download ảnh)
-- ❌ AR trên mobile native app (chỉ focus web-based)
+- Real-time webcam try-on (chỉ làm static image)
+- Multi-face detection (chỉ detect 1 khuôn mặt)
+- Advanced AR features (animation, lighting effects, etc.)
+- Hỗ trợ browsers khác ngoài Chrome desktop
+- Tối ưu cho kết nối mạng chậm (có thể làm sau)
 
 ## User Stories & Use Cases
 
-### 👤 Customer Stories (Priority: HIGH)
+**How will users interact with the solution?**
 
-#### US-1: Thử Kính Ảo Qua Webcam
+### User Story 1: Upload và Thử Kính
 
-**As a** khách hàng muốn mua kính  
-**I want to** bật webcam và nhìn thấy kính hiển thị trên khuôn mặt của tôi theo thời gian thực  
-**So that** tôi có thể đánh giá kính có phù hợp với khuôn mặt mình không
+```
+Là một khách hàng,
+Tôi muốn upload ảnh selfie của mình,
+Để xem các mẫu kính trông như thế nào trên khuôn mặt tôi.
+```
 
-**Acceptance Criteria**:
+**Acceptance Criteria:**
 
-- Có nút "Thử Kính Ảo" rõ ràng trên trang chi tiết sản phẩm
-- Yêu cầu quyền truy cập webcam, hiển thị lỗi thân thiện nếu bị từ chối
-- Facemesh model phát hiện khuôn mặt trong vòng 3-5 giây
-- Model 3D kính overlay chính xác trên mắt theo góc quay đầu
-- Frame rate tối thiểu 24 FPS cho trải nghiệm mượt
+- Người dùng có thể upload ảnh từ device (JPEG, PNG, max 10MB)
+- Hệ thống detect khuôn mặt trong ảnh tải lên
+- Hiển thị thông báo lỗi nếu không detect được khuôn mặt hoặc có nhiều hơn 1 khuôn mặt
+- Ảnh được preview trước khi xử lý
 
-#### US-2: Chọn Nhiều Mẫu Kính
+### User Story 2: Lựa Chọn Kính
 
-**As a** khách hàng đang thử kính  
-**I want to** xem danh sách các mẫu kính có sẵn và chuyển đổi giữa các mẫu  
-**So that** tôi có thể so sánh và chọn mẫu yêu thích
+```
+Là một khách hàng,
+Tôi muốn chọn từ danh sách các mẫu kính có sẵn,
+Để thử nhiều kiểu khác nhau và tìm mẫu phù hợp nhất.
+```
 
-**Acceptance Criteria**:
+**Acceptance Criteria:**
 
-- Hiển thị carousel/slider với thumbnail các mẫu kính
-- Click vào thumbnail để đổi model 3D ngay lập tức
-- Hiển thị tên sản phẩm và giá bên cạnh thumbnail
-- Highlight mẫu đang được chọn
-- Support swipe gestures trên mobile
+- Hiển thị danh sách các mẫu kính với thumbnail
+- Click vào kính để overlay lên ảnh đã upload
+- Switch giữa các mẫu kính smoothly (không cần re-upload ảnh)
+- Hiển thị tên và thông tin cơ bản của mỗi mẫu kính
 
-#### US-3: Chụp Ảnh Khi Thử Kính
+### User Story 3: Lưu và Chia Sẻ
 
-**As a** khách hàng đang thử kính  
-**I want to** chụp ảnh bản thân khi đeo kính ảo  
-**So that** tôi có thể lưu lại để xem xét hoặc xin ý kiến người khác
+```
+Là một khách hàng,
+Tôi muốn lưu hoặc chia sẻ ảnh tôi đang đeo kính ảo,
+Để hỏi ý kiến bạn bè hoặc so sánh các mẫu sau này.
+```
 
-**Acceptance Criteria**:
+**Acceptance Criteria:**
 
-- Có nút "Chụp Ảnh" rõ ràng khi đang trong chế độ thử kính
-- Ảnh chụp bao gồm cả khuôn mặt + model 3D kính
-- Cho phép download ảnh về máy (format PNG/JPEG)
-- Hiển thị preview ảnh vừa chụp trước khi download
-- Watermark nhỏ với logo website (optional)
+- Nút "Download" để tải ảnh kết quả về máy (PNG format)
+- Nút "Share" để copy link hoặc share lên social media (optional)
+- Ảnh được lưu trên server với unique URL (optional, cho share feature)
 
-#### US-4: Xem Lịch Sử Đã Thử
+### User Story 4: Thêm Vào Giỏ Hàng
 
-**As a** khách hàng đã đăng nhập  
-**I want to** xem lại các mẫu kính tôi đã thử  
-**So that** tôi có thể dễ dàng tìm lại các mẫu yêu thích
+```
+Là một khách hàng,
+Sau khi thử kính và hài lòng,
+Tôi muốn thêm mẫu kính đó vào giỏ hàng ngay lập tức.
+```
 
-**Acceptance Criteria**:
+**Acceptance Criteria:**
 
-- Lưu lịch sử thử kính vào database (linked to user)
-- Hiển thị danh sách "Đã Thử Gần Đây" trong profile
-- Mỗi item hiển thị: thumbnail kính + tên sản phẩm + thời gian thử
-- Click vào item để xem lại trang sản phẩm
-- Giới hạn lưu 50 items gần nhất
+- Nút "Add to Cart" hiển thị rõ ràng khi đang try-on
+- Click vào sẽ thêm sản phẩm vào giỏ hàng
+- Hiển thị confirmation message
+- Link đến giỏ hàng hoặc checkout page
 
-#### US-5: Tìm Sản Phẩm Có Model 3D
+### Edge Cases to Consider:
 
-**As a** khách hàng đang duyệt danh sách sản phẩm  
-**I want to** filter hoặc thấy badge "Có Thể Thử Ảo"  
-**So that** tôi biết sản phẩm nào hỗ trợ tính năng AR
-
-**Acceptance Criteria**:
-
-- Badge "🥽 Thử Ảo" hiển thị trên product card
-- Filter option "Hỗ Trợ Thử Ảo" trong trang danh sách sản phẩm
-- API endpoint trả về field `hasVirtualTryOn: boolean`
-- Search results ưu tiên sản phẩm có virtual try-on
-
-### 👨‍💼 Admin Stories (Priority: LOW - Phase 2)
-
-#### US-6: Upload Model 3D cho Sản Phẩm
-
-**As an** admin  
-**I want to** upload file GLTF và cấu hình vị trí/scale cho model 3D  
-**So that** sản phẩm kính mới có thể hỗ trợ virtual try-on
-
-**Note**: Feature này để phase sau, hiện tại dùng seed data
+- Ảnh không có khuôn mặt hoặc khuôn mặt bị che khuất (mặt nạ, tóc che mắt)
+- Ảnh có nhiều hơn 1 khuôn mặt
+- Ảnh có góc chụp nghiêng quá mức (profile, looking down/up)
+- Ảnh quá tối hoặc quá sáng
+- File size quá lớn hoặc format không hỗ trợ
+- Kính bị lệch hoặc không vừa với khuôn mặt (adjustment needed)
 
 ## Success Criteria
 
 **How will we know when we're done?**
 
-### Measurable Outcomes
+### Functional Success Criteria:
 
-- ✅ **Technical Performance**:
+- [ ] Người dùng có thể upload ảnh và nhận được kết quả trong < 5 giây
+- [ ] Face detection accuracy: >90% với ảnh selfie chuẩn (frontal face, good lighting)
+- [ ] Kính được overlay đúng vị trí (trên mũi, ngang mắt) với sai số < 5% kích thước khuôn mặt
+- [ ] Người dùng có thể switch giữa ít nhất 7 mẫu kính (có sẵn trong 3dmodel folder)
+- [ ] Có thể download ảnh kết quả (PNG, resolution giữ nguyên)
+- [ ] Tích hợp với giỏ hàng (add to cart từ try-on page)
 
-  - Facemesh detection latency < 3 giây
-  - Render FPS >= 24 trên desktop, >= 20 trên mobile
-  - Model 3D load time < 2 giây
-  - Webcam access success rate > 95% (trừ trường hợp user deny)
+### Performance Benchmarks:
 
-- ✅ **Business Metrics** (sau khi deploy):
+- Face detection + rendering: < 3 giây (Chrome desktop)
+- 3D model loading: < 2 giây per model
+- Switching giữa các mẫu kính: < 1 giây
+- Image download generation: < 2 giây
 
-  - Tăng conversion rate 15-20% cho sản phẩm có virtual try-on
-  - Giảm bounce rate 10% trên trang chi tiết kính
-  - 30% users thử ít nhất 1 mẫu kính khi vào trang sản phẩm
+### User Experience Criteria:
 
-- ✅ **User Experience**:
-  - Model 3D tracking chính xác khi quay đầu (test manual)
-  - Không có jank/lag khi switch giữa các mẫu kính
-  - UI responsive trên mobile + desktop
-  - Accessibility: keyboard navigation + screen reader support
+- Interface trực quan, dễ sử dụng (không cần hướng dẫn)
+- Responsive feedback khi user thao tác (loading states, error messages)
+- Ảnh kết quả trông realistic (không bị lệch, méo, hoặc scale sai)
 
-### Acceptance Criteria
+### Business Metrics (để đo sau khi deploy):
 
-- [ ] 7 model kính 3D được seed vào database với tên rõ ràng
-- [ ] Frontend có page `/products/:id/try-on` hoạt động đầy đủ
-- [ ] API `POST /try-on-history` lưu lịch sử thành công
-- [ ] API `GET /products?hasVirtualTryOn=true` filter đúng
-- [ ] Unit test coverage >= 80%
-- [ ] Manual testing pass trên Chrome, Safari, Firefox
-- [ ] HTTPS required (webcam access)
+- Tăng conversion rate ít nhất 5% cho users sử dụng try-on
+- Giảm return rate ít nhất 10% cho orders có sử dụng try-on
+- Usage rate: >30% khách hàng xem trang sản phẩm kính sử dụng tính năng try-on
 
 ## Constraints & Assumptions
 
-### Technical Constraints
+**What limitations do we need to work within?**
 
-- **Browser Support**: Chrome 90+, Safari 14+, Firefox 88+ (do WebRTC + WebGL)
-- **HTTPS Required**: Webcam API chỉ hoạt động qua HTTPS
-- **Model Size**: File GLTF + textures mỗi model < 5MB để load nhanh
-- **Database**: PostgreSQL với JSON field cho 3D model config
-- **Storage**: MinIO S3 (local Docker) để lưu GLTF files + textures
+### Technical Constraints:
 
-### Business Constraints
+- Chỉ hỗ trợ Chrome desktop (không cần cross-browser compatibility ngay)
+- Client-side processing (JavaScript + WebGL)
+- MediaPipe Face Landmarker API phải hoạt động ổn định
+- GLB 3D models có sẵn trong folder `3dmodel/` (7 models)
+- Backend có MinIO S3 để store 3D models và user images
 
-- **Phase 1 Priority**: End-user experience trước, admin sau
-- **Timeline**: Ưu tiên MVP trong 2-3 tuần
-- **Resources**: Solo developer, cần reuse code từ reference project
+### Business Constraints:
 
-### Assumptions
+- Không cần authentication (public feature, guest users OK)
+- Không cần real-time webcam (static image only)
+- Single face detection (không xử lý group photos)
 
-- ✅ Backend có sẵn Product entity, chỉ cần extend thêm fields
-- ✅ MinIO S3 đã được setup trong Docker (không cần setup mới)
-- ✅ 7 model 3D từ reference project có license CC-BY-4.0 (commercial use OK)
-- ✅ User đã đăng nhập khi muốn lưu lịch sử (không cần cho guest users)
-- ✅ Frontend có sẵn auth context và API client setup
-- ✅ Không cần mobile native app, chỉ focus responsive web
+### Assumptions:
+
+- Người dùng upload ảnh selfie chất lượng tốt (frontal face, good lighting)
+- 3D models đã được chuẩn bị sẵn và có cùng format/scale
+- Backend API endpoint sẽ được tạo để:
+  - Serve 3D models từ MinIO S3
+  - Lưu ảnh user upload (optional, cho share feature)
+  - Lưu ảnh kết quả (optional, cho share feature)
+- Frontend đã có product management system để integrate "Add to Cart"
+
+### Data Privacy:
+
+- Ảnh user upload không được lưu trữ lâu dài (trừ khi user chọn "save")
+- Tuân thủ GDPR/privacy regulations về xử lý biometric data
+- User có quyền xóa ảnh đã lưu
 
 ## Questions & Open Items
 
-### Resolved ✅
+**What do we still need to clarify?**
 
-- ~~Admin management UI?~~ → Để phase 2
-- ~~Model 3D lưu ở đâu?~~ → MinIO S3 local Docker
-- ~~Tên sản phẩm seed data?~~ → Tên rõ ràng như "Kính Thể Thao B307", "Kính Aviator"
+### Resolved:
 
-### Open Items 🔄
+- ✅ Technology stack: MediaPipe + Three.js
+- ✅ 3D models: GLB format, có sẵn
+- ✅ Authentication: Không cần
+- ✅ Scope: Static image only
 
-1. **Backend Product Schema**: Có sẵn entity `Product` chưa? Cần extend thêm fields nào?
+### Unresolved Questions:
 
-   - `virtualTryOnConfig: JSON` (chứa x, y, z, scale, up, modelPath)
-   - `has3DModel: boolean`
+- **Backend API endpoints:** Cần define API spec cho:
 
-2. **Authentication**: Try-on history có yêu cầu login không? Hay cho phép guest + prompt login khi muốn save?
+  - `GET /api/glasses/models` - List available 3D models
+  - `GET /api/glasses/models/:id` - Download specific GLB file
+  - `POST /api/glasses/try-on/save` - Save try-on result (optional)
+  - Schema cho Product model có cần thêm field `glassesModelUrl`?
 
-   - **Decision needed**: Bắt buộc login hoặc optional với localStorage fallback?
+- **Admin Features:** Khi admin tạo/update sản phẩm kính:
 
-3. **Image Upload for Screenshot**: Ảnh chụp khi thử kính có lưu vào backend không?
+  - Upload 3D model file (GLB) lên MinIO S3
+  - Liên kết model với product record
+  - Validate model format/size
 
-   - **Option A**: Chỉ download về máy (không lưu backend) → Đơn giản hơn
-   - **Option B**: Upload lên backend, link với user profile → Phức tạp hơn
+- **Product Integration:**
 
-4. **Browser Compatibility Testing**: Có test trên Safari iOS không?
+  - Try-on feature có ở trang nào? (Product detail page? Dedicated try-on page?)
+  - Làm sao để navigate từ product listing → try-on?
+  - Cart integration: Cần API nào để add product to cart?
 
-   - Safari iOS yêu cầu HTTPS strict + permission handling khác
+- **Image Storage:**
+  - Có cần lưu ảnh user upload không? (Privacy concern)
+  - Share feature có cần implement không? (Nếu có, cần generate shareable links)
+  - Ảnh download có cần watermark hoặc branding không?
 
-5. **CDN for TensorFlow.js**: Có tự host hay dùng unpkg CDN?
-   - Reference code dùng unpkg, nhưng có thể slow cho users ở VN
+### Research Needed:
 
-### Items Requiring Research
-
-- [ ] Three.js version compatibility với Next.js 14 App Router
-- [ ] TensorFlow.js Facemesh model có version mới hơn không? (reference dùng @0.0.1)
-- [ ] Performance optimization cho mobile devices (GPU acceleration)
-- [ ] CORS configuration cho MinIO S3 serving GLTF files
-
----
-
-**Next Steps**:
-
-1. Review requirements với stakeholder/product owner
-2. Clarify open items (đặc biệt về Product schema)
-3. Proceed to Design phase → `feature-virtual-glasses-try-on-design.md`
+- MediaPipe Face Landmarker performance với ảnh có lighting không tốt
+- Three.js best practices cho overlay 3D glasses on 2D image
+- Cách xử lý face angle/rotation để adjust kính cho đúng
