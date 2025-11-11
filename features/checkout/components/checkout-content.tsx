@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import type { JSX } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
@@ -20,6 +20,13 @@ import { PaymentWaitingDialog } from "@/features/payments/components/payment-wai
 import { formatPrice } from "@/features/products/utils"
 // PaymentSuccessDialog not used anymore - direct redirect instead
 
+/**
+ * Type guard function to validate if a string is a valid PaymentMethod
+ */
+function isPaymentMethod(value: string): value is PaymentMethod {
+  return value === PaymentMethod.COD || value === PaymentMethod.SEPAY
+}
+
 export default function CheckoutContent(): JSX.Element {
     const router = useRouter()
     const { isAuthenticated } = useAuth()
@@ -34,6 +41,13 @@ export default function CheckoutContent(): JSX.Element {
     const [qrCodeUrl, setQrCodeUrl] = useState<string>("")
     const [paymentId, setPaymentId] = useState<string>("")
     const [createdOrderId, setCreatedOrderId] = useState<string>("")
+
+    // Set default address when addresses are loaded
+    useEffect(() => {
+        if (!selectedAddressId && addresses.length > 0 && addresses[0]) {
+            setSelectedAddressId(addresses[0].id)
+        }
+    }, [selectedAddressId, addresses])
 
     // Check if user logged in - use isAuthenticated instead of checking !user
     if (!isAuthenticated) {
@@ -67,15 +81,11 @@ export default function CheckoutContent(): JSX.Element {
             <div className="container py-16 text-center">
                 <h1 className="text-2xl font-bold">Chưa có địa chỉ</h1>
                 <p className="text-muted-foreground mt-2">Vui lòng thêm địa chỉ giao hàng trước</p>
-                <Link href="/profile#addresses" className="text-primary hover:underline mt-4 inline-block">
+                <Link href="/profile?tab=addresses" className="text-primary hover:underline mt-4 inline-block">
                     Quản lý địa chỉ
                 </Link>
             </div>
         )
-    }
-
-    if (!selectedAddressId && addresses.length > 0 && addresses[0]) {
-        setSelectedAddressId(addresses[0].id)
     }
 
     const handleCheckout = async (): Promise<void> => {
@@ -168,6 +178,19 @@ export default function CheckoutContent(): JSX.Element {
         toast.error(error)
     }
 
+    /**
+     * Handler for payment method change with validation
+     */
+    const handlePaymentMethodChange = (value: string): void => {
+        if (isPaymentMethod(value)) {
+            setSelectedPayment(value)
+        } else {
+            // Fallback to COD if invalid value
+            console.warn(`Invalid payment method: ${value}, falling back to COD`)
+            setSelectedPayment(PaymentMethod.COD)
+        }
+    }
+
     if (cartLoading || addressesLoading) {
         return <div className="container py-8">Đang tải...</div>
     }
@@ -209,7 +232,7 @@ export default function CheckoutContent(): JSX.Element {
                                 </div>
                             </RadioGroup>
                             <Link
-                                href="/profile#addresses"
+                                href="/profile?tab=addresses"
                                 className="text-primary hover:underline text-sm mt-4 inline-block"
                             >
                                 Quản lý địa chỉ
@@ -223,7 +246,7 @@ export default function CheckoutContent(): JSX.Element {
                             <CardTitle>Phương thức thanh toán</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <RadioGroup value={selectedPayment} onValueChange={(value) => setSelectedPayment(value as PaymentMethod)}>
+                            <RadioGroup value={selectedPayment} onValueChange={handlePaymentMethodChange}>
                                 <div className="space-y-3">
                                     <label
                                         htmlFor="cod"

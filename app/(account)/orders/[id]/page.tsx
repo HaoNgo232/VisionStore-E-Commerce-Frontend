@@ -54,13 +54,19 @@ export default function OrderDetailPage(): JSX.Element {
                         const fetchedAddress = await addressesApi.getById(fetchedOrder.addressId)
                         setAddress(fetchedAddress)
                     } catch (error_) {
-                        console.warn("Không thể tải thông tin địa chỉ:", error_)
+                        // Log only in development mode
+                        if (process.env.NODE_ENV === 'development') {
+                            console.warn("Không thể tải thông tin địa chỉ:", error_)
+                        }
                         // Không dừng loading nếu lấy địa chỉ thất bại
                     }
                 }
             } catch (err) {
                 const errorMessage = err instanceof Error ? err.message : "Không thể tải chi tiết đơn hàng"
-                console.error("Error fetching order:", err)
+                // Log only in development mode
+                if (process.env.NODE_ENV === 'development') {
+                    console.error("Error fetching order:", err)
+                }
                 setError(errorMessage)
                 toast.error(errorMessage)
             } finally {
@@ -110,11 +116,11 @@ export default function OrderDetailPage(): JSX.Element {
                                 </BreadcrumbItem>
                                 <BreadcrumbSeparator />
                                 <BreadcrumbItem>
-                                    <BreadcrumbLink href="/profile">Tài khoản</BreadcrumbLink>
+                                    <BreadcrumbLink href="/profile?tab=profile">Tài khoản</BreadcrumbLink>
                                 </BreadcrumbItem>
                                 <BreadcrumbSeparator />
                                 <BreadcrumbItem>
-                                    <BreadcrumbLink href="/profile#orders">Đơn hàng</BreadcrumbLink>
+                                    <BreadcrumbLink href="/profile?tab=orders">Đơn hàng</BreadcrumbLink>
                                 </BreadcrumbItem>
                                 <BreadcrumbSeparator />
                                 <BreadcrumbItem>
@@ -314,7 +320,7 @@ export default function OrderDetailPage(): JSX.Element {
                                 Quay lại
                             </Button>
                             <Button onClick={() => {
-                                router.push("/profile#orders")
+                                router.push("/profile?tab=orders")
                             }}>
                                 Xem tất cả đơn hàng
                             </Button>

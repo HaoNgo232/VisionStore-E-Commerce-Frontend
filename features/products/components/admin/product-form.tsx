@@ -68,6 +68,7 @@ export function ProductForm({
     });
 
     // Pre-populate form for edit mode
+    // Reset form when product changes OR when categories load (to ensure Select has options)
     useEffect(() => {
         if (product && mode === "edit") {
             form.reset({
@@ -82,7 +83,7 @@ export function ProductForm({
                 model3dUrl: product.model3dUrl ?? null,
             });
         }
-    }, [product, mode, form]);
+    }, [product, mode, form, categories]); // Add categories to dependencies
 
     const handleSubmit = (data: ProductFormValues): void => {
         void onSubmit(data);
@@ -146,6 +147,7 @@ export function ProductForm({
                     render={({ field }) => {
                         // Convert field.value to string for Select component
                         // Use "__none__" as placeholder when value is null/undefined
+                        // Ensure value is string for Select component compatibility
                         const selectValue = field.value ? String(field.value) : "__none__";
 
                         return (
@@ -158,6 +160,7 @@ export function ProductForm({
                                     }}
                                     value={selectValue}
                                     disabled={isLoading}
+                                    key={`category-select-${selectValue}-${categories.length}`} // Force re-render when categories load
                                 >
                                     <FormControl>
                                         <SelectTrigger>

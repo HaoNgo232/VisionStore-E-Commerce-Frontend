@@ -16,15 +16,23 @@ import {
 } from "@/components/ui/breadcrumb"
 import { CheckCircle } from "lucide-react"
 import { ordersApi } from "@/features/orders/services/orders.service"
+import { addressesApi } from "@/features/addresses/services/addresses.service"
 // COD-only success page: no payment processing here
 import { useCartStore } from "@/stores/cart.store"
 import { formatPrice } from "@/features/products/utils"
 import { toast } from "sonner"
-import type { Order } from "@/types"
+import type { Order, Address } from "@/types"
 import { PaymentMethod } from "@/types"
 import { OrderStatusBadge } from "@/features/orders/components/order-status-badge"
 import { PaymentStatusBadge } from "@/features/payments/components/payment-status-badge"
 import Image from "next/image"
+
+/**
+ * Type guard function to validate if a string is a valid PaymentMethod
+ */
+function isPaymentMethod(value: string | null): value is PaymentMethod {
+  return value === PaymentMethod.COD || value === PaymentMethod.SEPAY
+}
 
 export default function SuccessPage(): JSX.Element {
   const router = useRouter()
@@ -33,9 +41,12 @@ export default function SuccessPage(): JSX.Element {
 
   const orderId = searchParams.get("orderId")
   const paymentMethodParam = searchParams.get("paymentMethod")
-  const paymentMethod: PaymentMethod = (paymentMethodParam === PaymentMethod.COD || paymentMethodParam === PaymentMethod.SEPAY) ? paymentMethodParam as PaymentMethod : PaymentMethod.COD
+  const paymentMethod: PaymentMethod = isPaymentMethod(paymentMethodParam)
+    ? paymentMethodParam
+    : PaymentMethod.COD
 
   const [order, setOrder] = useState<Order | null>(null)
+  const [address, setAddress] = useState<Address | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -49,6 +60,18 @@ export default function SuccessPage(): JSX.Element {
         setLoading(true)
         const fetchedOrder = await ordersApi.getById(orderId)
         setOrder(fetchedOrder)
+
+        // Lấy thông tin địa chỉ nếu có addressId
+        if (fetchedOrder.addressId) {
+          try {
+            const fetchedAddress = await addressesApi.getById(fetchedOrder.addressId)
+            setAddress(fetchedAddress)
+          } catch (error: unknown) {
+            console.error("Lỗi khi tải địa chỉ:", error)
+            toast.error("Không thể tải địa chỉ giao hàng")
+          }
+        }
+
         void clearCart()
       } catch (error) {
         console.error("Lỗi khi tải đơn hàng:", error)
@@ -128,7 +151,7 @@ export default function SuccessPage(): JSX.Element {
                 <Button variant="outline" onClick={() => router.push("/products")}>
                   Tiếp tục mua sắm
                 </Button>
-                <Button onClick={() => router.push("/profile#orders")}>Xem đơn hàng của tôi</Button>
+                <Button onClick={() => router.push("/profile?tab=orders")}>Xem đơn hàng của tôi</Button>
               </div>
 
               <div className="lg:col-span-2 space-y-6">
@@ -145,7 +168,7 @@ export default function SuccessPage(): JSX.Element {
                     <CardContent className="space-y-3">
                       <p className="text-sm text-green-700">
                         {paymentMethod === PaymentMethod.COD
-                          ? "Bạn sẽ thanh toán tiền khi nhận hàng từ shipper. Vui lòng chuẩn bị đủ tiền."
+                          ? "Bạn sẽ thanh toán tiền khi nhận hàng từ shipper. Vui lòng đừng bom hàng."
                           : "Thanh toán của bạn đã được xác nhận thành công. Đơn hàng đang được xử lý."}
                       </p>
                       <div className="rounded bg-white p-3 text-sm">
@@ -226,21 +249,51 @@ export default function SuccessPage(): JSX.Element {
                 )}
 
                 {/* Shipping Address */}
-                {order.addressId && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Địa chỉ giao hàng</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
-                        <p className="text-sm text-muted-foreground">Mã địa chỉ: {order.addressId}</p>
-                        <p className="text-sm text-muted-foreground">
-                          Chi tiết địa chỉ sẽ được hiển thị trong email xác nhận
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
+                {(() => {
+                  if (address) {
+                    return (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Địa chỉ giao hàng</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                          <div>
+                            <p className="text-sm text-muted-foreground">Họ tên</p>
+                            <p className="font-semibold">{address.fullName}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-muted-foreground">Số điện thoại</p>
+                            <p className="font-semibold">{address.phone}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-muted-foreground">Địa chỉ</p>
+                            <p className="font-semibold">
+                              {address.street}, {address.ward}, {address.district}, {address.city}
+                            </p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )
+                  }
+                  if (order.addressId) {
+                    return (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Địa chỉ giao hàng</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-2">
+                            <p className="text-sm text-muted-foreground">Mã địa chỉ: {order.addressId}</p>
+                            <p className="text-sm text-muted-foreground">
+                              Chi tiết địa chỉ sẽ được hiển thị trong email xác nhận
+                            </p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )
+                  }
+                  return null
+                })()}
 
                 {/* Order Summary */}
                 <Card>

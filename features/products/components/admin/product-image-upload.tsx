@@ -9,6 +9,7 @@ import { useState, useRef, type ChangeEvent, type DragEvent, type KeyboardEvent 
 import { Upload, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface ProductImageUploadProps {
     readonly value?: File | null;
@@ -27,12 +28,16 @@ export function ProductImageUpload({
 }: ProductImageUploadProps): React.ReactElement {
     const [isDragging, setIsDragging] = useState(false);
     const [preview, setPreview] = useState<string | null>(null);
+    const [localError, setLocalError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Generate preview URL from File object
     const handleFileSelect = (file: File): void => {
         // Validate file type
         if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+            const errorMessage = "Chỉ chấp nhận file ảnh định dạng JPEG, PNG hoặc WebP";
+            setLocalError(errorMessage);
+            toast.error(errorMessage);
             onChange(null);
             setPreview(null);
             return;
@@ -40,10 +45,16 @@ export function ProductImageUpload({
 
         // Validate file size (5MB)
         if (file.size > 5 * 1024 * 1024) {
+            const errorMessage = "Kích thước file không được vượt quá 5MB";
+            setLocalError(errorMessage);
+            toast.error(errorMessage);
             onChange(null);
             setPreview(null);
             return;
         }
+
+        // Clear error on success
+        setLocalError(null);
 
         // Update form value immediately
         onChange(file);
@@ -114,11 +125,14 @@ export function ProductImageUpload({
         if (isDragging && !disabled) {
             return "border-primary bg-primary/5";
         }
-        if (error) {
+        if (error || localError) {
             return "border-destructive";
         }
         return "border-muted-foreground/25";
     };
+
+    // Combine prop error and local error for display
+    const displayError = error || localError;
 
     return (
         <div className="space-y-2">
@@ -151,13 +165,14 @@ export function ProductImageUpload({
 
                 {displayPreview ? (
                     <div className="space-y-3">
-                        <div className="relative group">
+                        {/* Responsive container: smaller on desktop, full width on mobile */}
+                        <div className="relative group aspect-video md:aspect-square w-full md:max-w-xs mx-auto bg-muted rounded-md overflow-hidden">
                             {/* Use native img for preview to avoid Next.js Image re-render issues with data URLs */}
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                                 src={displayPreview}
                                 alt="Product preview"
-                                className="w-full h-48 object-cover rounded-md"
+                                className="w-full h-full object-contain rounded-md"
                             />
                             {/* Hover overlay - subtle */}
                             {!disabled && (
@@ -207,8 +222,8 @@ export function ProductImageUpload({
                 )}
             </div>
 
-            {error && (
-                <p className="text-sm text-destructive">{error}</p>
+            {displayError && (
+                <p className="text-sm text-destructive">{displayError}</p>
             )}
 
             {value && (

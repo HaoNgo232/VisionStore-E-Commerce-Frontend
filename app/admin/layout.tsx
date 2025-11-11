@@ -42,7 +42,7 @@ export default function AdminLayout({
   children,
 }: AdminLayoutProps): React.ReactElement {
   const router = useRouter();
-   
+
   const getUserRole = useAuthStore((state) => state.getUserRole);
 
   const handleLogout = (): void => {
@@ -51,7 +51,7 @@ export default function AdminLayout({
   };
 
   // Type assertion needed due to Zustand selector type inference
-   
+
   const userRole = getUserRole();
   const userInitials = userRole === "ADMIN" ? "A" : "U";
 
@@ -97,7 +97,7 @@ export default function AdminLayout({
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link href="/admin/profile" className="flex items-center">
+                    <Link href="/profile?tab=profile" className="flex items-center">
                       <User className="mr-2 size-4" />
                       Hồ sơ
                     </Link>

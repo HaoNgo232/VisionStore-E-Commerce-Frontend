@@ -5,9 +5,9 @@ import { CommandMenu } from "@/components/command-menu"
 
 export default function ShopLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode
-}): JSX.Element {
+}>): React.ReactElement {
   return (
     <>
       <CommandMenu />

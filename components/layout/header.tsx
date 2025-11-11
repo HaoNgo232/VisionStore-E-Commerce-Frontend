@@ -1,9 +1,9 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import type { JSX } from "react"
 import Link from "next/link"
-import { ShoppingCart, Menu, Search, User, LogOut, Settings, Package, ShieldCheck } from "lucide-react"
+import { ShoppingCart, Menu, Search, User, LogOut, Settings, Package, ShieldCheck, MapPin } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Badge } from "@/components/ui/badge"
@@ -57,7 +57,7 @@ export function Header(): JSX.Element {
     setIsMounted(true)
   }, [])
 
-  const handleLogout = (): void => {
+  const handleLogout = useCallback((): void => {
     try {
       authService.logout();
       logout();
@@ -66,7 +66,7 @@ export function Header(): JSX.Element {
     } catch {
       toast.error("Lỗi khi đăng xuất");
     }
-  };
+  }, [logout, router]);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -137,21 +137,21 @@ export function Header(): JSX.Element {
                 <DropdownMenuLabel>Tài khoản của tôi</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href="/profile" className="cursor-pointer">
+                  <Link href="/profile?tab=profile" className="cursor-pointer">
                     <User className="mr-2 h-4 w-4" />
                     Hồ sơ
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/profile#orders" className="cursor-pointer">
-                    <Package className="mr-2 h-4 w-4" />
-                    Đơn hàng
+                  <Link href="/profile?tab=addresses" className="cursor-pointer">
+                    <MapPin className="mr-2 h-4 w-4" />
+                    Địa chỉ
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/profile#settings" className="cursor-pointer">
-                    <Settings className="mr-2 h-4 w-4" />
-                    Cài đặt
+                  <Link href="/profile?tab=orders" className="cursor-pointer">
+                    <Package className="mr-2 h-4 w-4" />
+                    Đơn hàng
                   </Link>
                 </DropdownMenuItem>
                 {isAdmin && (
@@ -263,21 +263,21 @@ export function Header(): JSX.Element {
                   <div className="flex flex-col gap-1 border-t pt-4">
                     <h3 className="mb-2 px-3 text-sm font-semibold text-muted-foreground">Tài khoản</h3>
                     <Link
-                      href="/profile"
+                      href="/profile?tab=profile"
                       className="flex items-center rounded-md px-3 py-2 text-base font-medium transition-colors hover:bg-accent"
                     >
                       <User className="mr-2 h-4 w-4" />
                       Hồ sơ
                     </Link>
                     <Link
-                      href="/profile#orders"
+                      href="/profile?tab=orders"
                       className="flex items-center rounded-md px-3 py-2 text-base font-medium transition-colors hover:bg-accent"
                     >
                       <Package className="mr-2 h-4 w-4" />
                       Đơn hàng
                     </Link>
                     <Link
-                      href="/profile#settings"
+                      href="/profile?tab=profile"
                       className="flex items-center rounded-md px-3 py-2 text-base font-medium transition-colors hover:bg-accent"
                     >
                       <Settings className="mr-2 h-4 w-4" />

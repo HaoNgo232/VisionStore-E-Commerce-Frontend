@@ -40,7 +40,7 @@ export function ProductCard({ product }: ProductCardProps): JSX.Element {
             src={product.imageUrls[0] ?? "/placeholder.svg"}
             alt={product.name}
             fill
-            className="object-cover transition-transform group-hover:scale-105"
+            className="object-contain transition-transform group-hover:scale-105"
           />
           {!inStock && (
             <Badge className="absolute top-2 left-2" variant="secondary">

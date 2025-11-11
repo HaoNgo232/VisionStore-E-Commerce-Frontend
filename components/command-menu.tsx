@@ -19,6 +19,18 @@ import type { JSX } from "react"
 
 const RECENT_SEARCHES_KEY = "recent-searches"
 
+/**
+ * Type definition for recent searches
+ */
+type RecentSearches = string[]
+
+/**
+ * Type guard function to validate if data is a valid RecentSearches array
+ */
+function isValidRecentSearches(data: unknown): data is RecentSearches {
+    return Array.isArray(data) && data.every((item): item is string => typeof item === "string")
+}
+
 export function CommandMenu(): JSX.Element {
     const router = useRouter()
     const [open, setOpen] = useState(false)
@@ -35,16 +47,21 @@ export function CommandMenu(): JSX.Element {
     // Load recent searches from localStorage
     useEffect(() => {
         if (!mounted) { return; }
-        const saved = localStorage.getItem(RECENT_SEARCHES_KEY)
-        if (saved) {
-            try {
-                const parsed = JSON.parse(saved) as unknown;
-                if (Array.isArray(parsed) && parsed.every((item): item is string => typeof item === "string")) {
-                    setRecentSearches(parsed);
+        try {
+            const saved = localStorage.getItem(RECENT_SEARCHES_KEY)
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved) as unknown
+                    if (isValidRecentSearches(parsed)) {
+                        setRecentSearches(parsed)
+                    }
+                } catch {
+                    // Ignore parsing errors
                 }
-            } catch {
-                // Ignore parsing errors
             }
+        } catch (error) {
+            // Handle localStorage errors gracefully (e.g., quota exceeded, disabled storage)
+            console.error("Failed to load recent searches:", error)
         }
     }, [mounted])
 
@@ -67,7 +84,12 @@ export function CommandMenu(): JSX.Element {
         }
         setRecentSearches((prev) => {
             const updated = [search, ...prev.filter((s) => s !== search)].slice(0, 5)
-            localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated))
+            try {
+                localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated))
+            } catch (error) {
+                // Handle localStorage errors gracefully (e.g., quota exceeded)
+                console.error("Failed to save recent searches:", error)
+            }
             return updated
         })
     }, [])
@@ -142,7 +164,7 @@ export function CommandMenu(): JSX.Element {
                         <span>Liên hệ</span>
                     </CommandItem>
                     <CommandItem
-                        onSelect={() => runCommand(() => router.push("/profile"))}
+                        onSelect={() => runCommand(() => router.push("/profile?tab=profile"))}
                     >
                         <User className="mr-2 h-4 w-4" />
                         <span>Tài khoản</span>

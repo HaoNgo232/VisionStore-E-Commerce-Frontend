@@ -98,7 +98,7 @@ export function ProductDetailContent({ productId, productSlug }: ProductDetailCo
                             src={product.imageUrls[selectedImage] ?? "/placeholder.svg"}
                             alt={product.name}
                             fill
-                            className="object-cover"
+                            className="object-contain"
                         />
                     </div>
                     {product.imageUrls.length > 1 && (
@@ -116,7 +116,7 @@ export function ProductDetailContent({ productId, productSlug }: ProductDetailCo
                                             src={image ?? "/placeholder.svg"}
                                             alt={`${product.name} ${index + 1}`}
                                             fill
-                                            className="object-cover"
+                                            className="object-contain"
                                         />
                                     </button>
                                 )
