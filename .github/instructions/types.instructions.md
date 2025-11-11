@@ -4,6 +4,52 @@ applyTo: "**/*.ts,**/*.tsx,**/types/**/*.ts"
 
 # Type Safety Instructions
 
+## **Never Use `any` or `as` Type Assertion**
+
+### **❌ TRÁNH: Type Assertion với `as`**
+
+Type assertion `as` không an toàn vì nó bỏ qua type checking của TypeScript:
+
+```typescript
+// ❌ WRONG - Không an toàn, có thể gây runtime errors
+const mesh = child as THREE.Mesh;
+mesh.geometry.dispose(); // Nếu child không phải Mesh, sẽ crash
+
+// ❌ WRONG - Bỏ qua type checking
+const data = response as Product; // Không verify response có đúng shape không
+```
+
+### **✅ ĐÚNG: Dùng Type Guards**
+
+Sử dụng type guard functions để TypeScript tự động narrow type một cách an toàn:
+
+```typescript
+// ✅ CORRECT - Type guard function
+function isMesh(obj: THREE.Object3D): obj is THREE.Mesh {
+  return obj instanceof THREE.Mesh;
+}
+
+// Sử dụng type guard
+if (isMesh(child)) {
+  // TypeScript tự động narrow type: child is THREE.Mesh
+  child.geometry.dispose(); // Type-safe, không cần 'as'
+}
+
+// ✅ CORRECT - TypeScript narrows type automatically sau instanceof
+if (child instanceof THREE.Mesh) {
+  // child is automatically THREE.Mesh here
+  child.geometry.dispose();
+  // Không cần 'as', TypeScript đã biết type
+}
+```
+
+**Lý do tránh `as`:**
+
+1. **Runtime Safety**: `as` không verify type tại runtime, chỉ bỏ qua compile-time check
+2. **Type Errors**: Có thể gây runtime errors nếu type assertion sai
+3. **Code Maintainability**: Type guards rõ ràng hơn, dễ debug và maintain
+4. **TypeScript Benefits**: Mất đi lợi ích của type checking
+
 ## **Never Use `any` - Alternatives**
 
 ```typescript
@@ -72,16 +118,19 @@ export type Product = z.infer<typeof ProductSchema>;
 ## **Type Guards & Validation**
 
 ```typescript
-// Type guard functions
+// ✅ CORRECT - Type guard functions without 'as'
 export function isProduct(obj: unknown): obj is Product {
-  return (
-    typeof obj === "object" &&
-    obj !== null &&
-    "id" in obj &&
-    "name" in obj &&
-    typeof (obj as any).id === "string" &&
-    typeof (obj as any).name === "string"
-  );
+  if (typeof obj !== "object" || obj === null) {
+    return false;
+  }
+
+  // Check properties without type assertion
+  if (!("id" in obj) || !("name" in obj)) {
+    return false;
+  }
+
+  // TypeScript narrows obj to have 'id' and 'name' properties
+  return typeof obj.id === "string" && typeof obj.name === "string";
 }
 
 // API response validation

@@ -19,7 +19,7 @@ import { TryOnError, TryOnErrorCode } from "../types/try-on.types";
  * Key indices reference: https://github.com/google/mediapipe/blob/master/mediapipe/modules/face_geometry/data/canonical_face_model_uv_visualization.png
  */
 function extractKeyLandmarks(
-  rawLandmarks: NormalizedLandmark[]
+  rawLandmarks: NormalizedLandmark[],
 ): FaceLandmarks {
   // MediaPipe Face Landmarker returns 478 landmarks
   // Key indices for glasses positioning
@@ -53,8 +53,9 @@ export function useFaceDetection(): {
   isLoading: boolean;
   error: string | null;
 } {
-  const [faceLandmarker, setFaceLandmarker] =
-    useState<FaceLandmarker | null>(null);
+  const [faceLandmarker, setFaceLandmarker] = useState<FaceLandmarker | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -69,7 +70,7 @@ export function useFaceDetection(): {
 
         // Load WASM files from CDN
         const vision = await FilesetResolver.forVisionTasks(
-          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
+          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm",
         );
 
         // Create Face Landmarker instance
@@ -106,16 +107,29 @@ export function useFaceDetection(): {
 
   // Detect face in image
   const detectFace = useCallback(
-    async (image: HTMLImageElement): Promise<FaceLandmarks> => {
-      if (!faceLandmarker) {
-        throw new TryOnError(
-          "Face detector not initialized",
-          TryOnErrorCode.RENDERING_FAILED,
-          "Hệ thống đang khởi tạo. Vui lòng thử lại sau."
-        );
-      }
+    (image: HTMLImageElement): Promise<FaceLandmarks> => {
+      return Promise.resolve().then(() => {
+        if (!faceLandmarker) {
+          throw new TryOnError(
+            "Face detector not initialized",
+            TryOnErrorCode.RENDERING_FAILED,
+            "Hệ thống đang khởi tạo. Vui lòng thử lại sau.",
+          );
+        }
 
-      try {
+        // Verify image is valid before detection
+        if (
+          !image.complete ||
+          image.naturalWidth === 0 ||
+          image.naturalHeight === 0
+        ) {
+          throw new TryOnError(
+            "Image is not fully loaded",
+            TryOnErrorCode.INVALID_IMAGE,
+            "Ảnh chưa được tải xong. Vui lòng thử lại.",
+          );
+        }
+
         // Detect face landmarks
         const result = faceLandmarker.detect(image);
 
@@ -124,7 +138,7 @@ export function useFaceDetection(): {
           throw new TryOnError(
             "No face detected in image",
             TryOnErrorCode.NO_FACE_DETECTED,
-            "Không tìm thấy khuôn mặt trong ảnh. Vui lòng sử dụng ảnh selfie rõ mặt, ánh sáng tốt."
+            "Không tìm thấy khuôn mặt trong ảnh. Vui lòng sử dụng ảnh selfie rõ mặt, ánh sáng tốt.",
           );
         }
 
@@ -133,30 +147,17 @@ export function useFaceDetection(): {
           throw new TryOnError(
             `Multiple faces detected (${result.faceLandmarks.length})`,
             TryOnErrorCode.MULTIPLE_FACES,
-            "Phát hiện nhiều hơn 1 khuôn mặt trong ảnh. Vui lòng sử dụng ảnh chỉ có 1 người."
+            "Phát hiện nhiều hơn 1 khuôn mặt trong ảnh. Vui lòng sử dụng ảnh chỉ có 1 người.",
           );
         }
 
         // Extract key landmarks
         const landmarks = extractKeyLandmarks(result.faceLandmarks[0] ?? []);
         return landmarks;
-      } catch (err) {
-        // Re-throw TryOnError as-is
-        if (err instanceof TryOnError) {
-          throw err;
-        }
-
-        // Wrap other errors
-        throw new TryOnError(
-          err instanceof Error ? err.message : "Face detection failed",
-          TryOnErrorCode.RENDERING_FAILED,
-          "Lỗi khi xử lý ảnh. Vui lòng thử lại với ảnh khác."
-        );
-      }
+      });
     },
-    [faceLandmarker]
+    [faceLandmarker],
   );
 
   return { detectFace, isLoading, error };
 }
-

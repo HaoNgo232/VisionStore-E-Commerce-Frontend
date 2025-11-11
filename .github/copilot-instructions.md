@@ -2,12 +2,53 @@
 
 ## **Core Principles**
 
-### **1. Type Safety 100% - TUYỆT ĐỐI KHÔNG DÙNG `any`**
+### **1. Type Safety 100% - TUYỆT ĐỐI KHÔNG DÙNG `any` VÀ `as` TYPE ASSERTION**
 
 - Mọi biến, function, component props phải có type definitions rõ ràng
 - Sử dụng `unknown` thay vì `any` khi cần xử lý dữ liệu không rõ type
+- **TUYỆT ĐỐI KHÔNG DÙNG `as` type assertion** - Thay vào đó dùng type guards
 - Luôn validate types từ API responses bằng Zod hoặc type guards
 - Sử dụng strict TypeScript config với `noImplicitAny`, `strictNullChecks`
+
+#### **❌ TRÁNH: Type Assertion với `as`**
+
+```typescript
+// ❌ WRONG - Không an toàn, có thể gây runtime errors
+const mesh = child as THREE.Mesh;
+mesh.geometry.dispose(); // Nếu child không phải Mesh, sẽ crash
+
+// ❌ WRONG - Bỏ qua type checking
+const data = response as Product; // Không verify response có đúng shape không
+```
+
+#### **✅ ĐÚNG: Dùng Type Guards**
+
+```typescript
+// ✅ CORRECT - Type guard function
+function isMesh(obj: THREE.Object3D): obj is THREE.Mesh {
+  return obj instanceof THREE.Mesh;
+}
+
+// Sử dụng type guard
+if (isMesh(child)) {
+  // TypeScript tự động narrow type: child is THREE.Mesh
+  child.geometry.dispose(); // Type-safe, không cần 'as'
+}
+
+// ✅ CORRECT - TypeScript narrows type automatically sau instanceof
+if (child instanceof THREE.Mesh) {
+  // child is automatically THREE.Mesh here
+  child.geometry.dispose();
+  // Không cần 'as', TypeScript đã biết type
+}
+```
+
+**Lý do tránh `as`:**
+
+1. **Runtime Safety**: `as` không verify type tại runtime, chỉ bỏ qua compile-time check
+2. **Type Errors**: Có thể gây runtime errors nếu type assertion sai
+3. **Code Maintainability**: Type guards rõ ràng hơn, dễ debug và maintain
+4. **TypeScript Benefits**: Mất đi lợi ích của type checking
 
 ### **2. Backend Type Synchronization**
 
@@ -366,6 +407,7 @@ export function ProductForm({
 **Pre-commit Checklist:**
 
 - [ ] Không có `any` types trong code
+- [ ] Không có `as` type assertions (dùng type guards thay thế)
 - [ ] Tất cả API responses được validate bằng Zod/type guards
 - [ ] Component props có complete interface definitions
 - [ ] Error handling được implement với proper types
