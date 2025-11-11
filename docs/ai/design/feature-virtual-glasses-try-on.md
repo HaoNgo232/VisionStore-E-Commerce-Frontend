@@ -256,27 +256,31 @@ Response: {
 app/
 └── (public)/
     └── try-on/
-        ├── page.tsx                 # Main try-on page
-        └── components/
-            ├── ImageUploader.tsx    # Upload & preview
-            ├── FaceDetector.tsx     # MediaPipe integration
-            ├── GlassesPicker.tsx    # List of glasses models
-            ├── TryOnCanvas.tsx      # Three.js + Canvas rendering
-            ├── ResultActions.tsx    # Download, Save, Add to Cart
-            └── ErrorDisplay.tsx     # Error messages
+        └── page.tsx                 # Main try-on page
 
 features/
 └── try-on/
+    ├── components/
+    │   ├── ImageUploader.tsx        # Upload & preview
+    │   ├── FaceDetector.tsx         # MediaPipe integration
+    │   ├── GlassesPicker.tsx        # List of glasses models
+    │   ├── TryOnCanvas.tsx           # Three.js + Canvas rendering
+    │   ├── ResultActions.tsx         # Download, Save, Add to Cart
+    │   └── ErrorDisplay.tsx          # Error messages
+    │
     ├── hooks/
-    │   ├── useFaceDetection.ts      # MediaPipe logic
+    │   ├── useFaceDetection.ts       # MediaPipe logic
     │   ├── useGlassesLoader.ts      # Load GLB models
     │   ├── useTryOnRenderer.ts      # Three.js rendering
     │   └── useTryOnState.ts         # State management
+    │
     ├── services/
-    │   ├── glasses.service.ts       # API calls
+    │   ├── glasses.service.ts        # API calls
     │   └── image.service.ts         # Image processing utils
+    │
     ├── types/
     │   └── try-on.types.ts          # TypeScript definitions
+    │
     └── utils/
         ├── face-utils.ts            # Landmark calculations
         └── canvas-utils.ts          # Canvas helpers
