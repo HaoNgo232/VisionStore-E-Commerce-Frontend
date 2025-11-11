@@ -23,7 +23,47 @@ interface ListUsersParams {
   role?: UserRole;
 }
 
-export const usersApi = {
+/**
+ * Interface for Users Service
+ * Defines contract for user management operations
+ */
+export interface IUsersService {
+  /**
+   * List all users with pagination and filters (Admin only)
+   */
+  listUsers(query?: ListUsersParams): Promise<ListUsersResponse>;
+
+  /**
+   * Get user by ID
+   */
+  getUserById(userId: string): Promise<User>;
+
+  /**
+   * Get user by email (Admin only)
+   */
+  getUserByEmail(email: string): Promise<User>;
+
+  /**
+   * Update user profile (for current user)
+   */
+  updateProfile(userId: string, data: UpdateProfileRequest): Promise<User>;
+
+  /**
+   * Update user (Admin only)
+   */
+  updateUser(userId: string, data: UpdateUserRequest): Promise<User>;
+
+  /**
+   * Deactivate user account (Admin only)
+   */
+  deactivateUser(userId: string): Promise<User>;
+}
+
+/**
+ * Users Service Implementation
+ * Handles user management API operations with runtime validation
+ */
+export class UsersService implements IUsersService {
   /**
    * List all users with pagination and filters (Admin only)
    */
@@ -50,7 +90,7 @@ export const usersApi = {
       endpoint,
       ListUsersResponseSchema as z.ZodType<ListUsersResponse>,
     );
-  },
+  }
 
   /**
    * Get user by ID
@@ -60,7 +100,7 @@ export const usersApi = {
       `/users/${userId}`,
       UserSchema as z.ZodType<User>,
     );
-  },
+  }
 
   /**
    * Get user by email (Admin only)
@@ -70,7 +110,7 @@ export const usersApi = {
       `/users/email/${encodeURIComponent(email)}`,
       UserSchema as z.ZodType<User>,
     );
-  },
+  }
 
   /**
    * Update user profile (for current user)
@@ -84,7 +124,7 @@ export const usersApi = {
       UserSchema as z.ZodType<User>,
       data,
     );
-  },
+  }
 
   /**
    * Update user (Admin only)
@@ -95,7 +135,7 @@ export const usersApi = {
       UserSchema as z.ZodType<User>,
       data,
     );
-  },
+  }
 
   /**
    * Deactivate user account (Admin only)
@@ -106,5 +146,11 @@ export const usersApi = {
       UserSchema as z.ZodType<User>,
       {},
     );
-  },
-};
+  }
+}
+
+/**
+ * Default instance of UsersService
+ * Export singleton instance for backward compatibility
+ */
+export const usersApi = new UsersService();

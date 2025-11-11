@@ -33,7 +33,50 @@ export interface GetProductsParams {
   maxPriceInt?: number;
 }
 
-export const productsApi = {
+/**
+ * Interface for Products Service
+ * Defines contract for product catalog operations
+ */
+export interface IProductsService {
+  /**
+   * Get all products with optional filters
+   */
+  getAll(params?: GetProductsParams): Promise<PaginatedResponse<Product>>;
+
+  /**
+   * Get product by ID
+   */
+  getById(productId: string): Promise<Product>;
+
+  /**
+   * Create new product
+   */
+  create(data: CreateProductRequest): Promise<Product>;
+
+  /**
+   * Get product by slug
+   */
+  getBySlug(slug: string): Promise<Product>;
+
+  /**
+   * Update product
+   */
+  update(productId: string, data: UpdateProductRequest): Promise<Product>;
+
+  /**
+   * Delete product
+   */
+  delete(productId: string): Promise<void>;
+}
+
+/**
+ * Products Service Implementation
+ * Handles product catalog API operations with runtime validation
+ */
+export class ProductsService implements IProductsService {
+  /**
+   * Get all products with optional filters
+   */
   async getAll(
     params?: GetProductsParams,
   ): Promise<PaginatedResponse<Product>> {
@@ -63,30 +106,42 @@ export const productsApi = {
       endpoint,
       PaginatedProductsSchema,
     );
-  },
+  }
 
+  /**
+   * Get product by ID
+   */
   async getById(productId: string): Promise<Product> {
     return apiGetValidated<Product>(
       `/products/${productId}`,
       ProductSchema as z.ZodType<Product>,
     );
-  },
+  }
 
+  /**
+   * Create new product
+   */
   async create(data: CreateProductRequest): Promise<Product> {
     return apiPostValidated<Product, CreateProductRequest>(
       "/products",
       ProductSchema as z.ZodType<Product>,
       data,
     );
-  },
+  }
 
+  /**
+   * Get product by slug
+   */
   async getBySlug(slug: string): Promise<Product> {
     return apiGetValidated<Product>(
       `/products/slug/${slug}`,
       ProductSchema as z.ZodType<Product>,
     );
-  },
+  }
 
+  /**
+   * Update product
+   */
   async update(
     productId: string,
     data: UpdateProductRequest,
@@ -96,9 +151,18 @@ export const productsApi = {
       ProductSchema as z.ZodType<Product>,
       data,
     );
-  },
+  }
 
+  /**
+   * Delete product
+   */
   async delete(productId: string): Promise<void> {
     return apiDelete<void>(`/products/${productId}`);
-  },
-};
+  }
+}
+
+/**
+ * Default instance of ProductsService
+ * Export singleton instance for backward compatibility
+ */
+export const productsApi = new ProductsService();

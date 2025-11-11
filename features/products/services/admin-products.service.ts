@@ -60,72 +60,6 @@ export interface IAdminProductsService {
  */
 export class AdminProductsService implements IAdminProductsService {
   /**
-   * Build FormData from AdminCreateProductRequest
-   * Helper method to reduce code duplication
-   */
-  private buildCreateFormData(request: AdminCreateProductRequest): FormData {
-    const formData = new FormData();
-
-    // Required fields
-    formData.append("name", request.name);
-    formData.append("priceInt", String(request.priceInt));
-
-    // Optional fields
-    this.appendIfDefined(formData, "description", request.description);
-    this.appendIfDefined(formData, "categoryId", request.categoryId);
-    this.appendIfDefined(formData, "sku", request.sku);
-    this.appendIfDefined(formData, "slug", request.slug);
-    this.appendIfDefined(formData, "model3dUrl", request.model3dUrl);
-
-    if (request.stock !== undefined) {
-      formData.append("stock", String(request.stock));
-    }
-    if (request.attributes !== undefined && request.attributes !== null) {
-      formData.append("attributes", JSON.stringify(request.attributes));
-    }
-
-    // File upload (if provided)
-    if (request.image !== undefined && request.image !== null) {
-      formData.append("image", request.image);
-    }
-
-    return formData;
-  }
-
-  /**
-   * Build FormData from AdminUpdateProductRequest
-   * Helper method for partial updates
-   */
-  private buildUpdateFormData(request: AdminUpdateProductRequest): FormData {
-    const formData = new FormData();
-
-    // Only append provided fields (partial update)
-    this.appendIfDefined(formData, "name", request.name);
-    this.appendIfDefined(formData, "categoryId", request.categoryId);
-    this.appendIfDefined(formData, "sku", request.sku);
-    this.appendIfDefined(formData, "slug", request.slug);
-    this.appendIfDefined(formData, "description", request.description);
-    this.appendIfDefined(formData, "model3dUrl", request.model3dUrl);
-
-    if (request.priceInt !== undefined && request.priceInt !== null) {
-      formData.append("priceInt", String(request.priceInt));
-    }
-    if (request.stock !== undefined && request.stock !== null) {
-      formData.append("stock", String(request.stock));
-    }
-    if (request.attributes !== undefined && request.attributes !== null) {
-      formData.append("attributes", JSON.stringify(request.attributes));
-    }
-
-    // File upload (if provided - replaces old image)
-    if (request.image !== undefined && request.image !== null) {
-      formData.append("image", request.image);
-    }
-
-    return formData;
-  }
-
-  /**
    * Helper method to append value to FormData if defined and not null
    */
   private appendIfDefined(
@@ -229,6 +163,72 @@ export class AdminProductsService implements IAdminProductsService {
    */
   async delete(id: string): Promise<void> {
     await apiClient.delete(`/products/admin/${id}`);
+  }
+
+  /**
+   * Build FormData from AdminCreateProductRequest
+   * Helper method to reduce code duplication
+   */
+  private buildCreateFormData(request: AdminCreateProductRequest): FormData {
+    const formData = new FormData();
+
+    // Required fields
+    formData.append("name", request.name);
+    formData.append("priceInt", String(request.priceInt));
+
+    // Optional fields
+    this.appendIfDefined(formData, "description", request.description);
+    this.appendIfDefined(formData, "categoryId", request.categoryId);
+    this.appendIfDefined(formData, "sku", request.sku);
+    this.appendIfDefined(formData, "slug", request.slug);
+    this.appendIfDefined(formData, "model3dUrl", request.model3dUrl);
+
+    if (request.stock !== undefined) {
+      formData.append("stock", String(request.stock));
+    }
+    if (request.attributes !== undefined && request.attributes !== null) {
+      formData.append("attributes", JSON.stringify(request.attributes));
+    }
+
+    // File upload (if provided)
+    if (request.image !== undefined && request.image !== null) {
+      formData.append("image", request.image);
+    }
+
+    return formData;
+  }
+
+  /**
+   * Build FormData from AdminUpdateProductRequest
+   * Helper method for partial updates
+   */
+  private buildUpdateFormData(request: AdminUpdateProductRequest): FormData {
+    const formData = new FormData();
+
+    // Only append provided fields (partial update)
+    this.appendIfDefined(formData, "name", request.name);
+    this.appendIfDefined(formData, "categoryId", request.categoryId);
+    this.appendIfDefined(formData, "sku", request.sku);
+    this.appendIfDefined(formData, "slug", request.slug);
+    this.appendIfDefined(formData, "description", request.description);
+    this.appendIfDefined(formData, "model3dUrl", request.model3dUrl);
+
+    if (request.priceInt !== undefined && request.priceInt !== null) {
+      formData.append("priceInt", String(request.priceInt));
+    }
+    if (request.stock !== undefined && request.stock !== null) {
+      formData.append("stock", String(request.stock));
+    }
+    if (request.attributes !== undefined && request.attributes !== null) {
+      formData.append("attributes", JSON.stringify(request.attributes));
+    }
+
+    // File upload (if provided - replaces old image)
+    if (request.image !== undefined && request.image !== null) {
+      formData.append("image", request.image);
+    }
+
+    return formData;
   }
 }
 

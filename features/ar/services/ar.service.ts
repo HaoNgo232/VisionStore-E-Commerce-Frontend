@@ -10,23 +10,54 @@ import type {
   ARSnapshotResponse,
 } from "@/types";
 
-export const arApi = {
+/**
+ * Interface for AR Service
+ * Defines contract for AR snapshot and virtual try-on operations
+ */
+export interface IARService {
+  /**
+   * Fetch all AR snapshots for current user
+   */
+  getAll(): Promise<ARSnapshot[]>;
+
+  /**
+   * Fetch single AR snapshot by ID
+   */
+  getById(id: string): Promise<ARSnapshot>;
+
+  /**
+   * Upload new AR snapshot
+   */
+  upload(data: UploadARSnapshotRequest): Promise<ARSnapshotResponse>;
+
+  /**
+   * Delete AR snapshot
+   */
+  delete(id: string): Promise<void>;
+}
+
+/**
+ * AR Service Implementation
+ * Handles AR snapshots and virtual try-on operations
+ */
+export class ARService implements IARService {
   /**
    * Fetch all AR snapshots for current user
    */
   async getAll(): Promise<ARSnapshot[]> {
     return apiGet<ARSnapshot[]>("/ar/snapshots");
-  },
+  }
 
   /**
    * Fetch single AR snapshot by ID
    */
   async getById(id: string): Promise<ARSnapshot> {
     return apiGet<ARSnapshot>(`/ar/snapshots/${id}`);
-  },
+  }
 
   /**
    * Upload new AR snapshot
+   * Supports both File (multipart/form-data) and base64 string uploads
    */
   async upload(data: UploadARSnapshotRequest): Promise<ARSnapshotResponse> {
     // If image is a File, use FormData for multipart upload
@@ -39,12 +70,18 @@ export const arApi = {
 
     // Otherwise treat as base64 string
     return apiPost<ARSnapshotResponse>("/ar/snapshots", data);
-  },
+  }
 
   /**
    * Delete AR snapshot
    */
   async delete(id: string): Promise<void> {
     return apiDelete<void>(`/ar/snapshots/${id}`);
-  },
-};
+  }
+}
+
+/**
+ * Default instance of ARService
+ * Export singleton instance for backward compatibility
+ */
+export const arApi = new ARService();

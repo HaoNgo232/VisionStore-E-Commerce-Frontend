@@ -20,7 +20,94 @@ import { OrderSchema, PaginatedOrdersResponseSchema } from "@/types";
 import { useAuthStore } from "@/stores/auth.store";
 import { type z } from "zod";
 
-export const ordersApi = {
+/**
+ * Interface for Orders Service
+ * Defines contract for order management operations
+ */
+export interface IOrdersService {
+  /**
+   * Get all orders for current user
+   */
+  getAll(): Promise<PaginatedOrdersResponse>;
+
+  /**
+   * Get order by ID
+   */
+  getById(orderId: string): Promise<Order>;
+
+  /**
+   * Create new order
+   */
+  create(data: CreateOrderRequest): Promise<Order>;
+
+  /**
+   * Update order status
+   */
+  updateStatus(orderId: string, data: UpdateOrderStatusRequest): Promise<Order>;
+
+  /**
+   * Cancel order
+   */
+  cancel(orderId: string): Promise<Order>;
+
+  /**
+   * Delete order
+   */
+  delete(orderId: string): Promise<void>;
+
+  /**
+   * List all orders (Admin only)
+   * Filters: status, paymentStatus, search, date range
+   */
+  listAllOrders(query?: OrderAdminListQuery): Promise<PaginatedOrdersResponse>;
+}
+
+/**
+ * Orders Service Implementation
+ * Handles order management with runtime validation
+ */
+export class OrdersService implements IOrdersService {
+  /**
+   * Build URLSearchParams from OrderAdminListQuery
+   * Private helper method for query parameter construction
+   */
+  private buildOrderQueryParams(
+    query: OrderAdminListQuery | undefined,
+  ): URLSearchParams {
+    const searchParams = new URLSearchParams();
+
+    if (query === undefined) {
+      return searchParams;
+    }
+
+    if (query.page !== undefined) {
+      searchParams.set("page", query.page.toString());
+    }
+    if (query.pageSize !== undefined) {
+      searchParams.set("pageSize", query.pageSize.toString());
+    }
+    if (query.status !== undefined) {
+      searchParams.set("status", query.status);
+    }
+    if (query.paymentStatus !== undefined) {
+      searchParams.set("paymentStatus", query.paymentStatus);
+    }
+    if (query.search !== undefined && query.search !== "") {
+      searchParams.set("search", query.search);
+    }
+    if (query.startDate !== undefined) {
+      searchParams.set("startDate", query.startDate);
+    }
+    if (query.endDate !== undefined) {
+      searchParams.set("endDate", query.endDate);
+    }
+
+    return searchParams;
+  }
+
+  /**
+   * Get all orders for current user
+   */
   async getAll(): Promise<PaginatedOrdersResponse> {
     const userId = useAuthStore.getState().getUserId();
     if (!userId) {
@@ -33,15 +120,21 @@ export const ordersApi = {
         params: { userId },
       },
     );
-  },
+  }
 
+  /**
+   * Get order by ID
+   */
   async getById(orderId: string): Promise<Order> {
     return apiGetValidated<Order>(
       `/orders/${orderId}`,
       OrderSchema as z.ZodType<Order>,
     );
-  },
+  }
 
+  /**
+   * Create new order
+   */
   async create(data: CreateOrderRequest): Promise<Order> {
     const userId = useAuthStore.getState().getUserId();
     if (!userId) {
@@ -55,8 +148,11 @@ export const ordersApi = {
         userId,
       },
     );
-  },
+  }
 
+  /**
+   * Update order status
+   */
   async updateStatus(
     orderId: string,
     data: UpdateOrderStatusRequest,
@@ -66,19 +162,25 @@ export const ordersApi = {
       OrderSchema as z.ZodType<Order>,
       data,
     );
-  },
+  }
 
+  /**
+   * Cancel order
+   */
   async cancel(orderId: string): Promise<Order> {
     return apiPatchValidated<Order, Record<string, never>>(
       `/orders/${orderId}/cancel`,
       OrderSchema as z.ZodType<Order>,
       {},
     );
-  },
+  }
 
+  /**
+   * Delete order
+   */
   async delete(orderId: string): Promise<void> {
     return apiDelete<void>(`/orders/${orderId}`);
-  },
+  }
 
   /**
    * List all orders (Admin only)
@@ -87,7 +189,7 @@ export const ordersApi = {
   async listAllOrders(
     query?: OrderAdminListQuery,
   ): Promise<PaginatedOrdersResponse> {
-    const searchParams = buildOrderQueryParams(query);
+    const searchParams = this.buildOrderQueryParams(query);
     const queryString = searchParams.toString();
     const endpoint = queryString
       ? `/orders/admin/all?${queryString}`
@@ -97,42 +199,11 @@ export const ordersApi = {
       endpoint,
       PaginatedOrdersResponseSchema as z.ZodType<PaginatedOrdersResponse>,
     );
-  },
-};
+  }
+}
 
 /**
- * Build URLSearchParams from OrderAdminListQuery
+ * Default instance of OrdersService
+ * Export singleton instance for backward compatibility
  */
-function buildOrderQueryParams(
-  query: OrderAdminListQuery | undefined,
-): URLSearchParams {
-  const searchParams = new URLSearchParams();
-
-  if (query === undefined) {
-    return searchParams;
-  }
-
-  if (query.page !== undefined) {
-    searchParams.set("page", query.page.toString());
-  }
-  if (query.pageSize !== undefined) {
-    searchParams.set("pageSize", query.pageSize.toString());
-  }
-  if (query.status !== undefined) {
-    searchParams.set("status", query.status);
-  }
-  if (query.paymentStatus !== undefined) {
-    searchParams.set("paymentStatus", query.paymentStatus);
-  }
-  if (query.search !== undefined && query.search !== "") {
-    searchParams.set("search", query.search);
-  }
-  if (query.startDate !== undefined) {
-    searchParams.set("startDate", query.startDate);
-  }
-  if (query.endDate !== undefined) {
-    searchParams.set("endDate", query.endDate);
-  }
-
-  return searchParams;
-}
+export const ordersApi = new OrdersService();

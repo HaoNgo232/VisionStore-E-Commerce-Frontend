@@ -26,7 +26,48 @@ import {
 } from "@/types/auth.types";
 import { type z } from "zod";
 
-export const authService = {
+/**
+ * Interface for Auth Service
+ * Defines contract for authentication operations
+ */
+export interface IAuthService {
+  /**
+   * Login with email and password
+   */
+  login(credentials: LoginRequest): Promise<AuthResponse>;
+
+  /**
+   * Register new account
+   */
+  register(data: RegisterRequest): Promise<AuthResponse>;
+
+  /**
+   * Refresh access token using refresh token
+   */
+  refresh(refreshToken: string): Promise<TokenRefreshResponse>;
+
+  /**
+   * Verify if token is valid
+   */
+  verifyToken(): Promise<VerifyTokenResponse>;
+
+  /**
+   * Get current user profile
+   */
+  getCurrentUser(): Promise<User>;
+
+  /**
+   * Logout - clear local auth data
+   * Note: Backend will invalidate the token
+   */
+  logout(): void;
+}
+
+/**
+ * Auth Service Implementation
+ * Handles all authentication API calls with runtime validation
+ */
+export class AuthService implements IAuthService {
   /**
    * Login with email and password
    */
@@ -45,7 +86,7 @@ export const authService = {
     } catch (error) {
       throw new Error(getErrorMessage(error));
     }
-  },
+  }
 
   /**
    * Register new account
@@ -65,7 +106,7 @@ export const authService = {
     } catch (error) {
       throw new Error(getErrorMessage(error));
     }
-  },
+  }
 
   /**
    * Refresh access token using refresh token
@@ -86,7 +127,7 @@ export const authService = {
       useAuthStore.getState().clearTokens();
       throw new Error(getErrorMessage(error));
     }
-  },
+  }
 
   /**
    * Verify if token is valid
@@ -101,7 +142,7 @@ export const authService = {
     } catch (error) {
       throw new Error(getErrorMessage(error));
     }
-  },
+  }
 
   /**
    * Get current user profile
@@ -116,7 +157,7 @@ export const authService = {
     } catch (error) {
       throw new Error(getErrorMessage(error));
     }
-  },
+  }
 
   /**
    * Logout - clear local auth data
@@ -124,5 +165,11 @@ export const authService = {
    */
   logout(): void {
     useAuthStore.getState().clearTokens();
-  },
-};
+  }
+}
+
+/**
+ * Default instance of AuthService
+ * Export singleton instance for backward compatibility
+ */
+export const authService = new AuthService();

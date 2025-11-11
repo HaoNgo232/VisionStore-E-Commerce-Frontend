@@ -28,7 +28,48 @@ const CategoryArraySchema: z.ZodType<Category[]> = z.array(CategorySchema);
 const CategoryTreeArraySchema: z.ZodType<CategoryTree[]> =
   z.array(CategoryTreeSchema);
 
-export const categoriesApi = {
+/**
+ * Interface for Categories Service
+ * Defines contract for category management operations
+ */
+export interface ICategoriesService {
+  /**
+   * Fetch all categories
+   * Backend returns paginated response, so we unwrap the categories array
+   */
+  getAll(): Promise<Category[]>;
+
+  /**
+   * Fetch categories as tree structure (with nesting)
+   */
+  getTree(): Promise<CategoryTree[]>;
+
+  /**
+   * Fetch single category by ID
+   */
+  getById(id: string): Promise<Category>;
+
+  /**
+   * Create new category (admin only)
+   */
+  create(data: CreateCategoryRequest): Promise<Category>;
+
+  /**
+   * Update category (admin only)
+   */
+  update(id: string, data: UpdateCategoryRequest): Promise<Category>;
+
+  /**
+   * Delete category (admin only)
+   */
+  delete(id: string): Promise<void>;
+}
+
+/**
+ * Categories Service Implementation
+ * Handles all category-related API calls with runtime validation
+ */
+export class CategoriesService implements ICategoriesService {
   /**
    * Fetch all categories
    * Backend returns paginated response, so we unwrap the categories array
@@ -39,7 +80,7 @@ export const categoriesApi = {
       PaginatedCategoriesResponseSchema,
     );
     return response.categories;
-  },
+  }
 
   /**
    * Fetch categories as tree structure (with nesting)
@@ -49,14 +90,14 @@ export const categoriesApi = {
       "/categories/tree",
       CategoryTreeArraySchema,
     );
-  },
+  }
 
   /**
    * Fetch single category by ID
    */
   async getById(id: string): Promise<Category> {
     return apiGetValidated<Category>(`/categories/${id}`, CategorySchema);
-  },
+  }
 
   /**
    * Create new category (admin only)
@@ -67,7 +108,7 @@ export const categoriesApi = {
       CategorySchema,
       data,
     );
-  },
+  }
 
   /**
    * Update category (admin only)
@@ -78,12 +119,18 @@ export const categoriesApi = {
       CategorySchema,
       data,
     );
-  },
+  }
 
   /**
    * Delete category (admin only)
    */
   async delete(id: string): Promise<void> {
     return apiDelete<void>(`/categories/${id}`);
-  },
-};
+  }
+}
+
+/**
+ * Default instance of CategoriesService
+ * Export singleton instance for backward compatibility
+ */
+export const categoriesApi = new CategoriesService();
