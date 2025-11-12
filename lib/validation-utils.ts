@@ -93,6 +93,13 @@ export function validateResponse<T>(
             typeof data === "object" && data !== null ? Object.keys(data) : [],
         });
       }
+      // Log full error details to console
+      console.error(`[ValidationError] Full Error Details:`, {
+        context,
+        errors: error.errors,
+        message: error.message,
+      });
+
       throw new ValidationError(
         `Invalid ${context ?? "response"} format from backend`,
         error,
