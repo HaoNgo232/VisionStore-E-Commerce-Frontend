@@ -42,6 +42,7 @@ export function useCategories(): {
 /**
  * useCategoryTree Hook
  * Fetches categories as tree structure
+ * Note: Not implemented yet
  */
 export function useCategoryTree(): {
   tree: CategoryTree[];

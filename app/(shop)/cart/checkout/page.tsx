@@ -10,6 +10,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import type { JSX } from "react"
 
 export default function CheckoutPage(): JSX.Element {
   return (
