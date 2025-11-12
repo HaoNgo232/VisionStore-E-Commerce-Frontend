@@ -93,11 +93,20 @@ export function validateResponse<T>(
             typeof data === "object" && data !== null ? Object.keys(data) : [],
         });
       }
-      // Log full error details to console
+      // Log full error details to console with expanded data
       console.error(`[ValidationError] Full Error Details:`, {
         context,
-        errors: error.errors,
+        totalErrors: error.errors.length,
+        errors: error.errors.map((e) => ({
+          path: e.path.join("."),
+          message: e.message,
+          code: e.code,
+          // Only include expected/received if they exist
+          ...(("expected" in e) && { expected: e.expected }),
+          ...(("received" in e) && { received: e.received }),
+        })),
         message: error.message,
+        rawResponseData: data,
       });
 
       throw new ValidationError(
