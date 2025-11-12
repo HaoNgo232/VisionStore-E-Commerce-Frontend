@@ -219,7 +219,6 @@ export function ProfileTab(): JSX.Element {
                             ) : (
                                 <>
                                     <p className="font-semibold text-lg">{user.fullName}</p>
-                                    <p className="text-sm text-muted-foreground">{user.email}</p>
                                     {user.phone && (
                                         <p className="text-sm text-muted-foreground">{user.phone}</p>
                                     )}
@@ -242,14 +241,40 @@ export function ProfileTab(): JSX.Element {
 
                     {/* Additional Info */}
                     {!isEditing && (
-                        <div className="grid grid-cols-2 gap-4 text-sm">
-                            <div>
-                                <p className="font-medium text-muted-foreground">Ngày tạo</p>
-                                <p>{new Date(user.createdAt).toLocaleDateString("vi-VN")}</p>
-                            </div>
-                            <div>
-                                <p className="font-medium text-muted-foreground">Cập nhật lần cuối</p>
-                                <p>{new Date(user.updatedAt).toLocaleDateString("vi-VN")}</p>
+                        <div className="space-y-4 border-t pt-4">
+                            <div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
+                                <div>
+                                    <p className="font-medium text-muted-foreground">ID người dùng</p>
+                                    <p className="font-mono text-xs break-all">{user.id}</p>
+                                </div>
+                                <div>
+                                    <p className="font-medium text-muted-foreground">Email</p>
+                                    <p>{user.email}</p>
+                                </div>
+                                <div>
+                                    <p className="font-medium text-muted-foreground">Ngày tạo</p>
+                                    <p>
+                                        {new Date(user.createdAt).toLocaleString("vi-VN", {
+                                            year: "numeric",
+                                            month: "long",
+                                            day: "numeric",
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                        })}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="font-medium text-muted-foreground">Cập nhật lần cuối</p>
+                                    <p>
+                                        {new Date(user.updatedAt).toLocaleString("vi-VN", {
+                                            year: "numeric",
+                                            month: "long",
+                                            day: "numeric",
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                        })}
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     )}

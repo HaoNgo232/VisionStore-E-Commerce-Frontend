@@ -1,165 +1,129 @@
 "use client"
 
-import { Label } from "@/components/ui/label"
+import { useState, useMemo } from "react"
+import type { JSX } from "react"
 import { Checkbox } from "@/components/ui/checkbox"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Slider } from "@/components/ui/slider"
+import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { formatPrice } from "@/features/products/utils"
-import type { ProductFilters as ProductFiltersType } from "@/types"
+import { Separator } from "@/components/ui/separator"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { PriceRangeSlider } from "./price-range-slider"
+import { Input } from "@/components/ui/input"
+import { Search } from "lucide-react"
+import type { Category } from "@/types"
 
 interface ProductFiltersProps {
-  filters: ProductFiltersType
-  onFiltersChange: (filters: Partial<ProductFiltersType>) => void
-  onClearFilters: () => void
+  priceRange: [number, number]
+  onPriceRangeChange: (range: [number, number]) => void
+  defaultPriceRange: [number, number]
+  selectedCategories: string[]
+  onCategoriesChange: (categories: string[]) => void
+  categories: Category[]
+  categoriesLoading: boolean
+  onClearAll: () => void
 }
 
-const categories = [
-  { value: "sunglasses", label: "Kính râm" },
-  { value: "eyeglasses", label: "Kính cận" },
-  { value: "sports", label: "Thể thao" },
-  { value: "kids", label: "Trẻ em" },
-]
+export function ProductFilters({
+  priceRange,
+  onPriceRangeChange,
+  defaultPriceRange,
+  selectedCategories,
+  onCategoriesChange,
+  categories,
+  categoriesLoading,
+  onClearAll,
+}: Readonly<ProductFiltersProps>): JSX.Element {
+  const [categorySearch, setCategorySearch] = useState("")
 
-const brands = ["VisionPro", "UrbanEye", "RetroVision", "ActiveVision", "ChicVision", "JuniorVision"]
+  // Filter categories by search
+  const filteredCategories = useMemo(() => {
+    if (!categorySearch) { return categories }
+    const searchLower = categorySearch.toLowerCase()
+    return categories.filter((cat) => cat.name.toLowerCase().includes(searchLower))
+  }, [categories, categorySearch])
 
-const frameTypes = [
-  { value: "full-rim", label: "Full Rim" },
-  { value: "semi-rimless", label: "Semi-Rimless" },
-  { value: "rimless", label: "Rimless" },
-  { value: "aviator", label: "Aviator" },
-  { value: "wayfarer", label: "Wayfarer" },
-  { value: "round", label: "Round" },
-  { value: "cat-eye", label: "Cat-Eye" },
-]
+  const handleCategoryToggle = (slug: string, checked: boolean): void => {
+    if (checked) {
+      onCategoriesChange([...selectedCategories, slug])
+    } else {
+      onCategoriesChange(selectedCategories.filter((c) => c !== slug))
+    }
+  }
 
-export function ProductFilters({ filters, onFiltersChange, onClearFilters }: ProductFiltersProps): JSX.Element {
-  const [minPrice, maxPrice] = filters.priceRange ?? [0, 200]
+  const hasActiveFilters =
+    priceRange[0] !== defaultPriceRange[0] ||
+    priceRange[1] !== defaultPriceRange[1] ||
+    selectedCategories.length > 0
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">Bộ lọc</h3>
-        <Button variant="ghost" size="sm" onClick={onClearFilters}>
-          Xóa tất cả
-        </Button>
+        {hasActiveFilters && (
+          <Button variant="ghost" size="sm" onClick={onClearAll}>
+            Xóa tất cả
+          </Button>
+        )}
       </div>
 
-      <Accordion type="multiple" defaultValue={["category", "price", "brand"]} className="w-full">
-        {/* Category */}
-        <AccordionItem value="category">
-          <AccordionTrigger className="text-base font-semibold hover:no-underline">
-            Danh mục
-          </AccordionTrigger>
-          <AccordionContent>
-            <RadioGroup
-              value={filters.categorySlug ?? ""}
-              onValueChange={(value) => onFiltersChange({ categorySlug: value })}
-              className="space-y-3"
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="" id="all" />
-                <Label htmlFor="all" className="font-normal cursor-pointer">
-                  Tất cả danh mục
-                </Label>
-              </div>
-              {categories.map((category) => (
-                <div key={category.value} className="flex items-center space-x-2">
-                  <RadioGroupItem value={category.value} id={category.value} />
-                  <Label htmlFor={category.value} className="font-normal cursor-pointer">
-                    {category.label}
-                  </Label>
-                </div>
-              ))}
-            </RadioGroup>
-          </AccordionContent>
-        </AccordionItem>
+      <Separator />
 
-        {/* Price Range */}
-        <AccordionItem value="price">
-          <AccordionTrigger className="text-base font-semibold hover:no-underline">
-            Khoảng giá
-          </AccordionTrigger>
-          <AccordionContent>
-            <div className="pt-2 space-y-4">
-              <Slider
-                min={0}
-                max={2000000} // 2,000,000 VND
-                step={50000} // 50,000 VND steps
-                value={[minPrice, maxPrice]}
-                onValueChange={(value) => onFiltersChange({ priceRange: value as [number, number] })}
-              />
-              <div className="flex items-center justify-between text-sm text-muted-foreground">
-                <span>{formatPrice(minPrice)}</span>
-                <span>{formatPrice(maxPrice)}</span>
-              </div>
-            </div>
-          </AccordionContent>
-        </AccordionItem>
+      {/* Price Range */}
+      <div className="space-y-3">
+        <Label className="text-base font-medium">Khoảng giá</Label>
+        <PriceRangeSlider
+          value={priceRange}
+          onChange={onPriceRangeChange}
+          min={defaultPriceRange[0]}
+          max={defaultPriceRange[1]}
+        />
+      </div>
 
-        {/* Brand */}
-        <AccordionItem value="brand">
-          <AccordionTrigger className="text-base font-semibold hover:no-underline">
-            Thương hiệu
-          </AccordionTrigger>
-          <AccordionContent>
-            <div className="space-y-3">
-              {brands.map((brand) => (
-                <div key={brand} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={brand}
-                    disabled
-                  />
-                  <Label htmlFor={brand} className="font-normal cursor-pointer text-muted-foreground">
-                    {brand} (Sắp ra mắt)
-                  </Label>
-                </div>
-              ))}
-            </div>
-          </AccordionContent>
-        </AccordionItem>
+      <Separator />
 
-        {/* Frame Type */}
-        <AccordionItem value="frame">
-          <AccordionTrigger className="text-base font-semibold hover:no-underline">
-            Loại gọng kính
-          </AccordionTrigger>
-          <AccordionContent>
-            <div className="space-y-3">
-              {frameTypes.map((type) => (
-                <div key={type.value} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={type.value}
-                    disabled
-                  />
-                  <Label htmlFor={type.value} className="font-normal cursor-pointer text-muted-foreground">
-                    {type.label} (Sắp ra mắt)
-                  </Label>
-                </div>
-              ))}
+      {/* Categories */}
+      <div className="space-y-3">
+        <Label className="text-base font-medium">Danh mục</Label>
+        <div className="space-y-2">
+          <div className="relative">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Tìm danh mục..."
+              value={categorySearch}
+              onChange={(e) => setCategorySearch(e.target.value)}
+              className="pl-8"
+            />
+          </div>
+          <ScrollArea className="h-[200px]">
+            <div className="space-y-2 pr-4">
+              {categoriesLoading ? (
+                <p className="text-sm text-muted-foreground">Đang tải...</p>
+              ) : filteredCategories.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Không tìm thấy danh mục</p>
+              ) : (
+                filteredCategories.map((category) => (
+                  <div key={category.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`category-${category.slug}`}
+                      checked={selectedCategories.includes(category.slug)}
+                      onCheckedChange={(checked) =>
+                        handleCategoryToggle(category.slug, checked === true)
+                      }
+                    />
+                    <Label
+                      htmlFor={`category-${category.slug}`}
+                      className="text-sm font-normal cursor-pointer"
+                    >
+                      {category.name}
+                    </Label>
+                  </div>
+                ))
+              )}
             </div>
-          </AccordionContent>
-        </AccordionItem>
-
-        {/* In Stock */}
-        <AccordionItem value="stock">
-          <AccordionTrigger className="text-base font-semibold hover:no-underline">
-            Tình trạng
-          </AccordionTrigger>
-          <AccordionContent>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="inStock"
-                disabled
-              />
-              <Label htmlFor="inStock" className="font-normal cursor-pointer text-muted-foreground">
-                Chỉ còn hàng (Sắp ra mắt)
-              </Label>
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+          </ScrollArea>
+        </div>
+      </div>
     </div>
   )
 }
