@@ -1,365 +1,157 @@
+/**
+ * CheckoutContent Component
+ * Main orchestrator component for checkout flow
+ * Uses composition pattern with smaller components and custom hooks
+ */
+
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import type { JSX } from "react"
-import Image from "next/image"
-import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { useCart } from "@/features/cart/hooks/use-cart"
 import { useAddresses } from "@/features/addresses/hooks/use-addresses"
 import { useAuth } from "@/features/auth/hooks/use-auth"
-import { ordersApi } from "@/features/orders/services/orders.service"
-import { paymentsApi } from "@/features/payments/services/payments.service"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Label } from "@/components/ui/label"
-import { toast } from "sonner"
-import Link from "next/link"
-import { PaymentMethod, PaymentStatus, type Payment } from "@/types"
 import { PaymentWaitingDialog } from "@/features/payments/components/payment-waiting-dialog"
-import { formatPrice } from "@/features/products/utils"
-// PaymentSuccessDialog not used anymore - direct redirect instead
-
-/**
- * Type guard function to validate if a string is a valid PaymentMethod
- */
-function isPaymentMethod(value: string): value is PaymentMethod {
-  return value === PaymentMethod.COD || value === PaymentMethod.SEPAY
-}
+import { PaymentStatus } from "@/types"
+import { useCheckout } from "../hooks/use-checkout"
+import { AddressSelector } from "./address-selector"
+import { PaymentMethodSelector } from "./payment-method-selector"
+import { OrderSummary } from "./order-summary"
+import { CheckoutActions } from "./checkout-actions"
 
 export default function CheckoutContent(): JSX.Element {
-    const router = useRouter()
     const { isAuthenticated } = useAuth()
     const { cart, loading: cartLoading, clearCart } = useCart()
     const { addresses, loading: addressesLoading } = useAddresses()
-    const [selectedAddressId, setSelectedAddressId] = useState<string>("")
-    const [selectedPayment, setSelectedPayment] = useState<PaymentMethod>(PaymentMethod.COD)
-    const [isSubmitting, setIsSubmitting] = useState(false)
 
-    // Dialog states for payment flow (only waiting dialog used)
-    const [waitingDialogOpen, setWaitingDialogOpen] = useState(false)
-    const [qrCodeUrl, setQrCodeUrl] = useState<string>("")
-    const [paymentId, setPaymentId] = useState<string>("")
-    const [createdOrderId, setCreatedOrderId] = useState<string>("")
+    const {
+        state,
+        updateState,
+        paymentDialog,
+        setPaymentDialog,
+        handleCheckout,
+        handlePaymentSuccess,
+        handlePaymentTimeout,
+        handlePaymentError,
+    } = useCheckout(cart, clearCart)
 
     // Set default address when addresses are loaded
     useEffect(() => {
-        if (!selectedAddressId && addresses.length > 0 && addresses[0]) {
-            setSelectedAddressId(addresses[0].id)
+        if (!state.selectedAddressId && addresses.length > 0 && addresses[0]) {
+            updateState({ selectedAddressId: addresses[0].id })
         }
-    }, [selectedAddressId, addresses])
+    }, [state.selectedAddressId, addresses, updateState])
 
-    // Check if user logged in - use isAuthenticated instead of checking !user
+    // Early returns for loading and validation states
     if (!isAuthenticated) {
         return (
             <div className="container py-16 text-center">
                 <h1 className="text-2xl font-bold">Vui lòng đăng nhập</h1>
-                <p className="text-muted-foreground mt-2">Bạn cần đăng nhập để thanh toán</p>
-                <Link href="/auth/login" className="text-primary hover:underline mt-4 inline-block">
+                <p className="text-muted-foreground mt-2">
+                    Bạn cần đăng nhập để thanh toán
+                </p>
+                <Link
+                    href="/auth/login"
+                    className="text-primary hover:underline mt-4 inline-block"
+                >
                     Đăng nhập ngay
                 </Link>
             </div>
         )
     }
 
-    // Check if cart is empty
     if (!cartLoading && (!cart || cart.items.length === 0)) {
         return (
             <div className="container py-16 text-center">
                 <h1 className="text-2xl font-bold">Giỏ hàng trống</h1>
-                <p className="text-muted-foreground mt-2">Không có sản phẩm để thanh toán</p>
-                <Link href="/products" className="text-primary hover:underline mt-4 inline-block">
+                <p className="text-muted-foreground mt-2">
+                    Không có sản phẩm để thanh toán
+                </p>
+                <Link
+                    href="/products"
+                    className="text-primary hover:underline mt-4 inline-block"
+                >
                     Quay lại mua sắm
                 </Link>
             </div>
         )
     }
 
-    // Check if has address
     if (!addressesLoading && addresses.length === 0) {
         return (
             <div className="container py-16 text-center">
                 <h1 className="text-2xl font-bold">Chưa có địa chỉ</h1>
-                <p className="text-muted-foreground mt-2">Vui lòng thêm địa chỉ giao hàng trước</p>
-                <Link href="/profile?tab=addresses" className="text-primary hover:underline mt-4 inline-block">
+                <p className="text-muted-foreground mt-2">
+                    Vui lòng thêm địa chỉ giao hàng trước
+                </p>
+                <Link
+                    href="/profile?tab=addresses"
+                    className="text-primary hover:underline mt-4 inline-block"
+                >
                     Quản lý địa chỉ
                 </Link>
             </div>
         )
     }
 
-    const handleCheckout = async (): Promise<void> => {
-        // Validate address
-        if (!selectedAddressId) {
-            toast.error("Vui lòng chọn địa chỉ giao hàng")
-            return
-        }
-
-        // Validate cart exists and has items
-        if (!cart?.items || cart.items.length === 0) {
-            toast.error("Giỏ hàng trống")
-            return
-        }
-
-        // Validate all items have valid product data
-        const invalidItems = cart.items.filter(item => !item.product?.priceInt);
-        if (invalidItems.length > 0) {
-            toast.error("Giỏ hàng chứa sản phẩm không hợp lệ. Vui lòng làm mới trang.")
-            return
-        }
-
-        // Validate total amount
-        if (cart.totalInt <= 0) {
-            toast.error("Tổng giá trị đơn hàng không hợp lệ")
-            return
-        }
-
-        setIsSubmitting(true)
-        try {
-            // Create order with cart items
-            const order = await ordersApi.create({
-                addressId: selectedAddressId,
-                items: cart.items.map((item) => ({
-                    productId: item.productId,
-                    quantity: item.quantity,
-                    priceInt: item.product?.priceInt ?? 0,
-                })),
-            })
-
-            // Branch based on payment method
-            if (selectedPayment === PaymentMethod.COD) {
-                // COD flow: Show success toast and redirect to success page
-                toast.success("Đặt hàng thành công!")
-                router.push(`/cart/success?orderId=${order.id}&paymentMethod=${selectedPayment}`)
-            } else if (selectedPayment === PaymentMethod.SEPAY) {
-                // SePay flow: Process payment to get QR, then open waiting dialog (no toast yet)
-                setCreatedOrderId(order.id)
-                const payment = await paymentsApi.process(order.id, PaymentMethod.SEPAY, cart.totalInt)
-                setPaymentId(payment.paymentId)
-                setQrCodeUrl(payment.qrCode ?? "")
-                setWaitingDialogOpen(true)
-            }
-        } catch (err) {
-            const message = err instanceof Error ? err.message : "Đặt hàng thất bại"
-            toast.error(message)
-        } finally {
-            setIsSubmitting(false)
-        }
-    }
-
-    // Dialog handlers for payment flow separation
-    const handlePaymentSuccess = async (payment: Payment): Promise<void> => {
-        setWaitingDialogOpen(false)
-
-        // Show success toast immediately when payment detected
-        toast.success("🎉 Thanh toán thành công!", {
-            description: `Đơn hàng ${payment.orderId} đã được thanh toán`,
-            duration: 5000,
-        })
-
-        // Clear cart after successful payment
-        try {
-            await clearCart()
-        } catch {
-            // Swallow non-critical cart clear errors
-        }
-
-        // Redirect to success page (consistent with COD flow)
-        router.push(`/cart/success?orderId=${payment.orderId}&paymentMethod=${PaymentMethod.SEPAY}`)
-    }
-
-    const handlePaymentTimeout = (): void => {
-        setWaitingDialogOpen(false)
-        toast.error("Thanh toán hết thời gian. Vui lòng thử lại.")
-    }
-
-    const handlePaymentError = (error: string): void => {
-        setWaitingDialogOpen(false)
-        toast.error(error)
-    }
-
-    /**
-     * Handler for payment method change with validation
-     */
-    const handlePaymentMethodChange = (value: string): void => {
-        if (isPaymentMethod(value)) {
-            setSelectedPayment(value)
-        } else {
-            // Fallback to COD if invalid value
-            console.warn(`Invalid payment method: ${value}, falling back to COD`)
-            setSelectedPayment(PaymentMethod.COD)
-        }
-    }
-
     if (cartLoading || addressesLoading) {
         return <div className="container py-8">Đang tải...</div>
     }
 
-    const total = cart ? cart.totalInt : 0
+    if (!cart) {
+        return <></>;
+    }
 
     return (
         <div className="container py-8">
             <h1 className="text-3xl font-bold mb-8">Thanh toán</h1>
 
             <div className="grid gap-8 lg:grid-cols-3">
-                {/* Main Content */}
                 <div className="lg:col-span-2 space-y-8">
-                    {/* Shipping Address */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Địa chỉ giao hàng</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <RadioGroup value={selectedAddressId} onValueChange={setSelectedAddressId}>
-                                <div className="space-y-3">
-                                    {addresses.map((address) => (
-                                        <div key={address.id} className="flex items-start space-x-3 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer" data-testid="address-option">
-                                            <RadioGroupItem value={address.id} id={address.id} className="mt-1" />
-                                            <Label htmlFor={address.id} className="flex-1 cursor-pointer">
-                                                <div className="font-semibold">{address.fullName}</div>
-                                                <div className="text-sm text-muted-foreground">
-                                                    {address.street}, {address.ward}, {address.district}
-                                                </div>
-                                                <div className="text-sm text-muted-foreground">
-                                                    {address.city} • {address.phone}
-                                                </div>
-                                                {address.isDefault && (
-                                                    <div className="text-xs text-primary font-medium mt-1">Địa chỉ mặc định</div>
-                                                )}
-                                            </Label>
-                                        </div>
-                                    ))}
-                                </div>
-                            </RadioGroup>
-                            <Link
-                                href="/profile?tab=addresses"
-                                className="text-primary hover:underline text-sm mt-4 inline-block"
-                            >
-                                Quản lý địa chỉ
-                            </Link>
-                        </CardContent>
-                    </Card>
+                    <AddressSelector
+                        addresses={addresses}
+                        selectedAddressId={state.selectedAddressId}
+                        onSelectAddress={(id) => updateState({ selectedAddressId: id })}
+                    />
 
-                    {/* Payment Method */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Phương thức thanh toán</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <RadioGroup value={selectedPayment} onValueChange={handlePaymentMethodChange}>
-                                <div className="space-y-3">
-                                    <label
-                                        htmlFor="cod"
-                                        className="w-full flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer bg-transparent"
-                                    >
-                                        <RadioGroupItem value={PaymentMethod.COD} id="cod" />
-                                        <div className="flex-1 cursor-pointer">
-                                            <div className="font-semibold">Thanh toán khi nhận hàng (COD)</div>
-                                            <div className="text-sm text-muted-foreground">
-                                                Thanh toán tiền mặt khi nhân viên giao hàng tới
-                                            </div>
-                                        </div>
-                                    </label>
-                                    <label
-                                        htmlFor="sepay"
-                                        className="w-full flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer bg-transparent"
-                                    >
-                                        <RadioGroupItem value={PaymentMethod.SEPAY} id="sepay" />
-                                        <div className="flex-1 cursor-pointer">
-                                            <div className="font-semibold">Chuyển khoản ngân hàng (SePay)</div>
-                                            <div className="text-sm text-muted-foreground">
-                                                Quét mã QR để thanh toán qua ngân hàng
-                                            </div>
-                                        </div>
-                                    </label>
-                                </div>
-                            </RadioGroup>
-                        </CardContent>
-                    </Card>
+                    <PaymentMethodSelector
+                        selectedPayment={state.selectedPayment}
+                        onSelectPayment={(method) => updateState({ selectedPayment: method })}
+                    />
 
-                    {/* Order Items */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Chi tiết đơn hàng</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-3">
-                                {cart?.items.map((item) => (
-                                    <div key={item.id} className="flex items-center justify-between pb-3 border-b last:border-0">
-                                        <div className="flex items-center gap-3">
-                                            <Image
-                                                src={item.product?.imageUrls[0] ?? "/placeholder.svg"}
-                                                alt={item.product?.name ?? "Sản phẩm"}
-                                                width={48}
-                                                height={48}
-                                                className="h-12 w-12 rounded object-cover"
-                                            />
-                                            <div>
-                                                <p className="font-medium">{item.product?.name}</p>
-                                                <p className="text-sm text-muted-foreground">Số lượng: {item.quantity}</p>
-                                            </div>
-                                        </div>
-                                        <p className="font-semibold">
-                                            {formatPrice((item.product?.priceInt ?? 0) * item.quantity)}
-                                        </p>
-                                    </div>
-                                ))}
-                            </div>
-                        </CardContent>
-                    </Card>
+                    <OrderSummary cart={cart} />
                 </div>
 
-                {/* Summary Sidebar */}
                 <div>
-                    <Card className="sticky top-4">
-                        <CardHeader>
-                            <CardTitle>Tóm tắt</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">Tạm tính</span>
-                                <span className="font-medium">{formatPrice(total)}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">Vận chuyển</span>
-                                <span className="font-medium">Miễn phí</span>
-                            </div>
-                            <div className="border-t pt-4 flex justify-between text-lg">
-                                <span className="font-semibold">Tổng cộng</span>
-                                <span className="font-bold">{formatPrice(total)}</span>
-                            </div>
-
-                            <Button
-                                className="w-full mt-6"
-                                size="lg"
-                                onClick={() => { void handleCheckout(); }}
-                                disabled={isSubmitting || !selectedAddressId}
-                            >
-                                {isSubmitting ? "Đang xử lý..." : "Đặt hàng"}
-                            </Button>
-
-                            <Button variant="outline" className="w-full" asChild>
-                                <Link href="/cart">Quay lại giỏ hàng</Link>
-                            </Button>
-                        </CardContent>
-                    </Card>
+                    <CheckoutActions
+                        total={cart.totalInt}
+                        isSubmitting={state.isSubmitting}
+                        isDisabled={!state.selectedAddressId}
+                        onCheckout={() => {
+                            void handleCheckout()
+                        }}
+                    />
                 </div>
             </div>
 
-            {/* Payment Waiting Dialog */}
             <PaymentWaitingDialog
-                open={waitingDialogOpen}
-                onOpenChange={setWaitingDialogOpen}
-                orderId={createdOrderId}
+                open={paymentDialog.isOpen}
+                onOpenChange={(open) =>
+                    setPaymentDialog((prev) => ({ ...prev, isOpen: open }))
+                }
+                orderId={paymentDialog.orderId}
                 payment={{
-                    paymentId: paymentId,
+                    paymentId: paymentDialog.paymentId,
                     status: PaymentStatus.UNPAID,
-                    qrCode: qrCodeUrl,
+                    qrCode: paymentDialog.qrCodeUrl,
                 }}
-                amountInt={cart?.totalInt ?? 0}
-                onSuccess={(payment) => { void handlePaymentSuccess(payment); }}
-                onTimeout={() => { handlePaymentTimeout(); }}
-                onError={(error) => { handlePaymentError(error); }}
+                amountInt={cart.totalInt}
+                onSuccess={(payment) => {
+                    void handlePaymentSuccess(payment)
+                }}
+                onTimeout={handlePaymentTimeout}
+                onError={handlePaymentError}
             />
         </div>
     )
