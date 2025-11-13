@@ -11,21 +11,29 @@ alwaysApply: true
 - Tách UI components thành các components nhỏ hơn
 
 ```typescript
-// ✅ GOOD - Single responsibility
+//  GOOD - Single responsibility
 function ProductCard({ product }: { product: Product }) {
-  return <div>{product.name}</div>
+  return <div>{product.name}</div>;
 }
 
 function ProductActions({ productId }: { productId: string }) {
-  const handleAddToCart = () => { /* ... */ }
-  return <button onClick={handleAddToCart}>Add to Cart</button>
+  const handleAddToCart = () => {
+    /* ... */
+  };
+  return <button onClick={handleAddToCart}>Add to Cart</button>;
 }
 
-// ❌ BAD - Multiple responsibilities
+//  BAD - Multiple responsibilities
 function ProductCard({ product }: { product: Product }) {
-  const handleAddToCart = () => { /* ... */ }
-  const handleFavorite = () => { /* ... */ }
-  const handleShare = () => { /* ... */ }
+  const handleAddToCart = () => {
+    /* ... */
+  };
+  const handleFavorite = () => {
+    /* ... */
+  };
+  const handleShare = () => {
+    /* ... */
+  };
   // Too many responsibilities
 }
 ```
@@ -37,20 +45,31 @@ function ProductCard({ product }: { product: Product }) {
 - Sử dụng render props hoặc children patterns
 
 ```typescript
-// ✅ GOOD - Open for extension via props
+//  GOOD - Open for extension via props
 interface ButtonProps {
-  variant?: 'primary' | 'secondary'
-  size?: 'sm' | 'md' | 'lg'
-  children: React.ReactNode
+  variant?: "primary" | "secondary";
+  size?: "sm" | "md" | "lg";
+  children: React.ReactNode;
 }
 
-export function Button({ variant = 'primary', size = 'md', children }: ButtonProps) {
-  return <button className={cn(variant, size)}>{children}</button>
+export function Button({
+  variant = "primary",
+  size = "md",
+  children,
+}: ButtonProps) {
+  return <button className={cn(variant, size)}>{children}</button>;
 }
 
 // Extend via composition, not modification
-function IconButton({ icon, ...props }: ButtonProps & { icon: React.ReactNode }) {
-  return <Button {...props}><span>{icon}</span> {props.children}</Button>
+function IconButton({
+  icon,
+  ...props
+}: ButtonProps & { icon: React.ReactNode }) {
+  return (
+    <Button {...props}>
+      <span>{icon}</span> {props.children}
+    </Button>
+  );
 }
 ```
 
@@ -60,19 +79,19 @@ function IconButton({ icon, ...props }: ButtonProps & { icon: React.ReactNode })
 - Components với cùng interface phải có thể thay thế nhau
 
 ```typescript
-// ✅ GOOD - Consistent interface
+//  GOOD - Consistent interface
 interface FormField {
-  value: string
-  onChange: (value: string) => void
-  error?: string
+  value: string;
+  onChange: (value: string) => void;
+  error?: string;
 }
 
 function TextInput({ value, onChange, error }: FormField) {
-  return <input value={value} onChange={(e) => onChange(e.target.value)} />
+  return <input value={value} onChange={(e) => onChange(e.target.value)} />;
 }
 
 function TextArea({ value, onChange, error }: FormField) {
-  return <textarea value={value} onChange={(e) => onChange(e.target.value)} />
+  return <textarea value={value} onChange={(e) => onChange(e.target.value)} />;
 }
 
 // Both can be used interchangeably
@@ -84,27 +103,33 @@ function TextArea({ value, onChange, error }: FormField) {
 - Không force components implement methods không cần thiết
 
 ```typescript
-// ✅ GOOD - Segregated interfaces
+//  GOOD - Segregated interfaces
 interface Readable {
-  read(): string
+  read(): string;
 }
 
 interface Writable {
-  write(data: string): void
+  write(data: string): void;
 }
 
 interface Deletable {
-  delete(): void
+  delete(): void;
 }
 
 // Components only implement what they need
 class ReadOnlyComponent implements Readable {
-  read() { return 'data' }
+  read() {
+    return "data";
+  }
 }
 
 class EditableComponent implements Readable, Writable {
-  read() { return 'data' }
-  write(data: string) { /* ... */ }
+  read() {
+    return "data";
+  }
+  write(data: string) {
+    /* ... */
+  }
 }
 ```
 
@@ -115,27 +140,27 @@ class EditableComponent implements Readable, Writable {
 - Tạo interfaces cho services
 
 ```typescript
-// ✅ GOOD - Depend on abstraction
+//  GOOD - Depend on abstraction
 interface ProductRepository {
-  getById(id: string): Promise<Product>
-  getAll(): Promise<Product[]>
+  getById(id: string): Promise<Product>;
+  getAll(): Promise<Product[]>;
 }
 
 function useProduct(repository: ProductRepository, id: string) {
   return useQuery({
-    queryKey: ['product', id],
+    queryKey: ["product", id],
     queryFn: () => repository.getById(id),
-  })
+  });
 }
 
 // Can inject different implementations
 const apiRepository: ProductRepository = {
   getById: (id) => productsApi.getProductById(id),
   getAll: () => productsApi.getProducts({}),
-}
+};
 
 const mockRepository: ProductRepository = {
   getById: (id) => Promise.resolve(mockProduct),
   getAll: () => Promise.resolve([mockProduct]),
-}
+};
 ```

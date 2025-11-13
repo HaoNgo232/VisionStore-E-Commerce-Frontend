@@ -102,8 +102,8 @@ export function validateResponse<T>(
           message: e.message,
           code: e.code,
           // Only include expected/received if they exist
-          ...(("expected" in e) && { expected: e.expected }),
-          ...(("received" in e) && { received: e.received }),
+          ...("expected" in e && { expected: e.expected }),
+          ...("received" in e && { received: e.received }),
         })),
         message: error.message,
         rawResponseData: data,

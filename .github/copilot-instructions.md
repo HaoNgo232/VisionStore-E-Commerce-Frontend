@@ -146,12 +146,12 @@ Create adapter layer for immediate fix, then coordinate with BE team for Option 
 
 ## **Default Parameters Best Practices**
 
-### **❌ TRÁNH: Default Parameter với Object Literal**
+### ** TRÁNH: Default Parameter với Object Literal**
 
 Default parameter với object literal `= {}` gây ra TypeScript strict mode false positives và unsafe member access errors. Đây là một vấn đề phổ biến với TypeScript strict mode và ESLint.
 
 ```typescript
-// ❌ WRONG - Gây false positives với TypeScript strict mode
+//  WRONG - Gây false positives với TypeScript strict mode
 async function listUsers(
   query: ListUsersQuery = {},
 ): Promise<ListUsersResponse> {
@@ -161,7 +161,7 @@ async function listUsers(
   }
 }
 
-// ❌ WRONG - Cần nhiều eslint-disable comments (không clean)
+//  WRONG - Cần nhiều eslint-disable comments (không clean)
 async function listUsers(
   query: ListUsersQuery = {},
 ): Promise<ListUsersResponse> {
@@ -173,12 +173,12 @@ async function listUsers(
 }
 ```
 
-### **✅ ĐÚNG: Optional Parameter + Optional Chaining**
+### ** ĐÚNG: Optional Parameter + Optional Chaining**
 
 Sử dụng optional parameter `?` và optional chaining `?.` để tránh false positives. Đây là best practice được TypeScript community khuyến nghị.
 
 ```typescript
-// ✅ CORRECT - Type-safe, không có false positives, clean code
+//  CORRECT - Type-safe, không có false positives, clean code
 async function listUsers(query?: ListUsersQuery): Promise<ListUsersResponse> {
   const searchParams = new URLSearchParams();
 
@@ -202,12 +202,12 @@ async function listUsers(query?: ListUsersQuery): Promise<ListUsersResponse> {
 }
 ```
 
-### **✅ ĐÚNG: Local Interface Definition (Nếu cần)**
+### ** ĐÚNG: Local Interface Definition (Nếu cần)**
 
 Nếu vẫn gặp vấn đề với imported types, định nghĩa local interface trong file để TypeScript infer type tốt hơn:
 
 ```typescript
-// ✅ CORRECT - Local interface cho better type inference
+//  CORRECT - Local interface cho better type inference
 interface ListUsersParams {
   page?: number;
   pageSize?: number;
@@ -223,12 +223,12 @@ async function listUsers(query?: ListUsersParams): Promise<ListUsersResponse> {
 }
 ```
 
-### **✅ ĐÚNG: Destructuring với Default Values**
+### ** ĐÚNG: Destructuring với Default Values**
 
 Cho function parameters phức tạp với nhiều options, dùng destructuring với default values:
 
 ```typescript
-// ✅ CORRECT - Destructuring với default values (không gây false positives)
+//  CORRECT - Destructuring với default values (không gây false positives)
 function calculateCartTotals(
   items: CartItem[],
   options: {
@@ -282,7 +282,7 @@ function calculateCartTotals(
 ### **Component Props với Type Safety**
 
 ```typescript
-// ✅ Comprehensive prop types
+//  Comprehensive prop types
 interface ProductCardProps {
   product: Product;
   variant?: "default" | "compact" | "featured";

@@ -9,6 +9,7 @@ description: Component implementation, state management, và integration pattern
 ## Development Setup
 
 ### Prerequisites
+
 - Node.js 20+
 - pnpm 8+
 - Backend API running (`http://localhost:3000`)
@@ -30,6 +31,7 @@ pnpm dev
 ### Configuration Files
 
 **`.env.local`**:
+
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:3000
 NEXT_PUBLIC_APP_URL=http://localhost:3001
@@ -85,56 +87,59 @@ frontend-luan-van/
 **File**: `components/promotions/vip-badge.tsx`
 
 ```tsx
-import { Badge } from '@/components/ui/badge'
-import { cn } from '@/lib/utils'
-import { VipTier } from '@/types/promotion.types'
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { VipTier } from "@/types/promotion.types";
 
 interface VIPBadgeProps {
-  tier: VipTier
-  className?: string
-  showLabel?: boolean
+  tier: VipTier;
+  className?: string;
+  showLabel?: boolean;
 }
 
 const tierConfig: Record<
   VipTier,
   { icon: string; label: string; className: string }
 > = {
-  [VipTier.STANDARD]: { icon: '', label: '', className: '' },
+  [VipTier.STANDARD]: { icon: "", label: "", className: "" },
   [VipTier.BRONZE]: {
-    icon: '🥉',
-    label: 'Bronze',
-    className: 'bg-amber-700 text-white hover:bg-amber-800',
+    icon: "🥉",
+    label: "Bronze",
+    className: "bg-amber-700 text-white hover:bg-amber-800",
   },
   [VipTier.SILVER]: {
-    icon: '🥈',
-    label: 'Silver',
-    className: 'bg-gray-400 text-black hover:bg-gray-500',
+    icon: "🥈",
+    label: "Silver",
+    className: "bg-gray-400 text-black hover:bg-gray-500",
   },
   [VipTier.GOLD]: {
-    icon: '🥇',
-    label: 'Gold',
-    className: 'bg-yellow-400 text-black hover:bg-yellow-500',
+    icon: "🥇",
+    label: "Gold",
+    className: "bg-yellow-400 text-black hover:bg-yellow-500",
   },
   [VipTier.PLATINUM]: {
-    icon: '💎',
-    label: 'Platinum',
-    className: 'bg-purple-500 text-white hover:bg-purple-600',
+    icon: "💎",
+    label: "Platinum",
+    className: "bg-purple-500 text-white hover:bg-purple-600",
   },
-}
+};
 
 export function VIPBadge({ tier, className, showLabel = true }: VIPBadgeProps) {
-  if (tier === VipTier.STANDARD) return null
+  if (tier === VipTier.STANDARD) return null;
 
-  const config = tierConfig[tier]
+  const config = tierConfig[tier];
 
   return (
-    <Badge className={cn(config.className, className)} aria-label={`VIP ${config.label}`}>
+    <Badge
+      className={cn(config.className, className)}
+      aria-label={`VIP ${config.label}`}
+    >
       <span className="mr-1" aria-hidden="true">
         {config.icon}
       </span>
       {showLabel && config.label}
     </Badge>
-  )
+  );
 }
 ```
 
@@ -143,18 +148,18 @@ export function VIPBadge({ tier, className, showLabel = true }: VIPBadgeProps) {
 **File**: `features/promotions/components/vip-status-card.tsx`
 
 ```tsx
-'use client'
+"use client";
 
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
-import { VIPBadge } from '@/components/promotions/vip-badge'
-import { useMyVipInfo } from '../hooks/use-promotions'
-import { formatVND } from '@/lib/utils'
-import { AlertCircle } from 'lucide-react'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { VIPBadge } from "@/components/promotions/vip-badge";
+import { useMyVipInfo } from "../hooks/use-promotions";
+import { formatVND } from "@/lib/utils";
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export function VIPStatusCard() {
-  const { data: vipInfo, isLoading, error } = useMyVipInfo()
+  const { data: vipInfo, isLoading, error } = useMyVipInfo();
 
   if (isLoading) {
     return (
@@ -168,7 +173,7 @@ export function VIPStatusCard() {
           <Skeleton className="h-6 w-full" />
         </CardContent>
       </Card>
-    )
+    );
   }
 
   if (error) {
@@ -186,10 +191,10 @@ export function VIPStatusCard() {
           </Alert>
         </CardContent>
       </Card>
-    )
+    );
   }
 
-  if (!vipInfo) return null
+  if (!vipInfo) return null;
 
   return (
     <Card>
@@ -203,7 +208,9 @@ export function VIPStatusCard() {
         {/* Total Spending */}
         <div>
           <p className="text-sm text-muted-foreground">Total Spending</p>
-          <p className="text-2xl font-bold">{formatVND(vipInfo.totalSpentInt)}</p>
+          <p className="text-2xl font-bold">
+            {formatVND(vipInfo.totalSpentInt)}
+          </p>
         </div>
 
         {/* Discount Rate */}
@@ -222,7 +229,11 @@ export function VIPStatusCard() {
               <VIPBadge tier={vipInfo.nextTier.tier} />
             </div>
             <p className="text-sm">
-              Spend <span className="font-semibold">{formatVND(vipInfo.nextTier.remaining)}</span> more to unlock
+              Spend{" "}
+              <span className="font-semibold">
+                {formatVND(vipInfo.nextTier.remaining)}
+              </span>{" "}
+              more to unlock
             </p>
             {/* Optional: Progress bar */}
             <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -230,9 +241,9 @@ export function VIPStatusCard() {
                 className="h-full bg-gradient-to-r from-green-500 to-green-600 transition-all"
                 style={{
                   width: `${
-                    ((vipInfo.totalSpentInt /
+                    (vipInfo.totalSpentInt /
                       vipInfo.nextTier.requiredSpending) *
-                      100)
+                    100
                   }%`,
                 }}
               />
@@ -241,7 +252,7 @@ export function VIPStatusCard() {
         )}
       </CardContent>
     </Card>
-  )
+  );
 }
 ```
 
@@ -250,34 +261,34 @@ export function VIPStatusCard() {
 **File**: `features/promotions/components/discount-code-input.tsx`
 
 ```tsx
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Loader2, CheckCircle, XCircle } from 'lucide-react'
-import { useValidateDiscountCode } from '../hooks/use-promotions'
-import { formatVND } from '@/lib/utils'
-import { toast } from 'sonner'
-import { cn } from '@/lib/utils'
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Loader2, CheckCircle, XCircle } from "lucide-react";
+import { useValidateDiscountCode } from "../hooks/use-promotions";
+import { formatVND } from "@/lib/utils";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 interface DiscountCodeInputProps {
-  subtotalInt: number
-  onApplied: (code: string, discountedInt: number) => void
-  appliedCode?: string | null
-  onRemove: () => void
-  className?: string
+  subtotalInt: number;
+  onApplied: (code: string, discountedInt: number) => void;
+  appliedCode?: string | null;
+  onRemove: () => void;
+  className?: string;
 }
 
 const ERROR_MESSAGES = {
-  CODE_EXPIRED: 'This code has expired',
-  TIER_NOT_MET: 'Your VIP tier is not eligible for this code',
-  MAX_USAGE_REACHED: 'This code has reached its usage limit',
-  MIN_PURCHASE_NOT_MET: 'Minimum purchase amount not met',
-  CODE_NOT_FOUND: 'Invalid discount code',
-  CODE_INACTIVE: 'This code is not active',
-  USER_MAX_USAGE_REACHED: 'You have already used this code',
-} as const
+  CODE_EXPIRED: "This code has expired",
+  TIER_NOT_MET: "Your VIP tier is not eligible for this code",
+  MAX_USAGE_REACHED: "This code has reached its usage limit",
+  MIN_PURCHASE_NOT_MET: "Minimum purchase amount not met",
+  CODE_NOT_FOUND: "Invalid discount code",
+  CODE_INACTIVE: "This code is not active",
+  USER_MAX_USAGE_REACHED: "You have already used this code",
+} as const;
 
 export function DiscountCodeInput({
   subtotalInt,
@@ -286,69 +297,74 @@ export function DiscountCodeInput({
   onRemove,
   className,
 }: DiscountCodeInputProps) {
-  const [code, setCode] = useState('')
-  const validateMutation = useValidateDiscountCode()
+  const [code, setCode] = useState("");
+  const validateMutation = useValidateDiscountCode();
 
   const handleApply = async () => {
-    const trimmedCode = code.trim()
-    
+    const trimmedCode = code.trim();
+
     if (!trimmedCode) {
-      toast.error('Please enter a discount code')
-      return
+      toast.error("Please enter a discount code");
+      return;
     }
 
     try {
       const result = await validateMutation.mutateAsync({
         code: trimmedCode.toUpperCase(),
         subtotalInt,
-      })
+      });
 
       if (result.valid && result.discountedInt !== null) {
-        onApplied(trimmedCode.toUpperCase(), result.discountedInt)
-        toast.success(`Discount applied: ${formatVND(result.discountedInt)} off`, {
-          icon: <CheckCircle className="h-4 w-4" />,
-        })
-        setCode('')
+        onApplied(trimmedCode.toUpperCase(), result.discountedInt);
+        toast.success(
+          `Discount applied: ${formatVND(result.discountedInt)} off`,
+          {
+            icon: <CheckCircle className="h-4 w-4" />,
+          },
+        );
+        setCode("");
       } else if (result.error) {
-        const errorMessage = ERROR_MESSAGES[result.error] || 'Invalid discount code'
+        const errorMessage =
+          ERROR_MESSAGES[result.error] || "Invalid discount code";
         toast.error(errorMessage, {
           icon: <XCircle className="h-4 w-4" />,
-        })
+        });
       }
     } catch (error) {
-      toast.error('Failed to validate discount code. Please try again.')
+      toast.error("Failed to validate discount code. Please try again.");
     }
-  }
+  };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleApply()
+    if (e.key === "Enter") {
+      handleApply();
     }
-  }
+  };
 
   if (appliedCode) {
     return (
       <div
         className={cn(
-          'flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-md',
-          className
+          "flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-md",
+          className,
         )}
       >
         <div className="flex items-center gap-2">
           <CheckCircle className="h-4 w-4 text-green-600" />
           <p className="text-sm font-medium">
-            Code <span className="font-mono font-bold">{appliedCode}</span> applied
+            Code <span className="font-mono font-bold">{appliedCode}</span>{" "}
+            applied
           </p>
         </div>
         <Button variant="ghost" size="sm" onClick={onRemove}>
           Remove
         </Button>
       </div>
-    )
+    );
   }
 
   return (
-    <div className={cn('flex gap-2', className)}>
+    <div className={cn("flex gap-2", className)}>
       <Input
         placeholder="Enter discount code"
         value={code}
@@ -369,7 +385,7 @@ export function DiscountCodeInput({
         Apply
       </Button>
     </div>
-  )
+  );
 }
 ```
 
@@ -378,23 +394,23 @@ export function DiscountCodeInput({
 **File**: `features/promotions/hooks/use-promotions.ts`
 
 ```typescript
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { promotionsApi } from '@/services/promotions.service'
-import { toast } from 'sonner'
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { promotionsApi } from "@/services/promotions.service";
+import { toast } from "sonner";
 import type {
   CreateDiscountCodeDto,
   UpdateVipTierDto,
   DiscountCode,
-} from '@/types/promotion.types'
+} from "@/types/promotion.types";
 
 // Query Keys Factory
 export const promotionKeys = {
-  all: ['promotions'] as const,
-  vipInfo: () => [...promotionKeys.all, 'vip-info'] as const,
-  codes: () => [...promotionKeys.all, 'codes'] as const,
-  codesList: (params?: ListCodesParams) => 
+  all: ["promotions"] as const,
+  vipInfo: () => [...promotionKeys.all, "vip-info"] as const,
+  codes: () => [...promotionKeys.all, "codes"] as const,
+  codesList: (params?: ListCodesParams) =>
     [...promotionKeys.codes(), params || {}] as const,
-}
+};
 
 // Hook: Get my VIP info
 export function useMyVipInfo() {
@@ -403,15 +419,20 @@ export function useMyVipInfo() {
     queryFn: () => promotionsApi.getMyVipInfo(),
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 2,
-  })
+  });
 }
 
 // Hook: Validate discount code
 export function useValidateDiscountCode() {
   return useMutation({
-    mutationFn: ({ code, subtotalInt }: { code: string; subtotalInt: number }) =>
-      promotionsApi.validateDiscountCode(code, subtotalInt),
-  })
+    mutationFn: ({
+      code,
+      subtotalInt,
+    }: {
+      code: string;
+      subtotalInt: number;
+    }) => promotionsApi.validateDiscountCode(code, subtotalInt),
+  });
 }
 
 // Hook: List discount codes (Admin)
@@ -420,88 +441,88 @@ export function useDiscountCodes(params?: ListCodesParams) {
     queryKey: promotionKeys.codesList(params),
     queryFn: () => promotionsApi.listDiscountCodes(params),
     staleTime: 2 * 60 * 1000, // 2 minutes
-  })
+  });
 }
 
 // Hook: Create discount code (Admin)
 export function useCreateDiscountCode() {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (dto: CreateDiscountCodeDto) =>
       promotionsApi.createDiscountCode(dto),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: promotionKeys.codes() })
-      toast.success('Discount code created successfully')
+      queryClient.invalidateQueries({ queryKey: promotionKeys.codes() });
+      toast.success("Discount code created successfully");
     },
     onError: (error: Error) => {
-      toast.error(`Failed to create discount code: ${error.message}`)
+      toast.error(`Failed to create discount code: ${error.message}`);
     },
-  })
+  });
 }
 
 // Hook: Update discount code (Admin)
 export function useUpdateDiscountCode() {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({
       id,
       updates,
     }: {
-      id: string
-      updates: Partial<DiscountCode>
+      id: string;
+      updates: Partial<DiscountCode>;
     }) => promotionsApi.updateDiscountCode(id, updates),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: promotionKeys.codes() })
-      toast.success('Discount code updated successfully')
+      queryClient.invalidateQueries({ queryKey: promotionKeys.codes() });
+      toast.success("Discount code updated successfully");
     },
     onError: (error: Error) => {
-      toast.error(`Failed to update discount code: ${error.message}`)
+      toast.error(`Failed to update discount code: ${error.message}`);
     },
-  })
+  });
 }
 
 // Hook: Delete discount code (Admin)
 export function useDeleteDiscountCode() {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (id: string) => promotionsApi.deleteDiscountCode(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: promotionKeys.codes() })
-      toast.success('Discount code deleted successfully')
+      queryClient.invalidateQueries({ queryKey: promotionKeys.codes() });
+      toast.success("Discount code deleted successfully");
     },
     onError: (error: Error) => {
-      toast.error(`Failed to delete discount code: ${error.message}`)
+      toast.error(`Failed to delete discount code: ${error.message}`);
     },
-  })
+  });
 }
 
 // Hook: Update user VIP tier (Admin)
 export function useUpdateVipTier() {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({ userId, dto }: { userId: string; dto: UpdateVipTierDto }) =>
       promotionsApi.updateUserVipTier(userId, dto),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] })
-      toast.success('VIP tier updated successfully')
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      toast.success("VIP tier updated successfully");
     },
     onError: (error: Error) => {
-      toast.error(`Failed to update VIP tier: ${error.message}`)
+      toast.error(`Failed to update VIP tier: ${error.message}`);
     },
-  })
+  });
 }
 
 // Helper type
 interface ListCodesParams {
-  page?: number
-  limit?: number
-  tier?: string | null
-  status?: 'active' | 'inactive' | 'all'
-  search?: string
+  page?: number;
+  limit?: number;
+  tier?: string | null;
+  status?: "active" | "inactive" | "all";
+  search?: string;
 }
 ```
 
@@ -512,7 +533,7 @@ interface ListCodesParams {
 ```typescript
 // services/promotions.service.ts
 
-import { BaseApiService } from '@/lib/api-client'
+import { BaseApiService } from "@/lib/api-client";
 import {
   VipInfoSchema,
   DiscountCodeSchema,
@@ -522,56 +543,58 @@ import {
   type DiscountValidation,
   type CreateDiscountCodeDto,
   type UpdateVipTierDto,
-} from '@/types/promotion.types'
+} from "@/types/promotion.types";
 
 class PromotionsApiService extends BaseApiService {
   async getMyVipInfo(): Promise<VipInfo> {
-    const response = await this.get<VipInfo>('/users/me/vip')
-    return VipInfoSchema.parse(response) // Validate with Zod
+    const response = await this.get<VipInfo>("/users/me/vip");
+    return VipInfoSchema.parse(response); // Validate with Zod
   }
 
   async validateDiscountCode(
     code: string,
-    subtotalInt: number
+    subtotalInt: number,
   ): Promise<DiscountValidation> {
     const response = await this.post<DiscountValidation>(
-      '/promotions/codes/validate',
+      "/promotions/codes/validate",
       {
         code: code.toUpperCase(),
         subtotalInt,
-      }
-    )
-    return DiscountValidationSchema.parse(response)
+      },
+    );
+    return DiscountValidationSchema.parse(response);
   }
 
-  async listDiscountCodes(params?: ListCodesParams): Promise<PaginatedResponse<DiscountCode>> {
-    const searchParams = new URLSearchParams()
+  async listDiscountCodes(
+    params?: ListCodesParams,
+  ): Promise<PaginatedResponse<DiscountCode>> {
+    const searchParams = new URLSearchParams();
     if (params?.page !== undefined) {
-      searchParams.set('page', params.page.toString())
+      searchParams.set("page", params.page.toString());
     }
     if (params?.limit !== undefined) {
-      searchParams.set('limit', params.limit.toString())
+      searchParams.set("limit", params.limit.toString());
     }
     if (params?.tier) {
-      searchParams.set('tier', params.tier)
+      searchParams.set("tier", params.tier);
     }
     if (params?.status) {
-      searchParams.set('status', params.status)
+      searchParams.set("status", params.status);
     }
     if (params?.search) {
-      searchParams.set('search', params.search)
+      searchParams.set("search", params.search);
     }
 
     const endpoint = `/promotions/codes${
-      searchParams.toString() ? `?${searchParams}` : ''
-    }`
-    return this.get<PaginatedResponse<DiscountCode>>(endpoint)
+      searchParams.toString() ? `?${searchParams}` : ""
+    }`;
+    return this.get<PaginatedResponse<DiscountCode>>(endpoint);
   }
 
   // ... more methods
 }
 
-export const promotionsApi = new PromotionsApiService()
+export const promotionsApi = new PromotionsApiService();
 ```
 
 #### 2. Form Validation with Zod
@@ -579,16 +602,19 @@ export const promotionsApi = new PromotionsApiService()
 ```typescript
 // features/promotions/components/discount-code-form-dialog.tsx
 
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { CreateDiscountCodeSchema, type CreateDiscountCodeDto } from '@/types/promotion.types'
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  CreateDiscountCodeSchema,
+  type CreateDiscountCodeDto,
+} from "@/types/promotion.types";
 
 export function DiscountCodeFormDialog() {
   const form = useForm<CreateDiscountCodeDto>({
     resolver: zodResolver(CreateDiscountCodeSchema),
     defaultValues: {
-      code: '',
-      description: '',
+      code: "",
+      description: "",
       type: DiscountType.PERCENTAGE,
       value: 10,
       requiredTier: null,
@@ -598,20 +624,18 @@ export function DiscountCodeFormDialog() {
       expiresAt: null,
       minPurchaseInt: null,
     },
-  })
+  });
 
   const onSubmit = async (data: CreateDiscountCodeDto) => {
-    await createMutation.mutateAsync(data)
-    onClose()
-  }
+    await createMutation.mutateAsync(data);
+    onClose();
+  };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
-        {/* Form fields */}
-      </form>
+      <form onSubmit={form.handleSubmit(onSubmit)}>{/* Form fields */}</form>
     </Form>
-  )
+  );
 }
 ```
 
@@ -674,7 +698,7 @@ export function DiscountCodeFormDialog() {
 ```tsx
 // app/(account)/profile/page.tsx
 
-import { VIPStatusCard } from '@/features/promotions/components/vip-status-card'
+import { VIPStatusCard } from "@/features/promotions/components/vip-status-card";
 
 export default function ProfilePage() {
   return (
@@ -690,7 +714,7 @@ export default function ProfilePage() {
         <VIPStatusCard />
       </div>
     </div>
-  )
+  );
 }
 ```
 
@@ -699,23 +723,23 @@ export default function ProfilePage() {
 ```tsx
 // app/(shop)/checkout/page.tsx
 
-import { DiscountCodeInput } from '@/features/promotions/components/discount-code-input'
+import { DiscountCodeInput } from "@/features/promotions/components/discount-code-input";
 
 export default function CheckoutPage() {
-  const [appliedCode, setAppliedCode] = useState<string | null>(null)
-  const [discountAmount, setDiscountAmount] = useState(0)
+  const [appliedCode, setAppliedCode] = useState<string | null>(null);
+  const [discountAmount, setDiscountAmount] = useState(0);
 
   const handleDiscountApplied = (code: string, discountedInt: number) => {
-    setAppliedCode(code)
-    setDiscountAmount(discountedInt)
-  }
+    setAppliedCode(code);
+    setDiscountAmount(discountedInt);
+  };
 
   const handleRemoveDiscount = () => {
-    setAppliedCode(null)
-    setDiscountAmount(0)
-  }
+    setAppliedCode(null);
+    setDiscountAmount(0);
+  };
 
-  const finalTotal = subtotalInt + shippingCost - discountAmount
+  const finalTotal = subtotalInt + shippingCost - discountAmount;
 
   return (
     <div className="container py-8">
@@ -761,7 +785,7 @@ export default function CheckoutPage() {
         Place Order
       </Button>
     </div>
-  )
+  );
 }
 ```
 
@@ -776,41 +800,41 @@ export class ApiError extends Error {
   constructor(
     message: string,
     public statusCode: number,
-    public details?: unknown
+    public details?: unknown,
   ) {
-    super(message)
-    this.name = 'ApiError'
+    super(message);
+    this.name = "ApiError";
   }
 }
 
 class BaseApiService {
   protected async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
   ): Promise<T> {
     try {
       const response = await fetch(`${API_URL}${endpoint}`, {
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           ...this.getAuthHeaders(),
           ...options.headers,
         },
         ...options,
-      })
+      });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
+        const errorData = await response.json().catch(() => ({}));
         throw new ApiError(
           errorData.message || `Request failed: ${response.status}`,
           response.status,
-          errorData
-        )
+          errorData,
+        );
       }
 
-      return await response.json()
+      return await response.json();
     } catch (error) {
-      if (error instanceof ApiError) throw error
-      throw new ApiError('Network error', 500)
+      if (error instanceof ApiError) throw error;
+      throw new ApiError("Network error", 500);
     }
   }
 }
@@ -823,16 +847,19 @@ class BaseApiService {
 ```tsx
 // app/admin/promotions/page.tsx
 
-import dynamic from 'next/dynamic'
-import { Skeleton } from '@/components/ui/skeleton'
+import dynamic from "next/dynamic";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const DiscountCodeTable = dynamic(
-  () => import('@/features/promotions/components/discount-code-table').then(mod => ({ default: mod.DiscountCodeTable })),
+  () =>
+    import("@/features/promotions/components/discount-code-table").then(
+      (mod) => ({ default: mod.DiscountCodeTable }),
+    ),
   {
     loading: () => <Skeleton className="h-[400px]" />,
     ssr: false,
-  }
-)
+  },
+);
 
 export default function AdminPromotionsPage() {
   return (
@@ -840,34 +867,36 @@ export default function AdminPromotionsPage() {
       <h1>Discount Codes</h1>
       <DiscountCodeTable />
     </div>
-  )
+  );
 }
 ```
 
 ### 2. React.memo for Expensive Components
 
 ```tsx
-import { memo } from 'react'
+import { memo } from "react";
 
-export const VIPBadge = memo(function VIPBadge({ tier, className, showLabel }: VIPBadgeProps) {
+export const VIPBadge = memo(function VIPBadge({
+  tier,
+  className,
+  showLabel,
+}: VIPBadgeProps) {
   // Component logic
-})
+});
 ```
 
 ### 3. useMemo for Calculations
 
 ```tsx
 export function VIPStatusCard() {
-  const { data } = useMyVipInfo()
+  const { data } = useMyVipInfo();
 
   const progressPercentage = useMemo(() => {
-    if (!data?.nextTier) return 100
-    return (data.totalSpentInt / data.nextTier.requiredSpending) * 100
-  }, [data])
+    if (!data?.nextTier) return 100;
+    return (data.totalSpentInt / data.nextTier.requiredSpending) * 100;
+  }, [data]);
 
-  return (
-    <div style={{ width: `${progressPercentage}%` }} />
-  )
+  return <div style={{ width: `${progressPercentage}%` }} />;
 }
 ```
 
@@ -877,10 +906,10 @@ export function VIPStatusCard() {
 
 ```tsx
 // Always sanitize user input (React does this by default)
-<p>{user.name}</p> // ✅ Safe
+<p>{user.name}</p> //  Safe
 
 // Never use dangerouslySetInnerHTML with user input
-<div dangerouslySetInnerHTML={{ __html: userInput }} /> // ❌ Unsafe
+<div dangerouslySetInnerHTML={{ __html: userInput }} /> //  Unsafe
 ```
 
 ### 2. Authorization Checks
@@ -889,9 +918,9 @@ export function VIPStatusCard() {
 // Protect admin routes
 // middleware.ts
 export function middleware(request: NextRequest) {
-  const token = request.cookies.get('auth-token')
-  if (!token && request.nextUrl.pathname.startsWith('/admin')) {
-    return NextResponse.redirect(new URL('/auth/login', request.url))
+  const token = request.cookies.get("auth-token");
+  if (!token && request.nextUrl.pathname.startsWith("/admin")) {
+    return NextResponse.redirect(new URL("/auth/login", request.url));
   }
 }
 ```
@@ -903,7 +932,7 @@ export function middleware(request: NextRequest) {
 // Never store tokens in localStorage
 
 // If using localStorage (not recommended):
-const token = localStorage.getItem('token') // ⚠️ Vulnerable to XSS
+const token = localStorage.getItem("token"); // ⚠️ Vulnerable to XSS
 ```
 
 ## Testing Strategy
@@ -922,4 +951,3 @@ pnpm test:e2e
 # Coverage
 pnpm test:coverage
 ```
-

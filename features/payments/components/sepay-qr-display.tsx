@@ -51,7 +51,7 @@ export function SepayQRDisplay({
 
     // Update countdown timer
     useEffect(() => {
-        if (isPaid || error) {return}
+        if (isPaid || error) { return }
 
         const interval = setInterval(() => {
             setTimeRemaining((prev) => (prev > 0 ? prev - 1 : 0))
@@ -231,7 +231,7 @@ export function SepayQRDisplay({
 
                             {/* Info Messages */}
                             <div className="space-y-2 bg-blue-100 p-3 rounded-lg border border-blue-300">
-                                <p className="text-sm font-semibold text-blue-800">📋 Vui lòng thanh toán trước khi hết hạn:</p>
+                                <p className="text-sm font-semibold text-blue-800"> Vui lòng thanh toán trước khi hết hạn:</p>
                                 <div className="space-y-1">
                                     <div className="flex gap-2 text-sm text-blue-700">
                                         <span className="text-lg leading-none">✓</span>

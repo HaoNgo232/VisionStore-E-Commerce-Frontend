@@ -17,21 +17,17 @@ applyTo: "**/app/**/*.tsx,**/components/**/*.tsx"
 ## **Dynamic Route Params**
 
 ```typescript
-// ✅ CORRECT - Next.js 13+ App Router
-export default function ProductPage({ 
-  params 
-}: { 
-  params: { slug: string } 
-}) {
+//  CORRECT - Next.js 13+ App Router
+export default function ProductPage({ params }: { params: { slug: string } }) {
   // params is NOT a Promise in App Router
-  return <div>Product: {params.slug}</div>
+  return <div>Product: {params.slug}</div>;
 }
 
-// ❌ WRONG - Don't use Promise for params in App Router
-export default async function ProductPage({ 
-  params 
-}: { 
-  params: Promise<{ slug: string }> 
+//  WRONG - Don't use Promise for params in App Router
+export default async function ProductPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
 }) {
   // This is Pages Router pattern, not App Router
 }
@@ -46,23 +42,23 @@ export default async function ProductPage({
 ## **Type-Safe Data Fetching**
 
 ```typescript
-// ✅ Type-safe server component data fetching
+//  Type-safe server component data fetching
 async function getProduct(id: string): Promise<Product> {
-  const response = await fetch(`/api/products/${id}`)
+  const response = await fetch(`/api/products/${id}`);
   if (!response.ok) {
-    throw new Error('Failed to fetch product')
+    throw new Error("Failed to fetch product");
   }
-  const data = await response.json()
-  return ProductSchema.parse(data) // Validate with Zod
+  const data = await response.json();
+  return ProductSchema.parse(data); // Validate with Zod
 }
 
-export default async function ProductPage({ 
-  params 
-}: { 
-  params: { id: string } 
+export default async function ProductPage({
+  params,
+}: {
+  params: { id: string };
 }) {
-  const product = await getProduct(params.id)
-  return <ProductDetail product={product} />
+  const product = await getProduct(params.id);
+  return <ProductDetail product={product} />;
 }
 ```
 
@@ -70,40 +66,40 @@ export default async function ProductPage({
 
 ```typescript
 // Schema-first approach
-import { cuidSchema } from '@/types'
+import { cuidSchema } from "@/types";
 
 const productFormSchema = z.object({
-  name: z.string().min(1, 'Product name required'),
-  priceInt: z.number().int().positive('Price must be positive'),
+  name: z.string().min(1, "Product name required"),
+  priceInt: z.number().int().positive("Price must be positive"),
   categoryId: cuidSchema(), // Backend uses CUID, not UUID
   imageUrls: z.array(z.string().url()).default([]),
-})
+});
 
-type ProductFormData = z.infer<typeof productFormSchema>
+type ProductFormData = z.infer<typeof productFormSchema>;
 
-export function ProductForm({ 
-  onSubmit 
-}: { 
-  onSubmit: (data: ProductFormData) => Promise<void> 
+export function ProductForm({
+  onSubmit,
+}: {
+  onSubmit: (data: ProductFormData) => Promise<void>;
 }) {
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productFormSchema),
     defaultValues: {
-      name: '',
+      name: "",
       priceInt: 0,
-      categoryId: '',
+      categoryId: "",
       imageUrls: [],
     },
-  })
+  });
 
   const handleSubmit = async (data: ProductFormData) => {
     try {
-      await onSubmit(data)
-      form.reset()
+      await onSubmit(data);
+      form.reset();
     } catch (error) {
       // Error handled by parent
     }
-  }
+  };
 
   return (
     <Form {...form}>
@@ -111,6 +107,6 @@ export function ProductForm({
         {/* Type-safe form fields */}
       </form>
     </Form>
-  )
+  );
 }
 ```

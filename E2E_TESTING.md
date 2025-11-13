@@ -54,17 +54,17 @@ pnpm exec playwright test -g "COD: Complete checkout"
 
 **COD Flow** (`e2e/checkout-cod.spec.ts`) - 3 tests
 
-- ✅ Complete checkout and redirect to success page
-- ✅ Cart cleared after successful order
-- ✅ View order detail from success page
+- Complete checkout and redirect to success page
+- Cart cleared after successful order
+- View order detail from success page
 
 **SePay Flow** (`e2e/checkout-sepay.spec.ts`) - 5 tests
 
-- ✅ Open waiting dialog after order creation
-- ✅ Show success dialog when payment confirmed
-- ✅ Auto-redirect after success confirmation (3s countdown)
-- ✅ Manual redirect via "Xem chi tiết" button
-- ✅ Cart cleared after successful payment
+- Open waiting dialog after order creation
+- Show success dialog when payment confirmed
+- Auto-redirect after success confirmation (3s countdown)
+- Manual redirect via "Xem chi tiết" button
+- Cart cleared after successful payment
 
 **Total**: 8 test cases
 

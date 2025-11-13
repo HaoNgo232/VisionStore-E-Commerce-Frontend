@@ -2,7 +2,7 @@
 
 ## Khi nào NÊN sử dụng eslint-disable?
 
-### ✅ ACCEPTABLE: False positives với TypeScript control flow
+### ACCEPTABLE: False positives với TypeScript control flow
 
 Khi TypeScript không thể narrow type đúng SAU KHI đã check null/undefined + early return:
 
@@ -30,7 +30,7 @@ if (!user) {
 const name = user.fullName;
 ```
 
-### ✅ ACCEPTABLE: Zustand store selectors với complex inference
+### ACCEPTABLE: Zustand store selectors với complex inference
 
 ```typescript
 // Store type inference issue
@@ -38,42 +38,42 @@ const name = user.fullName;
 const role = useAuthStore.getState().getUserRole();
 ```
 
-### ❌ KHÔNG NÊN: Tắt rule globally hoặc ignore lỗi thật
+### KHÔNG NÊN: Tắt rule globally hoặc ignore lỗi thật
 
 ```typescript
-// ❌ BAD - tắt rule cho cả file
+//  BAD - tắt rule cho cả file
 /* eslint-disable @typescript-eslint/no-unsafe-* */
 
-// ❌ BAD - ignore mà không comment giải thích
+//  BAD - ignore mà không comment giải thích
 // eslint-disable-next-line
 const data = something.dangerous();
 ```
 
 ## Khi nào KHÔNG NÊN sử dụng eslint-disable?
 
-### ❌ Khi có thể fix bằng proper typing
+### Khi có thể fix bằng proper typing
 
 ```typescript
-// ❌ BAD
+//  BAD
 // eslint-disable-next-line
 const result = apiCall();
 
-// ✅ GOOD
+//  GOOD
 const result: ExpectedType = apiCall();
 // hoặc
 const result = apiCall() as ExpectedType;
 ```
 
-### ❌ Khi logic thật sự unsafe
+### Khi logic thật sự unsafe
 
 ```typescript
-// ❌ BAD - đây là lỗi thật
+//  BAD - đây là lỗi thật
 // eslint-disable-next-line
 function dangerous(x: any) {
   return x.something.deeply.nested;
 }
 
-// ✅ GOOD - fix logic
+//  GOOD - fix logic
 function safe(x: unknown): string | null {
   if (typeof x === "object" && x !== null && "something" in x) {
     const something = x.something;

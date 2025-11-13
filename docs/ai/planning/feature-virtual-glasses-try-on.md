@@ -685,9 +685,9 @@ Task 2.1 → Task 2.2 → Task 2.3 → Task 2.4 → Task 2.5 → Task 2.6 → Ta
 
 ### External Dependencies
 
-- ✅ MinIO S3 already setup in Docker
-- ✅ PostgreSQL database available
-- ✅ User authentication already implemented
+- MinIO S3 already setup in Docker
+- PostgreSQL database available
+- User authentication already implemented
 - ⚠️ Product entity exists? (verify schema)
 - ⚠️ Frontend has auth context + API client
 
@@ -804,10 +804,10 @@ Task 2.1 → Task 2.2 → Task 2.3 → Task 2.4 → Task 2.5 → Task 2.6 → Ta
 
 ### Tools & Services
 
-- ✅ Already available:
-  - Docker + MinIO S3
-  - PostgreSQL
-  - Next.js + NestJS
+- Already available:
+- Docker + MinIO S3
+- PostgreSQL
+- Next.js + NestJS
 - 🆕 New dependencies:
   - Three.js (~600KB)
   - TensorFlow.js (~2MB)
@@ -815,16 +815,16 @@ Task 2.1 → Task 2.2 → Task 2.3 → Task 2.4 → Task 2.5 → Task 2.6 → Ta
 
 ### Infrastructure
 
-- ✅ Local development: localhost HTTPS (for webcam)
-  - Use `mkcert` to generate local SSL cert
-- ✅ Staging: HTTPS required (Let's Encrypt)
-- ✅ Production: HTTPS (already setup)
+- Local development: localhost HTTPS (for webcam)
+- Use `mkcert` to generate local SSL cert
+- Staging: HTTPS required (Let's Encrypt)
+- Production: HTTPS (already setup)
 
 ### Documentation/Knowledge
 
-- ✅ Reference project: Virtual-Glasses-Try-on-main
-- ✅ Three.js docs: https://threejs.org/docs
-- ✅ TensorFlow.js Facemesh: https://github.com/tensorflow/tfjs-models/tree/master/face-landmarks-detection
+- Reference project: Virtual-Glasses-Try-on-main
+- Three.js docs: https://threejs.org/docs
+- TensorFlow.js Facemesh: https://github.com/tensorflow/tfjs-models/tree/master/face-landmarks-detection
 - 📚 Need to learn:
   - GLTF format structure
   - WebGL optimization techniques

@@ -7,12 +7,12 @@ applyTo: "**/*.ts,**/*.tsx,**/types/**/*.ts"
 ## **Never Use `any` - Alternatives**
 
 ```typescript
-// ❌ WRONG - Never do this
+//  WRONG - Never do this
 function processData(data: any): any {
   return data.someProperty;
 }
 
-// ✅ CORRECT - Use proper typing
+//  CORRECT - Use proper typing
 interface DataInput {
   someProperty: string;
   otherProperty: number;
@@ -24,7 +24,7 @@ function processData(data: DataInput): ProcessedData {
   };
 }
 
-// ✅ CORRECT - Use unknown for truly unknown data
+//  CORRECT - Use unknown for truly unknown data
 function handleUnknownData(data: unknown): string {
   if (typeof data === "string") {
     return data;
@@ -102,12 +102,12 @@ export function validateApiResponse<T>(
 
 ## **Default Parameters Best Practices**
 
-### **❌ TRÁNH: Default Parameter với Object Literal**
+### ** TRÁNH: Default Parameter với Object Literal**
 
 Default parameter với object literal `= {}` gây ra TypeScript strict mode false positives:
 
 ```typescript
-// ❌ WRONG - Gây false positives với TypeScript strict mode
+//  WRONG - Gây false positives với TypeScript strict mode
 async function listUsers(
   query: ListUsersQuery = {},
 ): Promise<ListUsersResponse> {
@@ -118,10 +118,10 @@ async function listUsers(
 }
 ```
 
-### **✅ ĐÚNG: Optional Parameter + Optional Chaining**
+### ** ĐÚNG: Optional Parameter + Optional Chaining**
 
 ```typescript
-// ✅ CORRECT - Type-safe, không có false positives
+//  CORRECT - Type-safe, không có false positives
 async function listUsers(query?: ListUsersQuery): Promise<ListUsersResponse> {
   const searchParams = new URLSearchParams();
 
@@ -140,10 +140,10 @@ async function listUsers(query?: ListUsersQuery): Promise<ListUsersResponse> {
 }
 ```
 
-### **✅ ĐÚNG: Local Interface (Nếu cần)**
+### ** ĐÚNG: Local Interface (Nếu cần)**
 
 ```typescript
-// ✅ CORRECT - Local interface cho better type inference
+//  CORRECT - Local interface cho better type inference
 interface ListUsersParams {
   page?: number;
   pageSize?: number;

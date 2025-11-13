@@ -26,22 +26,22 @@ feature: virtual-glasses-try-on
 
 ### Primary Goals
 
-- ✅ Cho phép khách hàng thử kính ảo (AR) trực tiếp trên khuôn mặt thông qua webcam
-- ✅ Tăng trải nghiệm mua sắm và tỷ lệ chuyển đổi (conversion rate)
-- ✅ Giảm tỷ lệ trả hàng do không vừa ý về kiểu dáng
+- Cho phép khách hàng thử kính ảo (AR) trực tiếp trên khuôn mặt thông qua webcam
+- Tăng trải nghiệm mua sắm và tỷ lệ chuyển đổi (conversion rate)
+- Giảm tỷ lệ trả hàng do không vừa ý về kiểu dáng
 
 ### Secondary Goals
 
-- ✅ Lưu lịch sử các mẫu kính đã thử để khách hàng dễ so sánh
-- ✅ Cho phép chụp ảnh khi thử kính để lưu lại hoặc chia sẻ
-- ✅ Tạo điểm khác biệt cạnh tranh cho nền tảng
+- Lưu lịch sử các mẫu kính đã thử để khách hàng dễ so sánh
+- Cho phép chụp ảnh khi thử kính để lưu lại hoặc chia sẻ
+- Tạo điểm khác biệt cạnh tranh cho nền tảng
 
 ### Non-Goals (Out of Scope)
 
-- ❌ Giao diện quản lý admin cho 3D models (để phase sau)
-- ❌ Virtual try-on cho các sản phẩm khác (mũ, khăn, v.v.)
-- ❌ Social sharing features phức tạp (chỉ cần download ảnh)
-- ❌ AR trên mobile native app (chỉ focus web-based)
+- Giao diện quản lý admin cho 3D models (để phase sau)
+- Virtual try-on cho các sản phẩm khác (mũ, khăn, v.v.)
+- Social sharing features phức tạp (chỉ cần download ảnh)
+- AR trên mobile native app (chỉ focus web-based)
 
 ## User Stories & Use Cases
 
@@ -132,24 +132,24 @@ feature: virtual-glasses-try-on
 
 ### Measurable Outcomes
 
-- ✅ **Technical Performance**:
+- **Technical Performance**:
 
-  - Facemesh detection latency < 3 giây
-  - Render FPS >= 24 trên desktop, >= 20 trên mobile
-  - Model 3D load time < 2 giây
-  - Webcam access success rate > 95% (trừ trường hợp user deny)
+- Facemesh detection latency < 3 giây
+- Render FPS >= 24 trên desktop, >= 20 trên mobile
+- Model 3D load time < 2 giây
+- Webcam access success rate > 95% (trừ trường hợp user deny)
 
-- ✅ **Business Metrics** (sau khi deploy):
+- **Business Metrics** (sau khi deploy):
 
-  - Tăng conversion rate 15-20% cho sản phẩm có virtual try-on
-  - Giảm bounce rate 10% trên trang chi tiết kính
-  - 30% users thử ít nhất 1 mẫu kính khi vào trang sản phẩm
+- Tăng conversion rate 15-20% cho sản phẩm có virtual try-on
+- Giảm bounce rate 10% trên trang chi tiết kính
+- 30% users thử ít nhất 1 mẫu kính khi vào trang sản phẩm
 
-- ✅ **User Experience**:
-  - Model 3D tracking chính xác khi quay đầu (test manual)
-  - Không có jank/lag khi switch giữa các mẫu kính
-  - UI responsive trên mobile + desktop
-  - Accessibility: keyboard navigation + screen reader support
+- **User Experience**:
+- Model 3D tracking chính xác khi quay đầu (test manual)
+- Không có jank/lag khi switch giữa các mẫu kính
+- UI responsive trên mobile + desktop
+- Accessibility: keyboard navigation + screen reader support
 
 ### Acceptance Criteria
 
@@ -179,16 +179,16 @@ feature: virtual-glasses-try-on
 
 ### Assumptions
 
-- ✅ Backend có sẵn Product entity, chỉ cần extend thêm fields
-- ✅ MinIO S3 đã được setup trong Docker (không cần setup mới)
-- ✅ 7 model 3D từ reference project có license CC-BY-4.0 (commercial use OK)
-- ✅ User đã đăng nhập khi muốn lưu lịch sử (không cần cho guest users)
-- ✅ Frontend có sẵn auth context và API client setup
-- ✅ Không cần mobile native app, chỉ focus responsive web
+- Backend có sẵn Product entity, chỉ cần extend thêm fields
+- MinIO S3 đã được setup trong Docker (không cần setup mới)
+- 7 model 3D từ reference project có license CC-BY-4.0 (commercial use OK)
+- User đã đăng nhập khi muốn lưu lịch sử (không cần cho guest users)
+- Frontend có sẵn auth context và API client setup
+- Không cần mobile native app, chỉ focus responsive web
 
 ## Questions & Open Items
 
-### Resolved ✅
+### Resolved
 
 - ~~Admin management UI?~~ → Để phase 2
 - ~~Model 3D lưu ở đâu?~~ → MinIO S3 local Docker

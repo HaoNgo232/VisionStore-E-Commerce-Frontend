@@ -332,7 +332,7 @@ describe("PaymentWaitingDialog", () => {
 
         it("displays info messages during polling", () => {
             render(<PaymentWaitingDialog {...mockProps} />);
-            expect(screen.getByText("📋 Vui lòng thanh toán trước khi hết hạn:")).toBeInTheDocument();
+            expect(screen.getByText(" Vui lòng thanh toán trước khi hết hạn:")).toBeInTheDocument();
             expect(screen.getByText("Mở app ngân hàng và quét mã QR ở trên")).toBeInTheDocument();
         });
     });

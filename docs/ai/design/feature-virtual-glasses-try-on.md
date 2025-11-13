@@ -206,7 +206,7 @@ export const VirtualTryOnConfigSchema = z.object({
 
 export type VirtualTryOnConfig = z.infer<typeof VirtualTryOnConfigSchema>;
 
-import { cuidSchema } from '@/types'
+import { cuidSchema } from "@/types";
 
 // Product with try-on support
 export const ProductWithTryOnSchema = z.object({
@@ -461,10 +461,10 @@ backend/src/
 
 **Rationale**:
 
-- ✅ Real-time performance (24+ FPS), không có network latency
-- ✅ Privacy-friendly: video stream không gửi lên server
-- ✅ Giảm tải backend
-- ❌ Trade-off: Tăng bundle size (~2MB cho TF.js model)
+- Real-time performance (24+ FPS), không có network latency
+- Privacy-friendly: video stream không gửi lên server
+- Giảm tải backend
+- Trade-off: Tăng bundle size (~2MB cho TF.js model)
 
 **Alternatives Considered**:
 
@@ -479,9 +479,9 @@ backend/src/
 
 **Rationale**:
 
-- ✅ UX tốt hơn: không rời khỏi product page
-- ✅ Giữ context của sản phẩm
-- ✅ Có thể có dedicated URL `/products/:id/try-on` cho deep linking
+- UX tốt hơn: không rời khỏi product page
+- Giữ context của sản phẩm
+- Có thể có dedicated URL `/products/:id/try-on` cho deep linking
 
 ---
 
@@ -491,10 +491,10 @@ backend/src/
 
 **Rationale**:
 
-- ✅ Tách biệt concerns (webcam, detection, rendering)
-- ✅ Reusable hooks, dễ test
-- ✅ Clean up tự động với React useEffect
-- ✅ Type-safe với TypeScript
+- Tách biệt concerns (webcam, detection, rendering)
+- Reusable hooks, dễ test
+- Clean up tự động với React useEffect
+- Type-safe với TypeScript
 
 **Pattern**:
 
@@ -517,16 +517,16 @@ function VirtualTryOnModal({ productId }: Props) {
 
 **Rationale**:
 
-- ✅ Persistent across devices
-- ✅ Có thể analyze user behavior
-- ✅ Support recommendations trong tương lai
-- ❌ Requires auth (acceptable trade-off)
+- Persistent across devices
+- Có thể analyze user behavior
+- Support recommendations trong tương lai
+- Requires auth (acceptable trade-off)
 
 **Alternative**: LocalStorage
 
-- ✅ No auth needed
-- ❌ Lost on device change
-- ❌ No analytics
+- No auth needed
+- Lost on device change
+- No analytics
 
 ---
 
@@ -555,9 +555,9 @@ function VirtualTryOnModal({ productId }: Props) {
 
 **Rationale**:
 
-- ✅ Dễ tìm kiếm trong admin/test
-- ✅ Clear distinction từ sản phẩm thật
-- ✅ SEO-friendly
+- Dễ tìm kiếm trong admin/test
+- Clear distinction từ sản phẩm thật
+- SEO-friendly
 
 ## Non-Functional Requirements
 

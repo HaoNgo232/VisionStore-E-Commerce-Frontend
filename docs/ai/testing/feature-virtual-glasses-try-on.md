@@ -10,17 +10,19 @@ feature: virtual-glasses-try-on
 ## Test Coverage Goals
 
 ### Coverage Targets
+
 - **Unit Tests**: 80%+ coverage cho new/changed code
 - **Integration Tests**: All critical API endpoints + component interactions
 - **E2E Tests**: 2-3 key user journeys
 - **Manual Tests**: Cross-browser compatibility + UX validation
 
 ### Alignment với Requirements
-- ✅ US-1: Thử kính qua webcam → E2E test + manual
-- ✅ US-2: Chọn nhiều mẫu kính → Integration test
-- ✅ US-3: Chụp ảnh → Unit test + manual
-- ✅ US-4: Xem lịch sử → Integration test
-- ✅ US-5: Filter sản phẩm → Unit + integration test
+
+- US-1: Thử kính qua webcam → E2E test + manual
+- US-2: Chọn nhiều mẫu kính → Integration test
+- US-3: Chụp ảnh → Unit test + manual
+- US-4: Xem lịch sử → Integration test
+- US-5: Filter sản phẩm → Unit + integration test
 
 ---
 
@@ -29,29 +31,35 @@ feature: virtual-glasses-try-on
 ### Backend Unit Tests
 
 #### Module 1: TryOnHistoryService
+
 **File**: `backend/src/try-on-history/try-on-history.service.spec.ts`
 
 - [ ] **Test case 1.1**: `saveTryOn - should create new record when first try`
+
   - Setup: Empty database
   - Action: Call `saveTryOn(userId, productId)`
   - Assert: Record created với `tryCount = 1`
 
 - [ ] **Test case 1.2**: `saveTryOn - should increment tryCount when try again same day`
+
   - Setup: Existing record với `tryCount = 1` created today
   - Action: Call `saveTryOn(userId, productId)` again
   - Assert: `tryCount` updated to 2, `triedAt` updated
 
 - [ ] **Test case 1.3**: `saveTryOn - should create new record when try different day`
+
   - Setup: Existing record created yesterday
   - Action: Call `saveTryOn(userId, productId)` today
   - Assert: New record created với `tryCount = 1`
 
 - [ ] **Test case 1.4**: `getTryOnHistory - should return user's history ordered by date`
+
   - Setup: 3 records for user, 2 records for other user
   - Action: Call `getTryOnHistory(userId, limit: 50)`
   - Assert: Returns 3 records, ordered by `triedAt DESC`
 
 - [ ] **Test case 1.5**: `getTryOnHistory - should respect pagination limit`
+
   - Setup: 100 records for user
   - Action: Call `getTryOnHistory(userId, limit: 20)`
   - Assert: Returns exactly 20 records
@@ -64,19 +72,23 @@ feature: virtual-glasses-try-on
 ---
 
 #### Module 2: ProductsService Extension
+
 **File**: `backend/src/products/products.service.spec.ts`
 
 - [ ] **Test case 2.1**: `getProductById - should include virtualTryOnConfig`
+
   - Setup: Product với `hasVirtualTryOn = true`
   - Action: Call `getProductById(id)`
   - Assert: Response includes populated `virtualTryOnConfig`
 
 - [ ] **Test case 2.2**: `getProductById - should transform modelPath to presigned URL`
+
   - Setup: Product với `virtualTryOnConfig.modelPath = "3d-models/glasses-01/scene.gltf"`
   - Action: Call `getProductById(id)`
   - Assert: Response `virtualTryOnConfig.modelPath` starts with `https://minio`
 
 - [ ] **Test case 2.3**: `getProducts - should filter by hasVirtualTryOn`
+
   - Setup: 5 products với `hasVirtualTryOn = true`, 5 với `false`
   - Action: Call `getProducts({ hasVirtualTryOn: true })`
   - Assert: Returns only 5 products với virtual try-on
@@ -89,14 +101,17 @@ feature: virtual-glasses-try-on
 ---
 
 #### Module 3: MinioService
+
 **File**: `backend/src/minio/minio.service.spec.ts`
 
 - [ ] **Test case 3.1**: `uploadGLTFModel - should upload file to bucket`
+
   - Setup: Mock MinIO client
   - Action: Call `uploadGLTFModel(buffer, productId, 'scene.gltf')`
   - Assert: `putObject` called with correct params
 
 - [ ] **Test case 3.2**: `getPresignedUrl - should generate valid URL`
+
   - Setup: Mock MinIO client
   - Action: Call `getPresignedUrl('3d-models/glasses-01/scene.gltf')`
   - Assert: Returns URL với expiry timestamp
@@ -111,19 +126,23 @@ feature: virtual-glasses-try-on
 ### Frontend Unit Tests
 
 #### Module 4: WebcamManager
+
 **File**: `frontend/src/features/virtual-try-on/lib/webcam-manager.spec.ts`
 
 - [ ] **Test case 4.1**: `start - should request user media with correct constraints`
+
   - Setup: Mock `navigator.mediaDevices.getUserMedia`
   - Action: Call `start(videoElement)`
   - Assert: `getUserMedia` called với video constraints
 
 - [ ] **Test case 4.2**: `start - should throw PERMISSION_DENIED on NotAllowedError`
+
   - Setup: Mock `getUserMedia` to reject với `NotAllowedError`
   - Action: Call `start(videoElement)`
   - Assert: Throws error với message 'PERMISSION_DENIED'
 
 - [ ] **Test case 4.3**: `stop - should stop all media tracks`
+
   - Setup: Start webcam first
   - Action: Call `stop()`
   - Assert: All tracks `stop()` called
@@ -136,19 +155,23 @@ feature: virtual-glasses-try-on
 ---
 
 #### Module 5: FacemeshDetector
+
 **File**: `frontend/src/features/virtual-try-on/lib/facemesh-detector.spec.ts`
 
 - [ ] **Test case 5.1**: `loadModel - should load TensorFlow model`
+
   - Setup: Mock `faceLandmarksDetection.load`
   - Action: Call `loadModel()`
   - Assert: `load` called with correct package
 
 - [ ] **Test case 5.2**: `detectFaces - should return keypoints for detected face`
+
   - Setup: Mock model với fake predictions
   - Action: Call `detectFaces(videoElement)`
   - Assert: Returns array với correct keypoints structure
 
 - [ ] **Test case 5.3**: `detectFaces - should return empty array when no face`
+
   - Setup: Mock model to return empty predictions
   - Action: Call `detectFaces(videoElement)`
   - Assert: Returns `[]`
@@ -161,14 +184,17 @@ feature: virtual-glasses-try-on
 ---
 
 #### Module 6: GLTFModelLoader
+
 **File**: `frontend/src/features/virtual-try-on/lib/gltf-loader.spec.ts`
 
 - [ ] **Test case 6.1**: `load - should load GLTF model from URL`
+
   - Setup: Mock `GLTFLoader.load`
   - Action: Call `load('https://example.com/model.gltf')`
   - Assert: `GLTFLoader.load` called với URL
 
 - [ ] **Test case 6.2**: `load - should cache loaded models`
+
   - Setup: Mock loader
   - Action: Call `load(url)` twice với same URL
   - Assert: Loader only called once, second call returns cached
@@ -181,14 +207,17 @@ feature: virtual-glasses-try-on
 ---
 
 #### Module 7: TrackingCalculator
+
 **File**: `frontend/src/features/virtual-try-on/lib/tracking-calculator.spec.ts`
 
 - [ ] **Test case 7.1**: `calculateGlassesTransform - should calculate correct position`
+
   - Setup: Mock keypoints với known values
   - Action: Call `calculateGlassesTransform(keypoints, config)`
   - Assert: Returns position matching expected math
 
 - [ ] **Test case 7.2**: `calculateGlassesTransform - should normalize up vector`
+
   - Setup: Mock keypoints
   - Action: Call function
   - Assert: `upVector` has length = 1 (normalized)
@@ -201,19 +230,23 @@ feature: virtual-glasses-try-on
 ---
 
 #### Module 8: VirtualTryOnService (API)
+
 **File**: `frontend/src/services/virtual-try-on.service.spec.ts`
 
 - [ ] **Test case 8.1**: `getProductForTryOn - should validate response với Zod`
+
   - Setup: Mock fetch với valid product response
   - Action: Call `getProductForTryOn(productId)`
   - Assert: Returns validated product
 
 - [ ] **Test case 8.2**: `getProductForTryOn - should throw on invalid response`
+
   - Setup: Mock fetch với invalid data (missing fields)
   - Action: Call `getProductForTryOn(productId)`
   - Assert: Throws ZodError
 
 - [ ] **Test case 8.3**: `saveTryOnHistory - should send POST request`
+
   - Setup: Mock fetch
   - Action: Call `saveTryOnHistory(productId)`
   - Assert: POST called với correct body
@@ -230,9 +263,11 @@ feature: virtual-glasses-try-on
 ### Backend Integration Tests
 
 #### Integration Scenario 1: Complete Try-On Flow
+
 **File**: `backend/test/try-on-flow.e2e-spec.ts`
 
 - [ ] **Test**: User tries glasses và saves history
+
   - Step 1: Create test user + product với virtual try-on
   - Step 2: POST `/api/try-on-history` với JWT token
   - Step 3: GET `/api/try-on-history` to verify saved
@@ -247,14 +282,17 @@ feature: virtual-glasses-try-on
 ---
 
 #### Integration Scenario 2: Product Virtual Try-On API
+
 **File**: `backend/test/products-virtual-tryon.e2e-spec.ts`
 
 - [ ] **Test**: Get product with try-on config
+
   - Step 1: Seed product với `hasVirtualTryOn = true`
   - Step 2: GET `/api/products/:id`
   - Assert: Response includes `virtualTryOnConfig` với presigned URL
 
 - [ ] **Test**: Filter products by hasVirtualTryOn
+
   - Step 1: Seed 3 products với try-on, 2 without
   - Step 2: GET `/api/products?hasVirtualTryOn=true`
   - Assert: Returns 3 products only
@@ -270,9 +308,11 @@ feature: virtual-glasses-try-on
 ### Frontend Integration Tests
 
 #### Integration Scenario 3: Virtual Try-On Modal Flow
+
 **File**: `frontend/src/features/virtual-try-on/components/VirtualTryOnModal.integration.spec.tsx`
 
 - [ ] **Test**: Complete modal workflow
+
   - Step 1: Render modal với mock product
   - Step 2: Mock webcam grant permission
   - Step 3: Mock facemesh detection returns landmarks
@@ -281,6 +321,7 @@ feature: virtual-glasses-try-on
   - Assert: Screenshot download triggered
 
 - [ ] **Test**: Model selection updates render
+
   - Step 1: Render modal với 3 models
   - Step 2: Wait for first model to load
   - Step 3: Click second model thumbnail
@@ -295,14 +336,17 @@ feature: virtual-glasses-try-on
 ---
 
 #### Integration Scenario 4: API Integration Flow
+
 **File**: `frontend/src/services/virtual-try-on.integration.spec.ts` (uses MSW)
 
 - [ ] **Test**: Fetch product and display try-on button
+
   - Step 1: Mock API `/api/products/123` returns product với `hasVirtualTryOn = true`
   - Step 2: Render product page
   - Assert: "Thử Kính Ảo" button visible
 
 - [ ] **Test**: Save try-on history on model selection
+
   - Step 1: Mock POST `/api/try-on-history`
   - Step 2: User selects model in modal
   - Step 3: Wait 3s (debounce)
@@ -318,9 +362,11 @@ feature: virtual-glasses-try-on
 ## End-to-End Tests
 
 ### E2E Test 1: Happy Path - Try Glasses
+
 **File**: `frontend/e2e/virtual-try-on-happy-path.spec.ts` (Playwright)
 
 **Steps**:
+
 1. Navigate to product detail page với virtual try-on support
 2. Click "🥽 Thử Kính Ảo" button
 3. Grant webcam permission (mock với fake video stream)
@@ -339,9 +385,11 @@ feature: virtual-glasses-try-on
 ---
 
 ### E2E Test 2: Error Handling - Permission Denied
+
 **File**: `frontend/e2e/virtual-try-on-permission-denied.spec.ts`
 
 **Steps**:
+
 1. Navigate to product page
 2. Click "Thử Kính Ảo"
 3. Deny webcam permission
@@ -354,9 +402,11 @@ feature: virtual-glasses-try-on
 ---
 
 ### E2E Test 3: Filter Products by Virtual Try-On
+
 **File**: `frontend/e2e/filter-virtual-tryon-products.spec.ts`
 
 **Steps**:
+
 1. Navigate to products list page
 2. Check filter "Hỗ Trợ Thử Ảo"
 3. Verify URL updates to `?hasVirtualTryOn=true`
@@ -373,6 +423,7 @@ feature: virtual-glasses-try-on
 ### Test Fixtures
 
 #### Fixture 1: Mock Face Landmarks
+
 ```typescript
 // test/fixtures/face-landmarks.fixture.ts
 export const mockFaceLandmarks = {
@@ -393,17 +444,18 @@ export const mockFaceLandmarks = {
 ```
 
 #### Fixture 2: Mock Product với Virtual Try-On
+
 ```typescript
 // test/fixtures/product-with-tryon.fixture.ts
 export const mockProductWithTryOn: ProductWithTryOn = {
-  id: 'test-product-123',
-  name: 'Kính 3D - Test Glasses',
+  id: "test-product-123",
+  name: "Kính 3D - Test Glasses",
   priceInt: 50000,
-  imageUrls: ['https://example.com/image.jpg'],
+  imageUrls: ["https://example.com/image.jpg"],
   hasVirtualTryOn: true,
   virtualTryOnConfig: {
-    modelType: 'gltf',
-    modelPath: 'https://minio.local/3d-models/test/scene.gltf',
+    modelType: "gltf",
+    modelPath: "https://minio.local/3d-models/test/scene.gltf",
     position: { x: 0, y: 0.5, z: 0 },
     rotation: { x: 0, y: 0, z: 0 },
     scale: 0.01,
@@ -413,17 +465,18 @@ export const mockProductWithTryOn: ProductWithTryOn = {
 ```
 
 #### Fixture 3: Mock Try-On History
+
 ```typescript
 // test/fixtures/try-on-history.fixture.ts
 export const mockTryOnHistory: TryOnHistoryItem[] = [
   {
-    id: 'history-1',
-    productId: 'product-1',
-    triedAt: '2024-01-15T10:30:00Z',
+    id: "history-1",
+    productId: "product-1",
+    triedAt: "2024-01-15T10:30:00Z",
     product: {
-      id: 'product-1',
-      name: 'Kính 3D - Aviator',
-      imageUrls: ['https://example.com/aviator.jpg'],
+      id: "product-1",
+      name: "Kính 3D - Aviator",
+      imageUrls: ["https://example.com/aviator.jpg"],
     },
   },
   // ... more items
@@ -433,21 +486,24 @@ export const mockTryOnHistory: TryOnHistoryItem[] = [
 ### Seed Data Requirements
 
 **Database Seed for Testing**:
+
 ```typescript
 // backend/test/seed-test-data.ts
 export async function seedTestData(dataSource: DataSource) {
   // Create test user
   const user = await dataSource.getRepository(User).save({
-    email: 'test@example.com',
-    password: 'hashed_password',
+    email: "test@example.com",
+    password: "hashed_password",
   });
 
   // Create 7 products với virtual try-on (matching production seed)
   const products = await Promise.all([
     dataSource.getRepository(Product).save({
-      name: 'Kính 3D - Sport Glasses B307',
+      name: "Kính 3D - Sport Glasses B307",
       hasVirtualTryOn: true,
-      virtualTryOnConfig: { /* config */ },
+      virtualTryOnConfig: {
+        /* config */
+      },
     }),
     // ... 6 more
   ]);
@@ -459,6 +515,7 @@ export async function seedTestData(dataSource: DataSource) {
 ### Test Database Setup
 
 **Use Docker for Test Database**:
+
 ```bash
 # docker-compose.test.yml
 version: '3.8'
@@ -480,6 +537,7 @@ services:
 ### Coverage Commands
 
 **Backend**:
+
 ```bash
 # Run tests với coverage
 npm run test:cov
@@ -492,6 +550,7 @@ npm run test:cov -- --coverageThreshold='{"global":{"branches":80,"functions":80
 ```
 
 **Frontend**:
+
 ```bash
 # Unit tests với coverage
 npm run test -- --coverage
@@ -509,11 +568,14 @@ npm run test:all
 ### Coverage Gaps & Rationale
 
 **Expected Coverage Gaps**:
+
 1. **Three.js Scene Rendering** (hard to test): ~50% coverage
+
    - Rationale: WebGL rendering requires browser environment, mock không realistic
    - Mitigation: Manual testing + visual regression tests
 
 2. **TensorFlow.js Model Loading** (~60% coverage):
+
    - Rationale: Model binary hard to mock realistically
    - Mitigation: Integration tests với real model loading
 
@@ -522,6 +584,7 @@ npm run test:all
    - Mitigation: E2E tests với real webcam simulation
 
 **Target Coverage by Module**:
+
 - Business logic (services, utils): 95%+
 - API clients: 90%+
 - React hooks: 85%+
@@ -541,7 +604,9 @@ npm run test:all
 ### UI/UX Testing Checklist
 
 #### Desktop Testing
+
 - [ ] **Chrome 120+ (Windows/Mac)**
+
   - Webcam permission flow smooth
   - Model renders correctly
   - FPS >= 24
@@ -549,12 +614,14 @@ npm run test:all
   - No console errors
 
 - [ ] **Safari 17+ (macOS)**
+
   - Webcam works (HTTPS required)
   - WebGL rendering correct
   - Model positioning accurate
   - Performance acceptable
 
 - [ ] **Firefox 120+**
+
   - All features work
   - Face detection accurate
   - No memory leaks
@@ -564,7 +631,9 @@ npm run test:all
   - No compatibility issues
 
 #### Mobile Testing
+
 - [ ] **iPhone Safari (iOS 16+)**
+
   - Webcam permission prompt clear
   - Camera flip button works
   - Touch gestures for model selection
@@ -577,19 +646,23 @@ npm run test:all
   - Landscape orientation support
 
 #### Accessibility Testing
+
 - [ ] **Keyboard Navigation**
+
   - Tab through all controls
   - ESC closes modal
   - Arrow keys select models
   - Enter confirms actions
 
 - [ ] **Screen Reader (NVDA/JAWS)**
+
   - Buttons have clear labels
   - Loading states announced
   - Error messages read aloud
   - Current model announced
 
 - [ ] **Color Contrast**
+
   - All text meets WCAG AA
   - Focus indicators visible
   - Error states clear
@@ -600,18 +673,19 @@ npm run test:all
 
 ### Browser/Device Compatibility Matrix
 
-| Browser/Device | Version | Webcam | Face Detection | 3D Rendering | Screenshot | Status |
-|----------------|---------|--------|----------------|--------------|------------|--------|
-| Chrome Desktop | 120+    | ✅     | ✅             | ✅           | ✅         | ✅ Pass |
-| Safari Desktop | 17+     | ✅     | ✅             | ✅           | ✅         | 🔄 Testing |
-| Firefox        | 120+    | ✅     | ✅             | ✅           | ✅         | 🔄 Testing |
-| Edge           | 120+    | ✅     | ✅             | ✅           | ✅         | 🔄 Testing |
-| iPhone Safari  | iOS 16+ | ✅     | ✅             | ✅           | ✅         | 🔄 Testing |
-| Android Chrome | 120+    | ✅     | ✅             | ✅           | ✅         | 🔄 Testing |
+| Browser/Device | Version | Webcam | Face Detection | 3D Rendering | Screenshot | Status     |
+| -------------- | ------- | ------ | -------------- | ------------ | ---------- | ---------- |
+| Chrome Desktop | 120+    |        |                |              |            | Pass       |
+| Safari Desktop | 17+     |        |                |              |            | 🔄 Testing |
+| Firefox        | 120+    |        |                |              |            | 🔄 Testing |
+| Edge           | 120+    |        |                |              |            | 🔄 Testing |
+| iPhone Safari  | iOS 16+ |        |                |              |            | 🔄 Testing |
+| Android Chrome | 120+    |        |                |              |            | 🔄 Testing |
 
 ### Smoke Tests After Deployment
 
 **Production Smoke Test Checklist**:
+
 1. [ ] Navigate to production site (HTTPS)
 2. [ ] Open any product với virtual try-on
 3. [ ] Click "Thử Kính Ảo"
@@ -625,6 +699,7 @@ npm run test:all
 11. [ ] Check Sentry for exceptions
 
 **Performance Checks**:
+
 - Lighthouse score > 80
 - FaceMesh load < 3s
 - Model load < 2s per model
@@ -637,43 +712,50 @@ npm run test:all
 ### Load Testing Scenarios
 
 #### Scenario 1: Concurrent Users Loading Models
+
 **Tool**: Apache JMeter hoặc k6
 
 **Setup**:
+
 - 100 concurrent users
 - Each user loads 3 different models
 - Duration: 5 minutes
 
 **Metrics**:
+
 - MinIO S3 response time < 200ms (P95)
 - Backend API response < 100ms (P95)
 - No 5xx errors
 - Server CPU < 70%
 
 **Script** (k6):
+
 ```javascript
-import http from 'k6/http';
+import http from "k6/http";
 
 export let options = {
   vus: 100,
-  duration: '5m',
+  duration: "5m",
 };
 
-export default function() {
-  const productIds = ['id1', 'id2', 'id3'];
-  productIds.forEach(id => {
+export default function () {
+  const productIds = ["id1", "id2", "id3"];
+  productIds.forEach((id) => {
     http.get(`https://api.example.com/products/${id}`);
   });
 }
 ```
 
 #### Scenario 2: Try-On History Write Load
+
 **Setup**:
+
 - 500 users saving try-on history
 - 10 requests per user per minute
 - Duration: 10 minutes
 
 **Metrics**:
+
 - Database write latency < 50ms (P95)
 - No deadlocks
 - Database CPU < 80%
@@ -681,11 +763,13 @@ export default function() {
 ### Stress Testing Approach
 
 **Stress Test Goals**:
+
 - Find breaking point (max concurrent users)
 - Verify graceful degradation
 - Check error handling under load
 
 **Method**:
+
 - Gradually increase load: 100 → 500 → 1000 → 2000 users
 - Monitor: response times, error rates, resource usage
 - Identify bottlenecks
@@ -702,6 +786,7 @@ export default function() {
 | Page Load Time | < 2s | Lighthouse |
 
 **Performance Degradation Alerts**:
+
 - If FPS drops below 20 → show warning "Kết nối chậm, trải nghiệm có thể không mượt"
 - If model load > 5s → retry with lower quality textures
 
@@ -712,17 +797,20 @@ export default function() {
 ### Issue Tracking Process
 
 **Bug Report Template**:
+
 ```markdown
 **Title**: [Component] Brief description
 
 **Severity**: Critical / High / Medium / Low
 
 **Environment**:
+
 - Browser: Chrome 120 / Safari 17 / etc.
 - OS: Windows 11 / macOS 14 / iOS 17
 - Device: Desktop / iPhone 14 / etc.
 
 **Steps to Reproduce**:
+
 1. Navigate to...
 2. Click...
 3. Observe...
@@ -738,7 +826,9 @@ Model appears offset by 10px to the right
 
 **Console Errors**:
 ```
+
 [Error log here]
+
 ```
 
 **Additional Context**:
@@ -747,16 +837,17 @@ Only happens on Safari, works on Chrome
 
 ### Bug Severity Levels
 
-| Severity | Definition | Example | Response Time |
-|----------|------------|---------|---------------|
-| **Critical** | Feature completely broken | Webcam không start, blocking all users | < 4 hours |
-| **High** | Major functionality impaired | Model không track face, affects UX significantly | < 24 hours |
-| **Medium** | Minor functionality issue | Screenshot filename typo, annoying but not blocking | < 3 days |
-| **Low** | Cosmetic issue | Button padding off by 2px | Next sprint |
+| Severity     | Definition                   | Example                                             | Response Time |
+| ------------ | ---------------------------- | --------------------------------------------------- | ------------- |
+| **Critical** | Feature completely broken    | Webcam không start, blocking all users              | < 4 hours     |
+| **High**     | Major functionality impaired | Model không track face, affects UX significantly    | < 24 hours    |
+| **Medium**   | Minor functionality issue    | Screenshot filename typo, annoying but not blocking | < 3 days      |
+| **Low**      | Cosmetic issue               | Button padding off by 2px                           | Next sprint   |
 
 ### Regression Testing Strategy
 
 **After Bug Fix**:
+
 1. Write test case reproducing bug
 2. Fix bug
 3. Verify test passes
@@ -764,11 +855,13 @@ Only happens on Safari, works on Chrome
 5. Run full regression suite before deploy
 
 **Regression Suite**:
+
 - All critical path E2E tests
 - All integration tests
 - Unit tests cho affected modules
 
 **Frequency**:
+
 - Before every release (mandatory)
 - Nightly builds (optional)
 
@@ -777,21 +870,25 @@ Only happens on Safari, works on Chrome
 ## Test Execution Timeline
 
 ### Phase 1: Development (Days 1-10)
+
 - [ ] Write unit tests alongside implementation
 - [ ] Run tests locally before commit
 - [ ] Aim for 80%+ coverage incrementally
 
 ### Phase 2: Integration Testing (Days 11-12)
+
 - [ ] Write integration tests
 - [ ] Test API endpoints với real database
 - [ ] Test component interactions
 
 ### Phase 3: E2E Testing (Day 13)
+
 - [ ] Write 2-3 critical E2E tests
 - [ ] Run on staging environment
 - [ ] Fix issues found
 
 ### Phase 4: Manual Testing (Day 14)
+
 - [ ] Cross-browser testing
 - [ ] Mobile device testing
 - [ ] Accessibility testing
@@ -799,6 +896,7 @@ Only happens on Safari, works on Chrome
 - [ ] UAT (User Acceptance Testing)
 
 ### Phase 5: Pre-Production (Day 15)
+
 - [ ] Full regression suite
 - [ ] Load testing
 - [ ] Security testing
@@ -807,6 +905,7 @@ Only happens on Safari, works on Chrome
 ---
 
 **Next Steps**:
+
 1. Use `/writing-test` command to generate unit tests cho từng module
 2. Write integration tests sau khi implement API endpoints
 3. Setup E2E test framework (Playwright)
@@ -817,11 +916,11 @@ Only happens on Safari, works on Chrome
 ---
 
 **Testing Complete Criteria**:
-- ✅ 80%+ unit test coverage
-- ✅ All integration tests passing
-- ✅ 2+ E2E tests covering critical paths
-- ✅ Manual testing completed on 3+ browsers
-- ✅ No critical/high severity bugs open
-- ✅ Performance benchmarks met
-- ✅ Accessibility checks passed
 
+- 80%+ unit test coverage
+- All integration tests passing
+- 2+ E2E tests covering critical paths
+- Manual testing completed on 3+ browsers
+- No critical/high severity bugs open
+- Performance benchmarks met
+- Accessibility checks passed
