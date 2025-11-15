@@ -371,7 +371,7 @@
 - Real-time order status updates (WebSocket/SSE)
 - Push notifications khi order status thay đổi
 
-**Backend Support:** ⚠️ Cần thêm event emitter cho order status changes
+**Backend Support:** Cần thêm event emitter cho order status changes
 
 #### 2.5 Product Reviews & Ratings - CHƯA CÓ
 
@@ -505,14 +505,14 @@ React Component Update
 
 ### Tính Năng Chưa Hoàn Thiện (8 features)
 
-1. ⚠️ Categories Management (Admin UI)
-2. ⚠️ AR Snapshots Gallery
-3. ⚠️ Real-time Payment Updates
-4. ⚠️ Real-time Order Status Updates
-5. Product Reviews & Ratings
-6. Wishlist/Favorites
-7. ⚠️ Advanced Search Page
-8. Reports/Analytics Dashboard
+1.  Categories Management (Admin UI)
+2.  AR Snapshots Gallery
+3.  Real-time Payment Updates
+4.  Real-time Order Status Updates
+5.  Product Reviews & Ratings
+6.  Wishlist/Favorites
+7.  Advanced Search Page
+8.  Reports/Analytics Dashboard
 
 ### Recommendations
 

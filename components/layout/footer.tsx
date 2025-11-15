@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { Facebook, Instagram, Twitter } from "lucide-react"
 import { siteConfig } from "@/config/site"
+import type { JSX } from "react"
 
 const footerLinks = {
   shop: [
@@ -121,13 +122,13 @@ export function Footer(): JSX.Element {
               © {new Date().getFullYear()} {siteConfig.name}. Bảo lưu mọi quyền.
             </p>
             <div className="flex gap-4 text-sm text-muted-foreground">
-              <Link href="/privacy" className="hover:text-foreground">
+              <Link href="/home" className="hover:text-foreground">
                 Bảo mật
               </Link>
-              <Link href="/terms" className="hover:text-foreground">
+              <Link href="/home" className="hover:text-foreground">
                 Điều khoản
               </Link>
-              <Link href="/cookies" className="hover:text-foreground">
+              <Link href="/home" className="hover:text-foreground">
                 Cookie
               </Link>
             </div>

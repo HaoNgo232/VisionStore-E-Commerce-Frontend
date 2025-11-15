@@ -932,7 +932,7 @@ export function middleware(request: NextRequest) {
 // Never store tokens in localStorage
 
 // If using localStorage (not recommended):
-const token = localStorage.getItem("token"); // ⚠️ Vulnerable to XSS
+const token = localStorage.getItem("token"); //  Vulnerable to XSS
 ```
 
 ## Testing Strategy

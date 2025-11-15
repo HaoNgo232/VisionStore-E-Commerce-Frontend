@@ -688,8 +688,8 @@ Task 2.1 → Task 2.2 → Task 2.3 → Task 2.4 → Task 2.5 → Task 2.6 → Ta
 - MinIO S3 already setup in Docker
 - PostgreSQL database available
 - User authentication already implemented
-- ⚠️ Product entity exists? (verify schema)
-- ⚠️ Frontend has auth context + API client
+- Product entity exists? (verify schema)
+- Frontend has auth context + API client
 
 ### Team Dependencies
 
