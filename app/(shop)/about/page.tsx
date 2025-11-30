@@ -1,4 +1,6 @@
-export default function AboutPage() {
+import React from 'react';
+
+export default function AboutPage(): React.ReactElement {
     return (
         <div className="container py-12">
             <h1 className="text-4xl font-bold mb-6">Về chúng tôi</h1>

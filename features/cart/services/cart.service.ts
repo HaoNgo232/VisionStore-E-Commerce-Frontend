@@ -107,7 +107,7 @@ export class CartService implements ICartService {
   async updateItem(data: UpdateCartItemRequest): Promise<Cart> {
     const userId = useAuthStore.getState().getUserId();
     if (!userId) {
-      throw new Error("User not authenticated");
+      throw new Error("Người dùng chưa đăng nhập");
     }
     const response = await apiPatchValidated<
       CartWithProductsResponse,
@@ -129,7 +129,7 @@ export class CartService implements ICartService {
   async removeItem(productId: string): Promise<Cart> {
     const userId = useAuthStore.getState().getUserId();
     if (!userId) {
-      throw new Error("User not authenticated");
+      throw new Error("Người dùng chưa đăng nhập");
     }
     const response = await apiDeleteValidated<CartWithProductsResponse>(
       "/cart/items",

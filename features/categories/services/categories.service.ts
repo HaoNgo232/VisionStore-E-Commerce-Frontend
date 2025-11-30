@@ -22,11 +22,17 @@ import { z } from "zod";
 // CategoryTree schema - recursive
 const CategoryTreeSchema: z.ZodType<CategoryTree> = CategorySchema.extend({
   children: z.lazy(() => z.array(CategoryTreeSchema)),
-});
+}) as z.ZodType<CategoryTree>;
 
-const CategoryArraySchema: z.ZodType<Category[]> = z.array(CategorySchema);
-const CategoryTreeArraySchema: z.ZodType<CategoryTree[]> =
-  z.array(CategoryTreeSchema);
+const CategoryTreeArraySchema: z.ZodType<CategoryTree[]> = z.array(
+  CategoryTreeSchema,
+) as z.ZodType<CategoryTree[]>;
+
+// Type-annotated schemas for compatibility
+const CategorySchemaTyped: z.ZodType<Category> =
+  CategorySchema as z.ZodType<Category>;
+const PaginatedCategoriesResponseSchemaTyped: z.ZodType<PaginatedCategoriesResponse> =
+  PaginatedCategoriesResponseSchema as z.ZodType<PaginatedCategoriesResponse>;
 
 /**
  * Interface for Categories Service
@@ -77,7 +83,7 @@ export class CategoriesService implements ICategoriesService {
   async getAll(): Promise<Category[]> {
     const response = await apiGetValidated<PaginatedCategoriesResponse>(
       "/categories",
-      PaginatedCategoriesResponseSchema,
+      PaginatedCategoriesResponseSchemaTyped,
     );
     return response.categories;
   }
@@ -96,7 +102,7 @@ export class CategoriesService implements ICategoriesService {
    * Fetch single category by ID
    */
   async getById(id: string): Promise<Category> {
-    return apiGetValidated<Category>(`/categories/${id}`, CategorySchema);
+    return apiGetValidated<Category>(`/categories/${id}`, CategorySchemaTyped);
   }
 
   /**
@@ -105,7 +111,7 @@ export class CategoriesService implements ICategoriesService {
   async create(data: CreateCategoryRequest): Promise<Category> {
     return apiPostValidated<Category, CreateCategoryRequest>(
       "/categories",
-      CategorySchema,
+      CategorySchemaTyped,
       data,
     );
   }
@@ -116,7 +122,7 @@ export class CategoriesService implements ICategoriesService {
   async update(id: string, data: UpdateCategoryRequest): Promise<Category> {
     return apiPatchValidated<Category, UpdateCategoryRequest>(
       `/categories/${id}`,
-      CategorySchema,
+      CategorySchemaTyped,
       data,
     );
   }

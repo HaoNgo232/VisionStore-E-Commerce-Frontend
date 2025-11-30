@@ -37,6 +37,10 @@ export function DeleteProductDialog({
         onOpenChange(false);
     };
 
+    const handleButtonClick = (): void => {
+        void handleConfirm();
+    };
+
     return (
         <AlertDialog open={open} onOpenChange={onOpenChange}>
             <AlertDialogContent>
@@ -54,7 +58,7 @@ export function DeleteProductDialog({
                 <AlertDialogFooter>
                     <AlertDialogCancel disabled={isLoading}>Hủy</AlertDialogCancel>
                     <AlertDialogAction
-                        onClick={handleConfirm}
+                        onClick={handleButtonClick}
                         disabled={isLoading}
                         className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                     >

@@ -7,6 +7,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Edit, Trash2, Plus, Image as ImageIcon } from "lucide-react";
 import {
   Table,
@@ -144,9 +145,11 @@ export function ProductList({
               <TableRow key={product.id}>
                 <TableCell>
                   {product.imageUrls?.[0] ? (
-                    <img
+                    <Image
                       src={product.imageUrls[0]}
                       alt={product.name}
+                      width={64}
+                      height={64}
                       className="size-16 object-cover rounded-md"
                     />
                   ) : (

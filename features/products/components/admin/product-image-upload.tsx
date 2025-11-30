@@ -132,7 +132,7 @@ export function ProductImageUpload({
     };
 
     // Combine prop error and local error for display
-    const displayError = error || localError;
+    const displayError = error ?? localError;
 
     return (
         <div className="space-y-2">

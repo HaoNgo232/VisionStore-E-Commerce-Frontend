@@ -237,7 +237,7 @@ export async function apiGetValidated<T>(
 
   // Log raw response in development for debugging
   if (process.env.NODE_ENV === "development") {
-    console.log(`[API Debug] GET ${endpoint} - Raw response:`, {
+    console.warn(`[API Debug] GET ${endpoint} - Raw response:`, {
       response,
       type: typeof response,
       isArray: Array.isArray(response),

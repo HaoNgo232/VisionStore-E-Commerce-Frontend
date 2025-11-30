@@ -99,7 +99,7 @@ export function AdminProductFilters({
 
             {/* Category Filter */}
             <Select
-                value={(filters.categorySlug ?? "all") as string}
+                value={filters.categorySlug ?? "all"}
                 onValueChange={handleCategoryChange}
                 disabled={isLoading}
             >
