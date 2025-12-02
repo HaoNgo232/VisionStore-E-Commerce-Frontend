@@ -322,34 +322,38 @@ feature: glasses-try-on-simple
 
 ---
 
-## Future Tests: Admin Try-On PNG Upload
+## Admin Try-On PNG Upload - Test Status
 
-> Các test này sẽ được thực hiện khi implement tính năng admin upload ảnh try-on.
+> Các test cho tính năng admin upload ảnh try-on PNG đã được implement ở cả backend và frontend admin.
 
-### Unit Tests (Backend)
+### Unit Tests (Backend) ✅
 
-- [ ] **Test case A1.1**: `CreateProduct - upload try-on PNG`
-  - Khi gửi request với file PNG hợp lệ → upload lên MinIO thành công → `attributes.tryOnImageUrl` và `tryOnKey` được set đúng.
-- [ ] **Test case A1.2**: `UpdateProduct - replace try-on PNG`
-  - Khi gửi file PNG mới → key/url mới được cập nhật, key/url cũ không còn được dùng.
-- [ ] **Test case A1.3**: `Validation - reject non-PNG mimetype`
-  - Gửi file JPEG/WebP → backend trả lỗi validation rõ ràng.
+- [x] **Test case A1.1**: `CreateProduct - upload try-on PNG`
+  - Khi gửi DTO với `tryOnFile*` (PNG hợp lệ) → service upload lên MinIO qua `uploadTryOnImage` → `attributes.tryOnImageUrl` và `tryOnKey` được set đúng trong `Prisma.product.create`.
+- [x] **Test case A1.2**: `UpdateProduct - replace try-on PNG`
+  - Khi update với `tryOnFile*` mới và product đã có `attributes.tryOnKey` cũ → gọi `minioService.deleteImage` với key cũ → gọi `uploadTryOnImage` cho file mới → attributes merge lại với `tryOnImageUrl`/`tryOnKey` mới.
+- [x] **Test case A1.3**: `Validation - reject non-PNG mimetype`
+  - `MinioService.uploadTryOnImage` ném `RpcException` khi `mimetype !== 'image/png'`.
+- [x] **Test case A1.4**: `Validation - reject oversize PNG`
+  - `uploadTryOnImage` ném `RpcException` khi `size > 20MB`.
 
-### Unit/Integration Tests (Frontend Admin)
+### Unit/Integration Tests (Frontend Admin) ✅
 
-- [ ] **Test case A2.1**: `Admin form - accept only PNG`
-  - Input file chỉ cho phép chọn `image/png`, chọn loại khác → hiển thị lỗi.
-- [ ] **Test case A2.2**: `Admin form - preview existing try-on image`
-  - Khi product đã có `tryOnImageUrl` → hiển thị preview trong form edit.
-- [ ] **Test case A2.3**: `Admin form - submit with PNG`
-  - Gửi form với file PNG → đúng payload (multipart) được gửi tới endpoint.
+- [x] **Test case A2.1**: `Admin form schema - accept only PNG`
+  - Zod schema `tryOnImageFileSchema` chỉ chấp nhận `File` với `type === 'image/png'` và size ≤ 20MB; test verify PNG hợp lệ pass, JPEG/WebP hoặc PNG > 20MB fail với `ZodError`.
+- [x] **Test case A2.2**: `Admin form - preview existing try-on image`
+  - `ProductForm` trong chế độ edit hiển thị preview khi `product.attributes.tryOnImageUrl` tồn tại và field `tryOnImage` chưa chọn file mới; test verify preview render.
+- [x] **Test case A2.3**: `Admin form - submit with PNG`
+  - Khi chọn file PNG ở field `tryOnImage` và submit, `onSubmit` nhận được `data.tryOnImage` đúng là `File` đã chọn (test trong `product-form.spec.tsx`).
+- [x] **Test case A2.4**: `Service FormData builders - append tryOnImage`
+  - `AdminProductsService.buildCreateFormData` / `buildUpdateFormData` append field `tryOnImage` khi request có file, không append khi `undefined/null` (test trong `admin-products.service.spec.ts`).
+- [x] **Test case A2.5**: `Admin pages new/edit - map tryOnImage into request`
+  - Trang `/admin/products/new` và `/admin/products/[id]/edit` gọi `mutateAsync` với payload chứa `tryOnImage` khi form có chọn file; test verify đúng shape payload (new/edit page specs).
 
-### E2E Scenario: Try-On với sản phẩm mới được upload PNG
+### E2E Scenario (Manual/High-Level) ✅
 
-- [ ] **Test case A3.1**: `New product with try-on PNG appears in AR selector`
-  - Tạo sản phẩm trong admin với ảnh try-on PNG.
-  - Mở trang sản phẩm đó → nút "Thử kính trực tuyến" xuất hiện.
-  - Mở Try-On Modal → sản phẩm xuất hiện trong `ProductSelector` và overlay hoạt động bình thường.
+- [x] **Test case A3.1**: `New/updated product with try-on PNG appears in AR selector`
+  - Đã kiểm tra thủ công: tạo/cập nhật sản phẩm trong admin với ảnh PNG try-on → mở trang sản phẩm → nút "Thử kính trực tuyến" hiển thị khi `tryOnImageUrl` có giá trị → Try-On Modal hiển thị sản phẩm trong `ProductSelector` và overlay kính PNG hoạt động bình thường.
   - Steps:
     1. Open on mobile device (iOS Safari, Chrome Mobile)
     2. Complete try-on flow

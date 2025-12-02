@@ -101,6 +101,14 @@ export function PaymentWaitingDialog({
                     <DialogDescription>
                         Vui lòng hoàn tất thanh toán trong thời gian quy định
                     </DialogDescription>
+                    {!isPolling && error && (
+                        <p
+                            className="mt-1 text-sm text-red-600"
+                            data-testid="payment-error-message"
+                        >
+                            {error}
+                        </p>
+                    )}
                 </DialogHeader>
 
                 <div className="space-y-4">

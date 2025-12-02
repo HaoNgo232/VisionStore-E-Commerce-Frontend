@@ -4,17 +4,17 @@ title: Project Planning & Task Breakdown
 description: Break down work into actionable tasks and estimate timeline
 feature: glasses-try-on-simple
 last-updated: 2024-12-02
-status: Phase 1–3 Complete
+status: All Phases Complete (Try-On + Admin PNG Upload)
 ---
 
 # Project Planning & Task Breakdown - Glasses Try-On Simple
 
 ## Progress Summary
 
-**Last Updated**: 2024-12-02  
-**Status**: Phase 1–3 Complete ✅ (Foundation + Core Engine + Integration & Polish)
+**Last Updated**: 2025-12-02  
+**Status**: All Phases Complete ✅ (Foundation + Core Engine + Integration & Polish + Admin PNG Upload)
 
-### Completed Tasks (13/13)
+### Completed Tasks (18/18)
 
 - ✅ Task 1.1: Install Dependencies
 - ✅ Task 1.2: Type Definitions & Zod Schemas
@@ -29,6 +29,9 @@ status: Phase 1–3 Complete
 - ✅ Task 3.3: Integration với Product Detail Page
 - ✅ Task 3.4: UI/UX Polish
 - ✅ Task 3.5: Error Handling & Edge Cases
+- ✅ Task A1: Backend Admin Try-On PNG Upload
+- ✅ Task A2: Frontend Admin Form & Service for Try-On PNG
+- ✅ Task A3: Backend & Frontend Tests for Admin Try-On PNG
 
 ### Key Deliverables Completed
 
@@ -537,24 +540,25 @@ Task 3.4 (Polish) ← Task 3.5 (Error Handling)
 
 **Reason**: Hiện tại ảnh try-on PNG được seed từ script. Cần cho phép admin upload trực tiếp ảnh PNG (nền trong suốt) khi tạo/cập nhật sản phẩm, để không phụ thuộc seed script.
 
-**Priority**: MEDIUM | **Owner**: Backend + Frontend (Admin)
+**Priority**: MEDIUM | **Owner**: Backend + Frontend (Admin)  
+**Status**: ✅ Completed (2025-12-02)
 
-### Planned Tasks
+### Completed Tasks
 
-- [ ] Backend: Hỗ trợ upload PNG try-on cho sản phẩm
+- ✅ Backend: Hỗ trợ upload PNG try-on cho sản phẩm
 
-  - [ ] Mở rộng DTO `AdminCreateProductRequest` / `AdminUpdateProductRequest` để nhận file PNG try-on (optional)
-  - [ ] Endpoint admin (create/update product) nhận thêm field `tryOnImageFile` (PNG only, validate mime type)
-  - [ ] Lưu file PNG vào MinIO (folder `try-on/`) với content-type `image/png`
-  - [ ] Cập nhật `attributes.tryOnImageUrl` và `tryOnKey` cho sản phẩm tương ứng
+  - ✅ Mở rộng DTO `AdminCreateProductDto` / `AdminUpdateProductDto` để nhận metadata file PNG try-on (base64 buffer, originalname, mimetype, size)
+  - ✅ Gateway admin endpoints (create/update product) nhận thêm field file `tryOnImage` (PNG only) qua `FileFieldsInterceptor` và serialize sang DTO
+  - ✅ MinIO service thêm method `uploadTryOnImage` (chỉ `image/png`, giới hạn size 20MB, lưu dưới folder `try-on/`)
+  - ✅ Products service upload PNG lên MinIO và cập nhật `attributes.tryOnImageUrl` và `tryOnKey` cho sản phẩm tương ứng; khi update thì xóa ảnh cũ nếu có
 
-- [ ] Frontend Admin: Form tạo/cập nhật sản phẩm
+- ✅ Frontend Admin: Form tạo/cập nhật sản phẩm
 
-  - [ ] Thêm input upload “Ảnh thử kính (PNG, nền trong suốt)” trong admin product form
-  - [ ] Validate chỉ cho phép `image/png` và kích thước hợp lý
-  - [ ] Gửi file này lên backend theo đúng DTO mới
-  - [ ] Hiển thị preview ảnh try-on (nếu đã có) trong form edit
+  - ✅ Thêm input upload “Ảnh thử kính (PNG, nền trong suốt)” trong admin product form
+  - ✅ Validate chỉ cho phép `image/png` và kích thước ≤ 20MB bằng Zod schema
+  - ✅ Gửi file này lên backend qua multipart/form-data trong `AdminProductsService` (`tryOnImage` field)
+  - ✅ Hiển thị preview ảnh try-on hiện tại (dựa trên `attributes.tryOnImageUrl`) trong form edit
 
-- [ ] Integration với AR Try-On
-  - [ ] Đảm bảo sản phẩm mới cập nhật `tryOnImageUrl` được hook `useProductsWithTryOn` pick up bình thường
-  - [ ] Test: tạo sản phẩm mới với ảnh PNG try-on và verify xuất hiện trong ProductSelector + TryOnModal
+- ✅ Integration với AR Try-On
+  - ✅ `tryOnImageUrl` được flatten từ `attributes` vào top-level product response; hook `useProductsWithTryOn` và `ProductSelector` chỉ cần đọc URL
+  - ✅ Đã test: tạo/cập nhật sản phẩm với PNG try-on mới và verify xuất hiện trong `ProductSelector` + TryOnModal, overlay hoạt động bình thường

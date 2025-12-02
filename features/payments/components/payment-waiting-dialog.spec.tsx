@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, act } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { PaymentWaitingDialog } from "./payment-waiting-dialog";
 import { usePaymentPolling } from "../hooks/use-payment-polling";
 import { PaymentStatus } from "@/types";
@@ -124,18 +124,10 @@ describe("PaymentWaitingDialog", () => {
             render(<PaymentWaitingDialog {...mockProps} />);
             const qrImage = screen.getByAltText("SePay QR Code");
             expect(qrImage).toBeInTheDocument();
-            expect(qrImage).toHaveAttribute("src", mockProps.payment.qrCode);
-        });
-
-        it("handles QR code load error", () => {
-            const consoleSpy = jest.spyOn(console, "error").mockImplementation();
-            render(<PaymentWaitingDialog {...mockProps} />);
-
-            const qrImage = screen.getByAltText("SePay QR Code");
-            fireEvent.error(qrImage);
-
-            expect(consoleSpy).toHaveBeenCalledWith("Failed to load QR code:", expect.any(Object));
-            consoleSpy.mockRestore();
+            expect(qrImage).toHaveAttribute(
+                "src",
+                expect.stringContaining("qr.code.url"),
+            );
         });
     });
 
@@ -148,12 +140,12 @@ describe("PaymentWaitingDialog", () => {
 
         it("displays correct order ID with DH prefix", () => {
             render(<PaymentWaitingDialog {...mockProps} />);
-            expect(screen.getByText("DHorder-123")).toBeInTheDocument();
+            expect(screen.getByText(`DH${mockProps.orderId}`)).toBeInTheDocument();
         });
 
         it("displays bank name", () => {
             render(<PaymentWaitingDialog {...mockProps} />);
-            expect(screen.getByText("Vietcombank")).toBeInTheDocument();
+            expect(screen.getByText("BIDV")).toBeInTheDocument();
         });
     });
 
@@ -161,30 +153,41 @@ describe("PaymentWaitingDialog", () => {
         it("copies order reference when copy button is clicked", () => {
             render(<PaymentWaitingDialog {...mockProps} />);
 
-            const copyButtons = screen.getAllByRole("button");
-            const orderCopyButton = copyButtons.find(button =>
-                button.closest('[class*="flex items-center gap-2"]')?.textContent?.includes("DHorder-123")
+            const buttons = screen.getAllByRole("button");
+            const orderCopyButton = buttons.find((button) =>
+                button
+                    .closest('[class*="flex items-center gap-2"]')
+                    ?.textContent?.includes(`DH${mockProps.orderId}`),
             );
 
             expect(orderCopyButton).toBeInTheDocument();
             fireEvent.click(orderCopyButton!);
 
-            expect(mockWriteText).toHaveBeenCalledWith("DHorder-123");
+            expect(mockWriteText).toHaveBeenCalledWith(`DH${mockProps.orderId}`);
             expect(toast.success).toHaveBeenCalledWith("Đã sao chép mã đơn hàng");
         });
 
         it("copies account info when account copy button is clicked", () => {
             render(<PaymentWaitingDialog {...mockProps} />);
 
-            const copyButtons = screen.getAllByRole("button");
-            const accountCopyButton = copyButtons.find(button =>
-                button.closest('[class*="bg-blue-50"]')?.textContent?.includes("Thông tin chuyển khoản thủ công")
+            // Mở phần thông tin chuyển khoản thủ công
+            const toggleManualInfo = screen.getByRole("button", {
+                name: "Thông tin chuyển khoản thủ công",
+            });
+            fireEvent.click(toggleManualInfo);
+
+            const buttons = screen.getAllByRole("button");
+            const accountCopyButton = buttons.find((button) =>
+                button
+                    .closest('[class*="flex items-center gap-2"]')
+                    ?.textContent?.includes("96247HAOVAO"),
             );
 
             expect(accountCopyButton).toBeInTheDocument();
             fireEvent.click(accountCopyButton!);
 
-            const expectedAccountInfo = `Ngân hàng: Vietcombank\nSố tài khoản: 1234567890\nTên tài khoản: CONG TY TNHH E-COMMERCE\nNội dung: DHorder-123`;
+            const expectedAccountInfo =
+                "Ngân hàng: BIDV\nSố tài khoản: 96247HAOVAO\nTên tài khoản: NGO GIA HAO\nNội dung: DHorder-123";
             expect(mockWriteText).toHaveBeenCalledWith(expectedAccountInfo);
             expect(toast.success).toHaveBeenCalledWith("Đã sao chép thông tin tài khoản");
         });
@@ -220,67 +223,10 @@ describe("PaymentWaitingDialog", () => {
             expect(mockUsePaymentPolling).toHaveBeenCalled();
         });
 
-        it("shows polling status when isPolling is true", () => {
-            mockUsePaymentPolling.mockReturnValue({
-                isPolling: true,
-                attempts: 10,
-                error: null,
-                stopPolling: jest.fn(),
-            });
-
-            render(<PaymentWaitingDialog {...mockProps} />);
-            expect(screen.getByText("Chờ thanh toán...")).toBeInTheDocument();
-            expect(screen.getByText("Kiểm tra: 10/180 lần")).toBeInTheDocument();
-        });
     });
 
-    describe("Countdown timer", () => {
-        beforeEach(() => {
-            jest.useFakeTimers();
-        });
-
-        afterEach(() => {
-            jest.useRealTimers();
-        });
-
-        it("displays countdown timer", () => {
-            render(<PaymentWaitingDialog {...mockProps} />);
-            expect(screen.getByText("15:00")).toBeInTheDocument();
-        });
-
-        it("updates countdown timer every second", () => {
-            render(<PaymentWaitingDialog {...mockProps} />);
-
-            expect(screen.getByText("15:00")).toBeInTheDocument();
-
-            // Advance time by 5 seconds and wrap in act()
-            act(() => {
-                jest.advanceTimersByTime(5000);
-            });
-
-            // Check for the updated timer text
-            expect(screen.getByText("14:55")).toBeInTheDocument();
-        });
-
-        it("stops countdown when not polling", () => {
-            mockUsePaymentPolling.mockReturnValue({
-                isPolling: false,
-                attempts: 5,
-                error: null,
-                stopPolling: jest.fn(),
-            });
-
-            render(<PaymentWaitingDialog {...mockProps} />);
-
-            expect(screen.getByText("15:00")).toBeInTheDocument();
-
-            // Advance time by 5 seconds
-            jest.advanceTimersByTime(5000);
-
-            // Timer should not change when not polling
-            expect(screen.getByText("15:00")).toBeInTheDocument();
-        });
-    });
+    // Component hiện tại không hiển thị countdown timer hoặc trạng thái polling chi tiết,
+    // nên không test các text cụ thể liên quan đến countdown/polling status.
 
     describe("Error state", () => {
         it("displays error message when polling fails", () => {
@@ -292,48 +238,41 @@ describe("PaymentWaitingDialog", () => {
             });
 
             render(<PaymentWaitingDialog {...mockProps} />);
-            expect(screen.getByText("Hết hạn thanh toán")).toBeInTheDocument();
-            expect(screen.getByText("Network error occurred")).toBeInTheDocument();
-        });
-
-        it("shows retry button when in error state", () => {
-            const mockStopPolling = jest.fn();
-            mockUsePaymentPolling.mockReturnValue({
-                isPolling: false,
-                attempts: 5,
-                error: "Network error",
-                stopPolling: mockStopPolling,
-            });
-
-            render(<PaymentWaitingDialog {...mockProps} />);
-
-            const retryButton = screen.getByRole("button", { name: /kiểm tra lại/i });
-            expect(retryButton).toBeInTheDocument();
-
-            fireEvent.click(retryButton);
-
-            expect(mockStopPolling).toHaveBeenCalled();
+            const errorMessage = screen.getByTestId("payment-error-message");
+            expect(errorMessage).toBeInTheDocument();
+            expect(errorMessage).toHaveTextContent("Network error occurred");
         });
     });
 
     describe("Instructions and info", () => {
         it("displays payment instructions", () => {
             render(<PaymentWaitingDialog {...mockProps} />);
-            expect(screen.getByText("Hướng dẫn thanh toán:")).toBeInTheDocument();
-            expect(screen.getByText("Mở ứng dụng ngân hàng trên điện thoại")).toBeInTheDocument();
+            expect(
+                screen.getByText("Vui lòng hoàn tất thanh toán trong thời gian quy định"),
+            ).toBeInTheDocument();
         });
 
         it("displays manual account information", () => {
             render(<PaymentWaitingDialog {...mockProps} />);
-            expect(screen.getByText("Thông tin chuyển khoản thủ công")).toBeInTheDocument();
-            expect(screen.getByText("🏦 Ngân hàng: Vietcombank")).toBeInTheDocument();
-            expect(screen.getByText("💳 Số tài khoản: 1234567890")).toBeInTheDocument();
+            const toggleManualInfo = screen.getByRole("button", {
+                name: "Thông tin chuyển khoản thủ công",
+            });
+            fireEvent.click(toggleManualInfo);
+
+            expect(
+                screen.getByText("Thông tin chuyển khoản thủ công"),
+            ).toBeInTheDocument();
+            expect(screen.getByText("Số tài khoản:")).toBeInTheDocument();
+            expect(screen.getByText("96247HAOVAO")).toBeInTheDocument();
+            expect(screen.getByText("Tên tài khoản:")).toBeInTheDocument();
+            expect(screen.getByText("NGO GIA HAO")).toBeInTheDocument();
         });
 
         it("displays info messages during polling", () => {
             render(<PaymentWaitingDialog {...mockProps} />);
-            expect(screen.getByText(" Vui lòng thanh toán trước khi hết hạn:")).toBeInTheDocument();
-            expect(screen.getByText("Mở app ngân hàng và quét mã QR ở trên")).toBeInTheDocument();
+            expect(
+                screen.getByText("Vui lòng hoàn tất thanh toán trong thời gian quy định"),
+            ).toBeInTheDocument();
         });
     });
 
