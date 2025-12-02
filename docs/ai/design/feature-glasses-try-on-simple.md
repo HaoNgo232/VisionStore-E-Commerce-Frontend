@@ -51,18 +51,21 @@ graph TD
 ### Key Components Responsibilities
 
 1. **Frontend - Try-On Modal Component**
+
    - Quản lý webcam lifecycle (start/stop/permissions)
    - Capture ảnh từ webcam hoặc upload từ máy
    - Hiển thị UI cho việc chọn kính và xem kết quả
    - Xử lý download ảnh kết quả
 
 2. **Frontend - Face Detection Engine**
+
    - Load face-api.js model (SSD MobileNet hoặc Tiny Face Detector)
    - Detect face landmarks từ ảnh đã chụp
    - Extract tọa độ mắt trái/phải
    - Xử lý trường hợp không detect được face
 
 3. **Frontend - Glasses Overlay Engine**
+
    - Load ảnh kính (PNG) từ backend
    - Tính toán vị trí, scale, rotation dựa trên face landmarks
    - Render overlay lên canvas
@@ -71,17 +74,18 @@ graph TD
 4. **Backend - Products API**
    - Serve danh sách sản phẩm có try-on assets
    - Cung cấp URL ảnh kính (PNG) từ MinIO
+   - Hỗ trợ admin upload ảnh try-on PNG khi tạo/cập nhật sản phẩm (lưu lên MinIO + cập nhật `tryOnImageUrl`)
    - Không xử lý face detection (chỉ serve assets)
 
 ### Technology Stack Choices
 
-| Component | Technology | Rationale |
-|-----------|-----------|-----------|
-| Face Detection | face-api.js | Nhẹ (~2MB), dễ tích hợp, đủ chính xác cho demo |
-| Image Processing | Canvas API | Native browser API, không cần thư viện thêm |
-| Image Loading | Next.js Image | Optimized image loading với caching |
-| State Management | React Hooks | Đơn giản, không cần Redux cho feature này |
-| API Client | React Query | Caching và error handling tốt |
+| Component        | Technology    | Rationale                                      |
+| ---------------- | ------------- | ---------------------------------------------- |
+| Face Detection   | face-api.js   | Nhẹ (~2MB), dễ tích hợp, đủ chính xác cho demo |
+| Image Processing | Canvas API    | Native browser API, không cần thư viện thêm    |
+| Image Loading    | Next.js Image | Optimized image loading với caching            |
+| State Management | React Hooks   | Đơn giản, không cần Redux cho feature này      |
+| API Client       | React Query   | Caching và error handling tốt                  |
 
 ## Data Models
 
@@ -148,27 +152,32 @@ interface Product {
 
 ## API Design
 
-### Backend Endpoints
+### Backend Endpoints (liên quan try-on)
 
-#### GET /api/products?hasTryOn=true
+#### GET /api/products (filtered by try-on trên frontend)
 
-**Description**: Lấy danh sách sản phẩm có try-on assets
+**Description**: Lấy danh sách sản phẩm, trong đó mỗi product có thể có `tryOnImageUrl`. Frontend tự filter các sản phẩm có hỗ trợ try-on.
 
-**Query Parameters:**
-- `hasTryOn` (boolean, required): Filter products có try-on
+**Query Parameters (ví dụ):**
+
 - `page` (number, optional): Pagination
 - `pageSize` (number, optional): Items per page
 
-**Response:**
+**Response (simplified):**
+
 ```json
 {
-  "data": [
+  "products": [
     {
       "id": "clxxx",
       "name": "Kính Mát Ray-Ban",
       "priceInt": 1500000,
-      "tryOnImageUrl": "https://minio.example.com/glasses/rayban.png",
-      "imageUrls": ["https://..."]
+      "tryOnImageUrl": "https://minio.example.com/web-ban-kinh/try-on/glasses_01.png",
+      "imageUrls": ["https://..."],
+      "attributes": {
+        "tryOnImageUrl": "https://minio.example.com/web-ban-kinh/try-on/glasses_01.png",
+        "tryOnKey": "try-on/glasses_01.png"
+      }
     }
   ],
   "total": 10,
@@ -179,7 +188,15 @@ interface Product {
 
 **Authentication**: Không cần (public endpoint)
 
-**CORS**: Cần cấu hình để frontend có thể fetch
+**CORS**: Cần cấu hình để frontend có thể fetch ảnh PNG trực tiếp từ MinIO/CDN
+
+#### (Tương lai) Admin endpoints: Upload ảnh try-on PNG
+
+**Note**: Sẽ được implement trong phạm vi "Admin Try-On Image Upload":
+
+- Admin create/update product gửi kèm file PNG (chỉ `image/png`)
+- Backend upload file lên MinIO (folder `try-on/`)
+- Backend cập nhật `attributes.tryOnImageUrl` + `tryOnKey` cho product
 
 ### Frontend API Service
 
@@ -192,12 +209,13 @@ class GlassesTryOnService extends BaseApiService {
     pageSize?: number;
   }): Promise<ProductsWithTryOnResponse> {
     const searchParams = new URLSearchParams();
-    searchParams.set('hasTryOn', 'true');
-    if (query?.page) searchParams.set('page', query.page.toString());
-    if (query?.pageSize) searchParams.set('pageSize', query.pageSize.toString());
-    
+    searchParams.set("hasTryOn", "true");
+    if (query?.page) searchParams.set("page", query.page.toString());
+    if (query?.pageSize)
+      searchParams.set("pageSize", query.pageSize.toString());
+
     return this.get<ProductsWithTryOnResponse>(
-      `/products?${searchParams.toString()}`
+      `/products?${searchParams.toString()}`,
     );
   }
 }
@@ -212,6 +230,7 @@ class GlassesTryOnService extends BaseApiService {
 **Location**: `features/ar/components/try-on-modal.tsx`
 
 **Props:**
+
 ```typescript
 interface TryOnModalProps {
   open: boolean;
@@ -221,6 +240,7 @@ interface TryOnModalProps {
 ```
 
 **Responsibilities:**
+
 - Quản lý state: webcam, captured image, selected product, result
 - Orchestrate flow: capture → detect → overlay → result
 - Render UI: webcam preview, product selector, result preview
@@ -230,6 +250,7 @@ interface TryOnModalProps {
 **Location**: `features/ar/components/webcam-capture.tsx`
 
 **Props:**
+
 ```typescript
 interface WebcamCaptureProps {
   onCapture: (imageData: string) => void; // base64 hoặc blob URL
@@ -238,6 +259,7 @@ interface WebcamCaptureProps {
 ```
 
 **Responsibilities:**
+
 - Request webcam permission
 - Display video preview
 - Capture frame to image
@@ -248,6 +270,7 @@ interface WebcamCaptureProps {
 **Location**: `features/ar/hooks/use-face-detector.ts`
 
 **API:**
+
 ```typescript
 function useFaceDetector() {
   return {
@@ -260,6 +283,7 @@ function useFaceDetector() {
 ```
 
 **Responsibilities:**
+
 - Load face-api.js model (lazy load, cache)
 - Detect face landmarks từ ảnh
 - Return tọa độ mắt trái/phải
@@ -269,6 +293,7 @@ function useFaceDetector() {
 **Location**: `features/ar/hooks/use-glasses-overlay.ts`
 
 **API:**
+
 ```typescript
 function useGlassesOverlay() {
   return {
@@ -282,6 +307,7 @@ function useGlassesOverlay() {
 ```
 
 **Responsibilities:**
+
 - Load ảnh kính từ URL
 - Tính toán overlay config (position, scale, rotation)
 - Render overlay lên canvas
@@ -292,6 +318,7 @@ function useGlassesOverlay() {
 **Location**: `features/ar/components/product-selector.tsx`
 
 **Props:**
+
 ```typescript
 interface ProductSelectorProps {
   products: ProductWithTryOn[];
@@ -301,6 +328,7 @@ interface ProductSelectorProps {
 ```
 
 **Responsibilities:**
+
 - Hiển thị danh sách kính có thể thử
 - Highlight selected product
 - Scrollable carousel (mobile-friendly)
@@ -312,12 +340,14 @@ interface ProductSelectorProps {
 **Chosen**: face-api.js
 
 **Rationale:**
+
 - Nhẹ hơn MediaPipe (~2MB vs ~10MB)
 - Dễ tích hợp, không cần WebAssembly setup
 - Đủ chính xác cho use case overlay kính
 - Có sẵn model files, không cần tự train
 
 **Alternatives Considered:**
+
 - MediaPipe: Chính xác hơn nhưng nặng hơn, phức tạp hơn
 - TensorFlow.js Face Detection: Tương tự face-api.js nhưng ít documentation
 
@@ -326,12 +356,14 @@ interface ProductSelectorProps {
 **Chosen**: Canvas 2D API
 
 **Rationale:**
+
 - Native browser API, không cần thư viện thêm
 - Đủ cho overlay ảnh 2D lên ảnh
 - Performance tốt, dễ debug
 - Có thể export ảnh kết quả dễ dàng
 
 **Alternatives Considered:**
+
 - WebGL: Overkill cho 2D overlay, phức tạp hơn
 - SVG: Khó xử lý ảnh bitmap, performance kém hơn
 
@@ -340,12 +372,14 @@ interface ProductSelectorProps {
 **Chosen**: PNG với nền trong suốt
 
 **Rationale:**
+
 - Hỗ trợ alpha channel (transparency)
 - Dễ tạo và chỉnh sửa
 - Browser support tốt
 - File size hợp lý
 
 **Alternatives Considered:**
+
 - SVG: Có thể scale tốt nhưng phức tạp hơn, khó tạo từ ảnh thật
 - WebP: Hỗ trợ transparency nhưng browser support kém hơn PNG
 
@@ -354,11 +388,13 @@ interface ProductSelectorProps {
 **Chosen**: React Hooks + Local State
 
 **Rationale:**
+
 - Feature đơn giản, không cần global state
 - State chỉ cần trong modal component
 - Dễ maintain và test
 
 **Alternatives Considered:**
+
 - Zustand/Redux: Overkill cho feature này
 - Context API: Không cần share state giữa components
 
@@ -394,13 +430,14 @@ interface ProductSelectorProps {
 ### Browser Compatibility
 
 **Required:**
+
 - Chrome 90+ (desktop + mobile)
 - Firefox 88+ (desktop + mobile)
 - Safari 14+ (desktop + iOS)
 
 **Features Used:**
+
 - `getUserMedia` API (webcam)
 - Canvas API (overlay)
 - IndexedDB (model caching)
 - Fetch API (load images)
-

@@ -22,6 +22,21 @@ const imageFileSchema = z
   );
 
 /**
+ * File validation helper for try-on PNG images
+ * Validates PNG type and size (up to 20MB to match backend limit)
+ */
+const tryOnImageFileSchema = z
+  .instanceof(File, { message: "Vui lòng chọn một file PNG" })
+  .refine(
+    (file) => file.size <= 20 * 1024 * 1024, // 20MB
+    "Kích thước file thử kính không được vượt quá 20MB",
+  )
+  .refine(
+    (file) => file.type === "image/png",
+    "Chỉ chấp nhận file PNG với nền trong suốt cho ảnh thử kính",
+  );
+
+/**
  * Product form schema for create/edit
  * Supports optional image upload
  */
@@ -50,6 +65,9 @@ export const productFormSchema = z.object({
   categoryId: cuidSchema().optional().nullable(),
 
   image: imageFileSchema.optional().nullable(),
+
+  // Optional try-on PNG image for AR feature
+  tryOnImage: tryOnImageFileSchema.optional().nullable(),
 
   // Optional fields for future expansion
   sku: z

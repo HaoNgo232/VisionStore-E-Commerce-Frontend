@@ -60,6 +60,7 @@ export function ProductForm({
             description: "",
             categoryId: null,
             image: null,
+            tryOnImage: null,
             sku: null,
             slug: null,
             stock: null,
@@ -77,6 +78,7 @@ export function ProductForm({
                 description: product.description ?? "",
                 categoryId: product.categoryId ?? null,
                 image: null, // Don't pre-populate file input
+                tryOnImage: null,
                 sku: product.sku ?? null,
                 slug: product.slug ?? null,
                 stock: product.stock ?? null,
@@ -229,6 +231,52 @@ export function ProductForm({
                                 {mode === "create"
                                     ? "Chọn ảnh sản phẩm (bắt buộc)"
                                     : "Chọn ảnh mới để thay thế ảnh hiện tại (tùy chọn)"}
+                            </FormDescription>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                {/* Try-On PNG Upload (optional) */}
+                <FormField
+                    control={form.control}
+                    name="tryOnImage"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Ảnh thử kính (PNG, nền trong suốt)</FormLabel>
+                            <FormControl>
+                                <div className="space-y-2">
+                                    <Input
+                                        type="file"
+                                        accept="image/png"
+                                        disabled={isLoading}
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0] ?? null;
+                                            field.onChange(file);
+                                        }}
+                                    />
+                                    {/* Preview hiện tại nếu đang edit và sản phẩm đã có tryOnImageUrl */}
+                                    {mode === "edit" &&
+                                        product?.attributes &&
+                                        typeof product.attributes === "object" &&
+                                        "tryOnImageUrl" in product.attributes &&
+                                        product.attributes.tryOnImageUrl && (
+                                            <div className="mt-2">
+                                                <p className="text-xs text-muted-foreground mb-1">
+                                                    Ảnh thử kính hiện tại:
+                                                </p>
+                                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                <img
+                                                    src={product.attributes.tryOnImageUrl}
+                                                    alt="Ảnh thử kính hiện tại"
+                                                    className="h-24 rounded border bg-muted object-contain"
+                                                />
+                                            </div>
+                                        )}
+                                </div>
+                            </FormControl>
+                            <FormDescription>
+                                Tùy chọn. Ảnh PNG nền trong suốt dùng cho tính năng thử kính trực tuyến (AR).
                             </FormDescription>
                             <FormMessage />
                         </FormItem>

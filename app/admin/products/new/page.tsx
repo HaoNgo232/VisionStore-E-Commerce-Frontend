@@ -11,9 +11,7 @@ import { ProductForm } from "@/features/products/components/admin/product-form";
 import { useCreateProduct } from "@/features/products/hooks/use-admin-products";
 import { useCategories } from "@/features/categories/hooks/use-categories";
 import type { ProductFormValues } from "@/features/products/schemas/product-form.schema";
-import type {
-  AdminCreateProductRequest,
-} from "@/types/product.types";
+import type { AdminCreateProductRequest } from "@/types/product.types";
 
 export default function NewProductPage(): React.ReactElement {
   const router = useRouter();
@@ -39,6 +37,9 @@ export default function NewProductPage(): React.ReactElement {
     }
     if (data.image !== null && data.image !== undefined) {
       request.image = data.image;
+    }
+    if (data.tryOnImage !== null && data.tryOnImage !== undefined) {
+      request.tryOnImage = data.tryOnImage;
     }
     if (data.sku !== null && data.sku !== undefined && data.sku !== "") {
       request.sku = data.sku;

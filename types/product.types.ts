@@ -192,6 +192,8 @@ export interface AdminCreateProductRequest {
   description?: string;
   categoryId?: string;
   image?: File; // File for multipart upload
+  // Optional try-on PNG image for AR feature
+  tryOnImage?: File;
   // Optional fields for future expansion
   sku?: string;
   slug?: string;

@@ -218,5 +218,10 @@ feature: glasses-try-on-simple
 ### Backend Questions
 
 - [ ] **Q6**: Backend API structure cho try-on assets?
+
   - **Answer**: Cần thêm field `tryOnImageUrl` vào Product model
-  - **Answer**: Cần endpoint `GET /api/products?hasTryOn=true`
+  - **Answer**: Cần endpoint backend trả về danh sách sản phẩm có `tryOnImageUrl` (đã hiện thực qua service hiện tại)
+
+- [ ] **Q7**: Quản lý ảnh try-on (PNG) cho admin như thế nào?
+  - **Current**: Ảnh PNG được seed qua script, không có UI admin để upload
+  - **New Requirement**: Cho phép admin upload ảnh PNG (nền trong suốt) khi tạo/cập nhật sản phẩm, backend lưu lên MinIO và cập nhật `tryOnImageUrl`

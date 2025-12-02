@@ -319,6 +319,37 @@ feature: glasses-try-on-simple
 **File**: `e2e/glasses-try-on-mobile.spec.ts`
 
 - [ ] **Test case E2E-3.1**: `Try-on works on mobile browser`
+
+---
+
+## Future Tests: Admin Try-On PNG Upload
+
+> Các test này sẽ được thực hiện khi implement tính năng admin upload ảnh try-on.
+
+### Unit Tests (Backend)
+
+- [ ] **Test case A1.1**: `CreateProduct - upload try-on PNG`
+  - Khi gửi request với file PNG hợp lệ → upload lên MinIO thành công → `attributes.tryOnImageUrl` và `tryOnKey` được set đúng.
+- [ ] **Test case A1.2**: `UpdateProduct - replace try-on PNG`
+  - Khi gửi file PNG mới → key/url mới được cập nhật, key/url cũ không còn được dùng.
+- [ ] **Test case A1.3**: `Validation - reject non-PNG mimetype`
+  - Gửi file JPEG/WebP → backend trả lỗi validation rõ ràng.
+
+### Unit/Integration Tests (Frontend Admin)
+
+- [ ] **Test case A2.1**: `Admin form - accept only PNG`
+  - Input file chỉ cho phép chọn `image/png`, chọn loại khác → hiển thị lỗi.
+- [ ] **Test case A2.2**: `Admin form - preview existing try-on image`
+  - Khi product đã có `tryOnImageUrl` → hiển thị preview trong form edit.
+- [ ] **Test case A2.3**: `Admin form - submit with PNG`
+  - Gửi form với file PNG → đúng payload (multipart) được gửi tới endpoint.
+
+### E2E Scenario: Try-On với sản phẩm mới được upload PNG
+
+- [ ] **Test case A3.1**: `New product with try-on PNG appears in AR selector`
+  - Tạo sản phẩm trong admin với ảnh try-on PNG.
+  - Mở trang sản phẩm đó → nút "Thử kính trực tuyến" xuất hiện.
+  - Mở Try-On Modal → sản phẩm xuất hiện trong `ProductSelector` và overlay hoạt động bình thường.
   - Steps:
     1. Open on mobile device (iOS Safari, Chrome Mobile)
     2. Complete try-on flow

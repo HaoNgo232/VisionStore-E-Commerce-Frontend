@@ -50,6 +50,9 @@ export default function EditProductPage(): React.ReactElement {
     if (data.image !== null && data.image !== undefined) {
       request.image = data.image;
     }
+    if (data.tryOnImage !== null && data.tryOnImage !== undefined) {
+      request.tryOnImage = data.tryOnImage;
+    }
     if (data.sku !== null && data.sku !== undefined && data.sku !== "") {
       request.sku = data.sku;
     }

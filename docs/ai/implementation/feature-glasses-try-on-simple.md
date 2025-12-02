@@ -553,3 +553,36 @@ async function loadModelsWithCache() {
 ### Secrets Management
 
 - **No Secrets**: No API keys or secrets needed for this feature
+
+---
+
+## Future Implementation: Admin Try-On PNG Upload
+
+> Ghi chú: Phần này mô tả hướng implement cho tính năng mới: admin có thể upload ảnh try-on PNG khi tạo/cập nhật sản phẩm. Chưa ảnh hưởng đến flow try-on client-side hiện tại.
+
+### Backend Changes (Product App + MinIO)
+
+- Mở rộng DTO admin:
+  - `AdminCreateProductRequest` / `AdminUpdateProductRequest` nhận thêm field optional (ví dụ) `tryOnImage?: File` (mimetype `image/png`).
+- Trong service tạo/cập nhật sản phẩm:
+  - Nếu có `tryOnImage`:
+    - Upload file này lên MinIO bằng helper hiện có (`uploadImageToMinIO` với `contentType = 'image/png'`), path gợi ý: `try-on/glasses_{slug or id}.png`.
+    - Lưu URL này vào `attributes.tryOnImageUrl` + lưu key vào `attributes.tryOnKey`.
+
+### Frontend Admin (Form Tạo/Cập Nhật Sản Phẩm)
+
+- Thêm field trong admin product form:
+  - Label: "Ảnh thử kính (PNG, nền trong suốt)".
+  - Input: `type="file"` chỉ chấp nhận `accept="image/png"`.
+  - Validate:
+    - Đúng mime type `image/png`.
+    - Kích thước file trong giới hạn (ví dụ < 5MB).
+  - Hiển thị preview ảnh try-on đang có (nếu `tryOnImageUrl` đã tồn tại trên product).
+- Khi submit:
+  - Gửi multipart/form-data bao gồm cả file PNG cho backend (theo DTO mới).
+
+### Integration với AR Try-On
+
+- Không cần thay đổi lớn ở phía client AR:
+  - `useProductsWithTryOn` vẫn filter theo `tryOnImageUrl` như hiện tại.
+  - Product mới upload ảnh PNG sẽ tự động xuất hiện trong `ProductSelector` khi backend trả `tryOnImageUrl`.

@@ -528,3 +528,33 @@ Task 3.4 (Polish) ← Task 3.5 (Error Handling)
 - face-api.js documentation: https://github.com/justadudewhohacks/face-api.js
 - Canvas API documentation: https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API
 - getUserMedia API: https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
+
+---
+
+## New Work: Admin Try-On Image Upload (Future Scope)
+
+### Admin Try-On Upload Support (Create/Update Product)
+
+**Reason**: Hiện tại ảnh try-on PNG được seed từ script. Cần cho phép admin upload trực tiếp ảnh PNG (nền trong suốt) khi tạo/cập nhật sản phẩm, để không phụ thuộc seed script.
+
+**Priority**: MEDIUM | **Owner**: Backend + Frontend (Admin)
+
+### Planned Tasks
+
+- [ ] Backend: Hỗ trợ upload PNG try-on cho sản phẩm
+
+  - [ ] Mở rộng DTO `AdminCreateProductRequest` / `AdminUpdateProductRequest` để nhận file PNG try-on (optional)
+  - [ ] Endpoint admin (create/update product) nhận thêm field `tryOnImageFile` (PNG only, validate mime type)
+  - [ ] Lưu file PNG vào MinIO (folder `try-on/`) với content-type `image/png`
+  - [ ] Cập nhật `attributes.tryOnImageUrl` và `tryOnKey` cho sản phẩm tương ứng
+
+- [ ] Frontend Admin: Form tạo/cập nhật sản phẩm
+
+  - [ ] Thêm input upload “Ảnh thử kính (PNG, nền trong suốt)” trong admin product form
+  - [ ] Validate chỉ cho phép `image/png` và kích thước hợp lý
+  - [ ] Gửi file này lên backend theo đúng DTO mới
+  - [ ] Hiển thị preview ảnh try-on (nếu đã có) trong form edit
+
+- [ ] Integration với AR Try-On
+  - [ ] Đảm bảo sản phẩm mới cập nhật `tryOnImageUrl` được hook `useProductsWithTryOn` pick up bình thường
+  - [ ] Test: tạo sản phẩm mới với ảnh PNG try-on và verify xuất hiện trong ProductSelector + TryOnModal

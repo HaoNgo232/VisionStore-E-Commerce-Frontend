@@ -190,9 +190,14 @@ export class AdminProductsService implements IAdminProductsService {
       formData.append("attributes", JSON.stringify(request.attributes));
     }
 
-    // File upload (if provided)
+    // Main image upload (if provided)
     if (request.image !== undefined && request.image !== null) {
       formData.append("image", request.image);
+    }
+
+    // Try-on PNG upload (if provided)
+    if (request.tryOnImage !== undefined && request.tryOnImage !== null) {
+      formData.append("tryOnImage", request.tryOnImage);
     }
 
     return formData;
@@ -223,9 +228,14 @@ export class AdminProductsService implements IAdminProductsService {
       formData.append("attributes", JSON.stringify(request.attributes));
     }
 
-    // File upload (if provided - replaces old image)
+    // Main image upload (if provided - replaces old image)
     if (request.image !== undefined && request.image !== null) {
       formData.append("image", request.image);
+    }
+
+    // Try-on PNG upload (if provided - replaces old try-on image)
+    if (request.tryOnImage !== undefined && request.tryOnImage !== null) {
+      formData.append("tryOnImage", request.tryOnImage);
     }
 
     return formData;
