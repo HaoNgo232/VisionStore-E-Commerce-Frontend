@@ -40,6 +40,9 @@ export interface ProductAttributes {
   multifocal?: boolean | undefined;
   eco?: boolean | undefined;
 
+  // Try-on specific (synced with backend ProductAttributes)
+  tryOnImageUrl?: string | undefined;
+
   // Allow future expansion
   [key: string]: unknown;
 }
@@ -75,6 +78,8 @@ export const ProductAttributesSchema = z
     foldable: z.boolean().optional(),
     multifocal: z.boolean().optional(),
     eco: z.boolean().optional(),
+    // Try-on specific
+    tryOnImageUrl: z.string().optional(),
   })
   .passthrough(); // Allow unknown fields for future expansion
 

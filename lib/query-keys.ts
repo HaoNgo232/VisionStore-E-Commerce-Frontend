@@ -3,11 +3,7 @@
  * Centralized query keys for React Query cache management
  */
 
-import type {
-  ProductFilters,
-  OrderFilters,
-  ListUsersQuery,
-} from "@/types";
+import type { ProductFilters, OrderFilters, ListUsersQuery } from "@/types";
 
 export const queryKeys = {
   auth: {
@@ -76,5 +72,10 @@ export const queryKeys = {
     details: () => [...queryKeys.ar.all, "detail"] as const,
     detail: (id: string) => [...queryKeys.ar.details(), id] as const,
   },
+  glassesTryOn: {
+    all: ["glassesTryOn"] as const,
+    products: () => [...queryKeys.glassesTryOn.all, "products"] as const,
+    productList: (params?: { page?: number; pageSize?: number }) =>
+      [...queryKeys.glassesTryOn.products(), "list", params] as const,
+  },
 };
-

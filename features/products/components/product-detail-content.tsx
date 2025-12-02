@@ -1,8 +1,10 @@
-'use client'
+"use client"
 
 import { useState } from "react"
 import type { JSX } from "react"
 import Image from "next/image"
+import { ShoppingCart, Truck, Shield, Sparkles } from "lucide-react"
+
 import { useProductDetail } from "@/features/products/hooks/use-product-detail"
 import { ProductDetailSkeleton } from "@/components/skeletons/product-detail-skeleton"
 import { Button } from "@/components/ui/button"
@@ -17,9 +19,9 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { ShoppingCart, Truck, Shield } from "lucide-react"
 import { useCartStore } from "@/stores/cart.store"
 import { formatPrice } from "@/features/products/utils"
+import { TryOnModal } from "@/features/ar/components/try-on-modal"
 
 interface ProductDetailContentProps {
     readonly productId?: string
@@ -34,6 +36,7 @@ export function ProductDetailContent({ productId, productSlug }: ProductDetailCo
     const [selectedImage, setSelectedImage] = useState(0)
     const [quantity, setQuantity] = useState(1)
     const [isAdding, setIsAdding] = useState(false)
+    const [isTryOnOpen, setIsTryOnOpen] = useState(false)
     const addItem = useCartStore((state) => state.addItem)
 
     if (loading) {
@@ -52,6 +55,7 @@ export function ProductDetailContent({ productId, productSlug }: ProductDetailCo
     const price = formatPrice(product.priceInt)
     const inStock = product.stock > 0
     const attributes = product.attributes ?? null
+    const hasTryOn = Boolean(attributes?.tryOnImageUrl)
 
     const handleAddToCart = async (): Promise<void> => {
         setIsAdding(true)
@@ -175,8 +179,25 @@ export function ProductDetailContent({ productId, productSlug }: ProductDetailCo
 
                     <Separator />
 
-                    {/* Quantity and Add to Cart */}
+                    {/* Try-on & Quantity / Add to Cart */}
                     <div className="space-y-4">
+                        {hasTryOn && (
+                            <div className="space-y-2">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    className="w-full justify-center gap-2"
+                                    onClick={() => setIsTryOnOpen(true)}
+                                >
+                                    <Sparkles className="h-4 w-4" />
+                                    Thử kính trực tuyến
+                                </Button>
+                                <p className="text-xs text-muted-foreground">
+                                    Dùng camera để xem kính này trên khuôn mặt bạn. Ảnh chỉ xử lý trên trình duyệt.
+                                </p>
+                            </div>
+                        )}
+
                         <div className="flex items-center gap-4">
                             <label htmlFor="quantity" className="text-sm font-medium">Số lượng:</label>
                             <div id="quantity" className="flex items-center border rounded-lg">
@@ -249,6 +270,14 @@ export function ProductDetailContent({ productId, productSlug }: ProductDetailCo
                         </TabsContent>
                     </Tabs>
                 </div>
+            )}
+
+            {hasTryOn && (
+                <TryOnModal
+                    open={isTryOnOpen}
+                    onOpenChange={setIsTryOnOpen}
+                    productId={product.id}
+                />
             )}
         </div>
     )
