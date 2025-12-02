@@ -305,7 +305,10 @@ export function TryOnModal({
 
     return (
         <Dialog open={open} onOpenChange={handleModalChange}>
-            <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] overflow-y-auto sm:w-full">
+            <DialogContent
+                fullWidth
+                className="w-[98vw] max-h-[95vh] overflow-y-auto sm:w-full"
+            >
                 <DialogHeader>
                     <DialogTitle>Thử kính trực tuyến</DialogTitle>
                     <DialogDescription>

@@ -25,13 +25,13 @@ export function calculateOverlayConfig(
       Math.pow(landmarks.rightEye.y - landmarks.leftEye.y, 2),
   );
 
-  // Calculate vertical offset: glasses should be positioned slightly below eye center
-  // Offset by ~15-20% of eye distance downward for more natural placement
-  const verticalOffset = eyeDistance * 0.18;
+  // Tính toán độ lệch dọc: kính nên được đặt hơi thấp hơn trung tâm mắt một chút
+  // Dịch xuống dưới khoảng 18-22% khoảng cách giữa hai mắt để trông tự nhiên hơn
+  const verticalOffset = eyeDistance * 0.08;
 
-  // Calculate scale based on eye distance
-  // Multiplier 1.4-1.5 makes glasses slightly larger than eye distance for better fit
-  const scale = (eyeDistance / glassesImage.width) * 1.45;
+  // Tính scale kính dựa vào khoảng cách 2 mắt
+  // Multiplier 4 giúp kính lớn, phủ hết chiều ngang mặt, tránh bị nhỏ
+  const scale = (eyeDistance / glassesImage.width) * 4;
 
   return {
     position: {
