@@ -31,8 +31,7 @@ export function useWebcam(): UseWebcamReturn {
 
       if (
         typeof navigator === "undefined" ||
-        !navigator.mediaDevices ||
-        !navigator.mediaDevices.getUserMedia
+        !navigator.mediaDevices?.getUserMedia
       ) {
         throw new Error(
           "Trình duyệt của bạn không hỗ trợ truy cập webcam. Vui lòng thử trên Chrome hoặc một trình duyệt khác, hoặc dùng tính năng upload ảnh (sẽ được bổ sung sau).",

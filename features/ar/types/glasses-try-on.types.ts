@@ -111,12 +111,13 @@ export const TryOnResultSchema = z.object({
 
 /**
  * API Response for products with try-on
+ * Backend always returns page and pageSize (with defaults: page=1, pageSize=20)
  */
 export interface ProductsWithTryOnResponse {
   data: ProductWithTryOn[];
   total: number;
-  page?: number;
-  pageSize?: number;
+  page: number;
+  pageSize: number;
 }
 
 /**
@@ -125,8 +126,8 @@ export interface ProductsWithTryOnResponse {
 export const ProductsWithTryOnResponseSchema = z.object({
   data: z.array(ProductWithTryOnSchema),
   total: z.number().int().nonnegative(),
-  page: z.number().int().positive().optional(),
-  pageSize: z.number().int().positive().optional(),
+  page: z.number().int().positive(),
+  pageSize: z.number().int().positive(),
 });
 
 /**

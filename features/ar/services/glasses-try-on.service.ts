@@ -4,9 +4,14 @@
  */
 
 import { apiGet } from "@/lib/api-client";
-import type { ProductsWithTryOnResponse, ProductWithTryOn } from "../types/glasses-try-on.types";
-import { ProductsWithTryOnResponseSchema, ProductWithTryOnSchema } from "../types/glasses-try-on.types";
-import { type z } from "zod";
+import type {
+  ProductsWithTryOnResponse,
+  ProductWithTryOn,
+} from "../types/glasses-try-on.types";
+import {
+  ProductsWithTryOnResponseSchema,
+  ProductWithTryOnSchema,
+} from "../types/glasses-try-on.types";
 
 export interface GetProductsWithTryOnParams {
   page?: number;
@@ -50,18 +55,19 @@ export class GlassesTryOnService implements IGlassesTryOnService {
     }
 
     const query = queryParams.toString();
-    const endpoint = `/products${query ? `?${query}` : ""}`;
+    const endpoint = query ? `/products?${query}` : "/products";
 
     // Backend returns { products: ProductResponse[], total, page, pageSize }
     // Backend always includes tryOnImageUrl in response if it exists in attributes
+    // Backend always returns page and pageSize (defaults: page=1, pageSize=20)
     const backendResponse = await apiGet<{
-      products: Array<{
+      products: {
         id: string;
         name: string;
         priceInt: number;
         tryOnImageUrl?: string; // Extracted from attributes by backend
         imageUrls: string[];
-      }>;
+      }[];
       total: number;
       page: number;
       pageSize: number;
@@ -69,7 +75,9 @@ export class GlassesTryOnService implements IGlassesTryOnService {
 
     // Filter products that have tryOnImageUrl (frontend-side filtering)
     // Frontend will fetch images directly from MinIO URLs
-    const filteredProducts = backendResponse.products.filter((p) => p.tryOnImageUrl);
+    const filteredProducts = backendResponse.products.filter(
+      (p) => p.tryOnImageUrl,
+    );
 
     // Transform to frontend format: { data: ProductWithTryOn[], total, page, pageSize }
     const transformedData: ProductWithTryOn[] = filteredProducts.map((p) => {
@@ -85,6 +93,7 @@ export class GlassesTryOnService implements IGlassesTryOnService {
     });
 
     // Validate and return transformed response
+    // Backend always returns page and pageSize, so we can safely include them
     return ProductsWithTryOnResponseSchema.parse({
       data: transformedData,
       total: filteredProducts.length, // Total of filtered products
