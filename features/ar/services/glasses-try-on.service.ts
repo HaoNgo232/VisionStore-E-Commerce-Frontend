@@ -7,11 +7,11 @@ import { apiGet } from "@/lib/api-client";
 import type {
   ProductsWithTryOnResponse,
   ProductWithTryOn,
-} from "../types/glasses-try-on.types";
+} from "@/features/ar/types/glasses-try-on.types";
 import {
   ProductsWithTryOnResponseSchema,
   ProductWithTryOnSchema,
-} from "../types/glasses-try-on.types";
+} from "@/features/ar/types/glasses-try-on.types";
 
 export interface GetProductsWithTryOnParams {
   page?: number;
