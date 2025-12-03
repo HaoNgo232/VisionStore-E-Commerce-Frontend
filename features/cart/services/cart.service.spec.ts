@@ -38,7 +38,7 @@ describe("cartApi", () => {
       id: cart.id,
       sessionId: cart.sessionId,
       userId: cart.userId,
-      items: cart.items.map(({ product, ...item }) => item), // Remove product field for CartResponse
+      items: cart.items.map(({ product: _product, ...item }) => item), // Remove product field for CartResponse
       totalInt: cart.totalInt,
       createdAt: cart.createdAt,
       updatedAt: cart.updatedAt,
@@ -176,7 +176,7 @@ describe("cartApi", () => {
 
       await expect(
         cartApi.updateItem({ productId: "prod-123", quantity: 3 }),
-      ).rejects.toThrow("User not authenticated");
+      ).rejects.toThrow("Người dùng chưa đăng nhập");
     });
   });
 
@@ -211,7 +211,7 @@ describe("cartApi", () => {
       });
 
       await expect(cartApi.removeItem("prod-123")).rejects.toThrow(
-        "User not authenticated",
+        "Người dùng chưa đăng nhập",
       );
     });
   });

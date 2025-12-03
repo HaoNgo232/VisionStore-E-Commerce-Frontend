@@ -1,9 +1,16 @@
 import { paymentsApi } from "./payments.service";
-import * as apiClient from "@/lib/api-client";
 import { PaymentMethod, PaymentStatus } from "@/types";
 
 // Mock dependencies
-jest.mock("@/lib/api-client");
+const mockApiPostValidated = jest.fn<Promise<unknown>, unknown[]>();
+const mockApiGetValidated = jest.fn<Promise<unknown>, unknown[]>();
+
+jest.mock("@/lib/api-client", () => ({
+  apiPostValidated: (...args: unknown[]): Promise<unknown> =>
+    mockApiPostValidated(...args),
+  apiGetValidated: (...args: unknown[]): Promise<unknown> =>
+    mockApiGetValidated(...args),
+}));
 
 describe("paymentsApi", () => {
   const mockOrderId = "order-123";
@@ -19,15 +26,8 @@ describe("paymentsApi", () => {
     updatedAt: "2025-01-01T00:00:00Z",
   };
 
-  // Create typed mock functions to avoid unbound-method errors
-  const mockPost = jest.fn();
-  const mockGet = jest.fn();
-
   beforeEach(() => {
     jest.clearAllMocks();
-    // Setup mocks
-    (apiClient.apiClient.post as jest.Mock) = mockPost;
-    (apiClient.apiClient.get as jest.Mock) = mockGet;
   });
 
   describe("process", () => {
@@ -40,9 +40,7 @@ describe("paymentsApi", () => {
         amountInt: 199900,
       };
 
-      mockPost.mockResolvedValue({
-        data: mockResponse,
-      });
+      mockApiPostValidated.mockResolvedValue(mockResponse);
 
       const result = await paymentsApi.process(
         mockOrderId,
@@ -50,11 +48,15 @@ describe("paymentsApi", () => {
         199900,
       );
 
-      expect(mockPost).toHaveBeenCalledWith("/payments/process", {
-        orderId: mockOrderId,
-        method: PaymentMethod.COD,
-        amountInt: 199900,
-      });
+      expect(mockApiPostValidated).toHaveBeenCalledWith(
+        "/payments/process",
+        expect.anything(), // schema
+        {
+          orderId: mockOrderId,
+          method: PaymentMethod.COD,
+          amountInt: 199900,
+        },
+      );
       expect(result).toEqual(mockResponse);
     });
 
@@ -68,9 +70,7 @@ describe("paymentsApi", () => {
         qrCode: "00020101021202031050...",
       };
 
-      mockPost.mockResolvedValue({
-        data: mockResponse,
-      });
+      mockApiPostValidated.mockResolvedValue(mockResponse);
 
       const result = await paymentsApi.process(
         mockOrderId,
@@ -78,37 +78,43 @@ describe("paymentsApi", () => {
         199900,
       );
 
-      expect(mockPost).toHaveBeenCalledWith("/payments/process", {
-        orderId: mockOrderId,
-        method: PaymentMethod.SEPAY,
-        amountInt: 199900,
-      });
+      expect(mockApiPostValidated).toHaveBeenCalledWith(
+        "/payments/process",
+        expect.anything(), // schema
+        {
+          orderId: mockOrderId,
+          method: PaymentMethod.SEPAY,
+          amountInt: 199900,
+        },
+      );
       expect(result.qrCode).toBeDefined();
     });
   });
 
   describe("getByOrder", () => {
     it("gets payment by order ID", async () => {
-      mockGet.mockResolvedValue({
-        data: mockPayment,
-      });
+      mockApiGetValidated.mockResolvedValue(mockPayment);
 
       const result = await paymentsApi.getByOrder(mockOrderId);
 
-      expect(mockGet).toHaveBeenCalledWith(`/payments/order/${mockOrderId}`);
+      expect(mockApiGetValidated).toHaveBeenCalledWith(
+        `/payments/order/${mockOrderId}`,
+        expect.anything(), // schema
+      );
       expect(result).toEqual(mockPayment);
     });
   });
 
   describe("getById", () => {
     it("gets payment by payment ID", async () => {
-      mockGet.mockResolvedValue({
-        data: mockPayment,
-      });
+      mockApiGetValidated.mockResolvedValue(mockPayment);
 
       const result = await paymentsApi.getById(mockPaymentId);
 
-      expect(mockGet).toHaveBeenCalledWith(`/payments/${mockPaymentId}`);
+      expect(mockApiGetValidated).toHaveBeenCalledWith(
+        `/payments/${mockPaymentId}`,
+        expect.anything(), // schema
+      );
       expect(result).toEqual(mockPayment);
     });
   });
@@ -120,14 +126,14 @@ describe("paymentsApi", () => {
         status: PaymentStatus.PAID,
       };
 
-      mockPost.mockResolvedValue({
-        data: paidPayment,
-      });
+      mockApiPostValidated.mockResolvedValue(paidPayment);
 
       const result = await paymentsApi.confirmCod(mockOrderId);
 
-      expect(mockPost).toHaveBeenCalledWith(
+      expect(mockApiPostValidated).toHaveBeenCalledWith(
         `/payments/confirm-cod/${mockOrderId}`,
+        expect.anything(), // schema
+        {},
       );
       expect(result.status).toBe(PaymentStatus.PAID);
     });

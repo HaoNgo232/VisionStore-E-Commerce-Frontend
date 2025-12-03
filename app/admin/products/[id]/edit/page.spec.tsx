@@ -1,4 +1,4 @@
-import { render, fireEvent, screen } from "@testing-library/react";
+import { render, fireEvent, screen, waitFor } from "@testing-library/react";
 import EditProductPage from "./page";
 import {
     useAdminProduct,
@@ -40,7 +40,7 @@ jest.mock("@/features/categories/hooks/use-categories", () => ({
 }));
 
 describe("EditProductPage integration - tryOnImage", () => {
-    it("maps data.tryOnImage to AdminUpdateProductRequest.tryOnImage", () => {
+    it("maps data.tryOnImage to AdminUpdateProductRequest.tryOnImage", async () => {
         (useAdminProduct as jest.Mock).mockReturnValue({
             data: mockProduct,
             isLoading: false,
@@ -51,7 +51,7 @@ describe("EditProductPage integration - tryOnImage", () => {
             isPending: false,
         });
 
-        render(<EditProductPage />);
+        const { container } = render(<EditProductPage />);
 
         const nameInput = screen.getByLabelText("Tên sản phẩm *");
         const priceInput = screen.getByLabelText("Giá sản phẩm (VND) *");
@@ -59,7 +59,12 @@ describe("EditProductPage integration - tryOnImage", () => {
         fireEvent.change(priceInput, { target: { value: "2000" } });
 
         const file = new File(["data"], "glasses.png", { type: "image/png" });
-        const tryOnInput = screen.getByLabelText("Ảnh thử kính (PNG, nền trong suốt)");
+        // Find tryOnImage input (second file input or by accept attribute)
+        const allFileInputs = container.querySelectorAll<HTMLInputElement>('input[type="file"]');
+        const tryOnInput = allFileInputs[1] ?? container.querySelector<HTMLInputElement>('input[type="file"][accept="image/png"]');
+        if (!tryOnInput) {
+            throw new Error("tryOnImage input not found");
+        }
         fireEvent.change(tryOnInput, { target: { files: [file] } });
 
         const submitButton = screen.getByRole("button", {
@@ -67,7 +72,9 @@ describe("EditProductPage integration - tryOnImage", () => {
         });
         fireEvent.click(submitButton);
 
-        expect(mutateAsyncMock).toHaveBeenCalledTimes(1);
+        await waitFor(() => {
+            expect(mutateAsyncMock).toHaveBeenCalledTimes(1);
+        });
         const [[payloadArg]] = mutateAsyncMock.mock
             .calls as [[{ id: string; data: AdminUpdateProductRequest }]];
         expect(payloadArg.data.tryOnImage).toBe(file);

@@ -1,65 +1,56 @@
 import { renderHook } from "@testing-library/react";
 import { useAuth } from "./use-auth";
-import { useAuthStore } from "@/stores/auth.store";
 
-jest.mock("@/stores/auth.store");
+// Mock zustand store
+const mockStore = {
+  accessToken: null as string | null,
+  isAuthenticated: jest.fn(),
+  clearTokens: jest.fn(),
+};
+
+jest.mock("@/stores/auth.store", () => ({
+  useAuthStore: jest.fn((selector: (state: typeof mockStore) => unknown) => {
+    return selector(mockStore);
+  }),
+}));
 
 describe("useAuth", () => {
-  const mockUser = {
-    userId: "user-123",
-    email: "john@example.com",
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
+    mockStore.accessToken = null;
+    mockStore.isAuthenticated.mockReturnValue(false);
   });
 
   it("returns auth state when authenticated", () => {
-    (useAuthStore as unknown as jest.Mock).mockReturnValue({
-      accessToken: "token-123",
-      user: mockUser,
-      isAuthenticated: () => true,
-      clearAuth: jest.fn(),
-    });
+    mockStore.accessToken = "token-123";
+    mockStore.isAuthenticated.mockReturnValue(true);
 
     const { result } = renderHook(() => useAuth());
 
     expect(result.current.accessToken).toBe("token-123");
-    expect(result.current.user).toEqual(mockUser);
     expect(result.current.isAuthenticated).toBe(true);
     expect(result.current.logout).toBeDefined();
   });
 
   it("returns null user when not authenticated", () => {
-    (useAuthStore as unknown as jest.Mock).mockReturnValue({
-      accessToken: null,
-      user: null,
-      isAuthenticated: () => false,
-      clearAuth: jest.fn(),
-    });
+    mockStore.accessToken = null;
+    mockStore.isAuthenticated.mockReturnValue(false);
 
     const { result } = renderHook(() => useAuth());
 
     expect(result.current.accessToken).toBeNull();
-    expect(result.current.user).toBeNull();
     expect(result.current.isAuthenticated).toBe(false);
     expect(result.current.logout).toBeDefined();
   });
 
   it("provides logout method", () => {
-    const mockClearAuth = jest.fn();
-
-    (useAuthStore as unknown as jest.Mock).mockReturnValue({
-      accessToken: "token-123",
-      user: mockUser,
-      isAuthenticated: () => true,
-      clearAuth: mockClearAuth,
-    });
+    mockStore.accessToken = "token-123";
+    mockStore.isAuthenticated.mockReturnValue(true);
 
     const { result } = renderHook(() => useAuth());
 
     result.current.logout();
 
-    expect(mockClearAuth).toHaveBeenCalled();
+    expect(mockStore.clearTokens).toHaveBeenCalled();
   });
 });

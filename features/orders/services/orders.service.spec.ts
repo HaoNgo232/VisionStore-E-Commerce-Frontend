@@ -1,11 +1,24 @@
 import { ordersApi } from "./orders.service";
 import { useAuthStore } from "@/stores/auth.store";
-import * as apiClient from "@/lib/api-client";
 import { OrderStatus, PaymentStatus } from "@/types";
 
 // Mock dependencies
 jest.mock("@/stores/auth.store");
-jest.mock("@/lib/api-client");
+
+const mockApiGetValidated = jest.fn<Promise<unknown>, unknown[]>();
+const mockApiPostValidated = jest.fn<Promise<unknown>, unknown[]>();
+const mockApiPatchValidated = jest.fn<Promise<unknown>, unknown[]>();
+const mockApiDelete = jest.fn<Promise<unknown>, unknown[]>();
+
+jest.mock("@/lib/api-client", () => ({
+  apiGetValidated: (...args: unknown[]): Promise<unknown> =>
+    mockApiGetValidated(...args),
+  apiPostValidated: (...args: unknown[]): Promise<unknown> =>
+    mockApiPostValidated(...args),
+  apiPatchValidated: (...args: unknown[]): Promise<unknown> =>
+    mockApiPatchValidated(...args),
+  apiDelete: (...args: unknown[]): Promise<unknown> => mockApiDelete(...args),
+}));
 
 describe("ordersApi", () => {
   const mockUserId = "user-123";
@@ -39,13 +52,17 @@ describe("ordersApi", () => {
         totalPages: 1,
       };
 
-      (apiClient.apiGet as jest.Mock).mockResolvedValue(mockResponse);
+      mockApiGetValidated.mockResolvedValue(mockResponse);
 
       const result = await ordersApi.getAll();
 
-      expect(apiClient.apiGet).toHaveBeenCalledWith("/orders", {
-        params: { userId: mockUserId },
-      });
+      expect(mockApiGetValidated).toHaveBeenCalledWith(
+        "/orders",
+        expect.anything(), // schema
+        {
+          params: { userId: mockUserId },
+        },
+      );
       expect(result).toEqual(mockResponse);
     });
 
@@ -62,11 +79,14 @@ describe("ordersApi", () => {
 
   describe("getById", () => {
     it("fetches order by id", async () => {
-      (apiClient.apiGet as jest.Mock).mockResolvedValue(mockOrder);
+      mockApiGetValidated.mockResolvedValue(mockOrder);
 
       const result = await ordersApi.getById("order-123");
 
-      expect(apiClient.apiGet).toHaveBeenCalledWith("/orders/order-123");
+      expect(mockApiGetValidated).toHaveBeenCalledWith(
+        "/orders/order-123",
+        expect.anything(), // schema
+      );
       expect(result).toEqual(mockOrder);
     });
   });
@@ -84,14 +104,18 @@ describe("ordersApi", () => {
         ],
       };
 
-      (apiClient.apiPost as jest.Mock).mockResolvedValue(mockOrder);
+      mockApiPostValidated.mockResolvedValue(mockOrder);
 
       const result = await ordersApi.create(createData);
 
-      expect(apiClient.apiPost).toHaveBeenCalledWith("/orders", {
-        ...createData,
-        userId: mockUserId,
-      });
+      expect(mockApiPostValidated).toHaveBeenCalledWith(
+        "/orders",
+        expect.anything(), // schema
+        {
+          ...createData,
+          userId: mockUserId,
+        },
+      );
       expect(result).toEqual(mockOrder);
     });
 
@@ -121,12 +145,13 @@ describe("ordersApi", () => {
       const updateData = { status: OrderStatus.PROCESSING };
       const updatedOrder = { ...mockOrder, status: OrderStatus.PROCESSING };
 
-      (apiClient.apiPatch as jest.Mock).mockResolvedValue(updatedOrder);
+      mockApiPatchValidated.mockResolvedValue(updatedOrder);
 
       const result = await ordersApi.updateStatus("order-123", updateData);
 
-      expect(apiClient.apiPatch).toHaveBeenCalledWith(
+      expect(mockApiPatchValidated).toHaveBeenCalledWith(
         "/orders/order-123/status",
+        expect.anything(), // schema
         updateData,
       );
       expect(result).toEqual(updatedOrder);
@@ -137,12 +162,13 @@ describe("ordersApi", () => {
     it("cancels order", async () => {
       const cancelledOrder = { ...mockOrder, status: OrderStatus.CANCELLED };
 
-      (apiClient.apiPatch as jest.Mock).mockResolvedValue(cancelledOrder);
+      mockApiPatchValidated.mockResolvedValue(cancelledOrder);
 
       const result = await ordersApi.cancel("order-123");
 
-      expect(apiClient.apiPatch).toHaveBeenCalledWith(
+      expect(mockApiPatchValidated).toHaveBeenCalledWith(
         "/orders/order-123/cancel",
+        expect.anything(), // schema
         {},
       );
       expect(result).toEqual(cancelledOrder);
@@ -151,11 +177,11 @@ describe("ordersApi", () => {
 
   describe("delete", () => {
     it("deletes order", async () => {
-      (apiClient.apiDelete as jest.Mock).mockResolvedValue(undefined);
+      mockApiDelete.mockResolvedValue(undefined);
 
       const result = await ordersApi.delete("order-123");
 
-      expect(apiClient.apiDelete).toHaveBeenCalledWith("/orders/order-123");
+      expect(mockApiDelete).toHaveBeenCalledWith("/orders/order-123");
       expect(result).toBeUndefined();
     });
   });
