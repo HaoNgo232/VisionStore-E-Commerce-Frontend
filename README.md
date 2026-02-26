@@ -60,25 +60,25 @@ The frontend communicates with the [backend microservices](../Microservices-E-co
 ```
                             ┌──────────────────────────┐
                             │       Next.js App        │
-                            │    (app/ directory)       │
-                            │  Pages, Layouts, Routes   │
+                            │    (app/ directory)      │
+                            │  Pages, Layouts, Routes  │
                             └─────────┬────────────────┘
                                       │
                ┌──────────────────────┼──────────────────────┐
                │                      │                      │
-      ┌────────▼────────┐   ┌────────▼────────┐   ┌────────▼────────┐
+      ┌────────▼────────┐   ┌──────── ▼────────┐   ┌─────────▼───────┐
       │   Components    │   │   Feature Modules│   │   Shared Hooks  │
       │  (components/)  │   │   (features/)    │   │   (hooks/)      │
       │  Layout, UI,    │   │  Products, Cart, │   │  useDebounce,   │
       │  Sections       │   │  Orders, Auth,   │   │  useMobile,     │
-      │                 │   │  AR, Payments    │   │  useAsync        │
-      └────────┬────────┘   └────────┬────────┘   └─────────────────┘
+      │                 │   │  AR, Payments    │   │  useAsync       │
+      └────────┬────────┘   └─────────┬────────┘   └─────────────────┘
                │                      │
                └──────────┬───────────┘
                           │
       ┌───────────────────┼───────────────────┐
       │                   │                   │
-┌─────▼─────┐     ┌──────▼──────┐    ┌───────▼──────┐
+┌─────▼──────┐     ┌──────▼──────┐    ┌───────▼──────┐
 │  Zustand   │     │  TanStack   │    │  API Client  │
 │  Stores    │     │  React Query│    │  (lib/)      │
 │ Auth, Cart │     │  Server     │    │  Axios +     │
