@@ -536,5 +536,6 @@ This frontend is one half of the **E-Commerce Microservices Platform**. Both rep
 | **This repo** (frontend) | Next.js, React, TanStack Query, Zustand | Storefront, customer dashboard, admin panel |
 
 <p align="center">
-  Built with <a href="https://nextjs.org/">Next.js</a> &bull; <a href="https://react.dev/">React</a> &bull; <a href="https://tailwindcss.com/">Tailwind CSS</a> &bull; <a href="https://ui.shadcn.com/">shadcn/ui</a>
+  Built with <a href="https://nextjs.org/">Next.js</a> &bull; <a href="https://react.dev/">React</a> &bull; <a href="https://tailwindcss.com/">Tailwind CSS</a> &bull; <a href="https://ui.shadcn.com/">shadcn/ui</a><br>
+  MIT &copy; HaoNgo232
 </p>
