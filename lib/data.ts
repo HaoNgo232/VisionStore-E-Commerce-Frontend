@@ -78,7 +78,7 @@ export const mockProducts: Product[] = [
       "Phong cách retro kinh điển, gọng nhựa acetate cao cấp, biểu tượng của sự tự do.",
     imageUrls: [
       "https://images.unsplash.com/photo-1511499767390-90342f568952?q=80&w=1000",
-      "https://images.unsplash.com/photo-1625591338076-29177303f831?q=80&w=1000",
+      "https://images.unsplash.com/photo-1594236773539-75573415170d?q=80&w=1000",
     ],
     categoryId: "cmhozukjp0001",
     attributes: {
@@ -244,30 +244,6 @@ export const mockProducts: Product[] = [
       frameShape: "Shield",
       color: "White/Prizm Road",
       prizm: true,
-    },
-    model3dUrl: null,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-
-  // Accessories
-  {
-    id: "cmhozukjp4001",
-    sku: "CASE-LEATHER",
-    name: "Hộp Kính Da Thủ Công",
-    slug: "handmade-leather-case",
-    priceInt: 450000,
-    stock: 150,
-    description:
-      "Chất liệu da thật, lót nhung bảo vệ kính tối ưu, phong cách sang trọng.",
-    imageUrls: [
-      "https://images.unsplash.com/photo-1589782182703-2aad69741b23?q=80&w=1000",
-    ],
-    categoryId: "cmhozukjp0004",
-    attributes: {
-      brand: "Luxury Case",
-      color: "Brown",
-      type: "Hard Case",
     },
     model3dUrl: null,
     createdAt: new Date().toISOString(),
