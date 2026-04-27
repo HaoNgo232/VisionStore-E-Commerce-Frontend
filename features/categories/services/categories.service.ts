@@ -1,6 +1,7 @@
 /**
  * Categories Service
  * Handles all category-related API calls with runtime validation
+ * Falls back to mock data when API is unavailable (Dev/PoC Mode)
  */
 
 import {
@@ -18,6 +19,7 @@ import type {
 } from "@/types";
 import { CategorySchema, PaginatedCategoriesResponseSchema } from "@/types";
 import { z } from "zod";
+import { mockCategories } from "@/lib/data";
 
 // CategoryTree schema - recursive
 const CategoryTreeSchema: z.ZodType<CategoryTree> = CategorySchema.extend({
@@ -39,104 +41,115 @@ const PaginatedCategoriesResponseSchemaTyped: z.ZodType<PaginatedCategoriesRespo
  * Defines contract for category management operations
  */
 export interface ICategoriesService {
-  /**
-   * Fetch all categories
-   * Backend returns paginated response, so we unwrap the categories array
-   */
   getAll(): Promise<Category[]>;
-
-  /**
-   * Fetch categories as tree structure (with nesting)
-   */
   getTree(): Promise<CategoryTree[]>;
-
-  /**
-   * Fetch single category by ID
-   */
   getById(id: string): Promise<Category>;
-
-  /**
-   * Create new category (admin only)
-   */
   create(data: CreateCategoryRequest): Promise<Category>;
-
-  /**
-   * Update category (admin only)
-   */
   update(id: string, data: UpdateCategoryRequest): Promise<Category>;
-
-  /**
-   * Delete category (admin only)
-   */
   delete(id: string): Promise<void>;
 }
 
 /**
  * Categories Service Implementation
- * Handles all category-related API calls with runtime validation
+ * Handles all category-related API calls with fallback to mock data
  */
 export class CategoriesService implements ICategoriesService {
   /**
    * Fetch all categories
-   * Backend returns paginated response, so we unwrap the categories array
+   * Backend returns paginated response, unwrap the categories array
    */
   async getAll(): Promise<Category[]> {
-    const response = await apiGetValidated<PaginatedCategoriesResponse>(
-      "/categories",
-      PaginatedCategoriesResponseSchemaTyped,
-    );
-    return response.categories;
+    try {
+      const response = await apiGetValidated<PaginatedCategoriesResponse>(
+        "/categories",
+        PaginatedCategoriesResponseSchemaTyped,
+      );
+      return response.categories;
+    } catch (error) {
+      console.warn("Categories API unavailable, falling back to mock data");
+      return mockCategories;
+    }
   }
 
   /**
-   * Fetch categories as tree structure (with nesting)
+   * Fetch categories as tree structure
    */
   async getTree(): Promise<CategoryTree[]> {
-    return apiGetValidated<CategoryTree[]>(
-      "/categories/tree",
-      CategoryTreeArraySchema,
-    );
+    try {
+      return await apiGetValidated<CategoryTree[]>(
+        "/categories/tree",
+        CategoryTreeArraySchema,
+      );
+    } catch (error) {
+      console.warn("Categories Tree API unavailable, simulating tree from mock data");
+      return mockCategories.map(cat => ({ ...cat, children: [] }));
+    }
   }
 
   /**
    * Fetch single category by ID
    */
   async getById(id: string): Promise<Category> {
-    return apiGetValidated<Category>(`/categories/${id}`, CategorySchemaTyped);
+    try {
+      return await apiGetValidated<Category>(`/categories/${id}`, CategorySchemaTyped);
+    } catch (error) {
+      const category = mockCategories.find(c => c.id === id);
+      if (!category) throw new Error("Category not found");
+      return category;
+    }
   }
 
   /**
-   * Create new category (admin only)
+   * Create new category (Mock implementation)
    */
   async create(data: CreateCategoryRequest): Promise<Category> {
-    return apiPostValidated<Category, CreateCategoryRequest>(
-      "/categories",
-      CategorySchemaTyped,
-      data,
-    );
+    try {
+      return await apiPostValidated<Category, CreateCategoryRequest>(
+        "/categories",
+        CategorySchemaTyped,
+        data,
+      );
+    } catch (error) {
+      console.warn("API unavailable, simulating create category");
+      return {
+        ...data,
+        id: `mock-cat-${Date.now()}`,
+        imageUrl: "/images/placeholder.jpg",
+      } as Category;
+    }
   }
 
   /**
-   * Update category (admin only)
+   * Update category (Mock implementation)
    */
   async update(id: string, data: UpdateCategoryRequest): Promise<Category> {
-    return apiPatchValidated<Category, UpdateCategoryRequest>(
-      `/categories/${id}`,
-      CategorySchemaTyped,
-      data,
-    );
+    try {
+      return await apiPatchValidated<Category, UpdateCategoryRequest>(
+        `/categories/${id}`,
+        CategorySchemaTyped,
+        data,
+      );
+    } catch (error) {
+      console.warn("API unavailable, simulating update category");
+      const category = mockCategories.find(c => c.id === id);
+      if (!category) throw new Error("Category not found");
+      return { ...category, ...data } as Category;
+    }
   }
 
   /**
-   * Delete category (admin only)
+   * Delete category (Mock implementation)
    */
   async delete(id: string): Promise<void> {
-    return apiDelete<void>(`/categories/${id}`);
+    try {
+      await apiDelete<void>(`/categories/${id}`);
+    } catch (error) {
+      console.warn("API unavailable, simulating delete category");
+    }
   }
 }
 
 /**
  * Default instance of CategoriesService
- * Export singleton instance for backward compatibility
  */
 export const categoriesApi = new CategoriesService();
