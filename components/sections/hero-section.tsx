@@ -1,8 +1,8 @@
-import Link from "next/link"
-import Image from "next/image"
-import type { JSX } from "react"
-import { Button } from "@/components/ui/button"
-import { ArrowRight } from "lucide-react"
+import Link from "next/link";
+import Image from "next/image";
+import type { JSX } from "react";
+import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
 
 export function HeroSection(): JSX.Element {
   return (
@@ -18,7 +18,9 @@ export function HeroSection(): JSX.Element {
               Nhìn thế giới theo phong cách của bạn
             </h1>
             <p className="text-lg text-muted-foreground leading-relaxed text-pretty max-w-[600px]">
-              Khám phá kính mắt cao cấp được thiết kế cho lối sống hiện đại. Từ kính phi công cổ điển đến khung gọng đương đại, tìm cặp kính hoàn hảo cho bạn.
+              Khám phá kính mắt cao cấp được thiết kế cho lối sống hiện đại. Từ
+              kính phi công cổ điển đến khung gọng đương đại, tìm cặp kính hoàn
+              hảo cho bạn.
             </p>
             <div className="flex flex-col gap-3 sm:flex-row">
               <Button size="lg" asChild>
@@ -28,7 +30,7 @@ export function HeroSection(): JSX.Element {
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <Link href="/products?featured=true">Thử kính ảo</Link>
+                <Link href="/try-on/test">Thử kính ảo</Link>
               </Button>
             </div>
             <div className="flex items-center gap-8 pt-4">
@@ -39,7 +41,9 @@ export function HeroSection(): JSX.Element {
               <div className="h-12 w-px bg-border" />
               <div>
                 <p className="text-2xl font-bold">50K+</p>
-                <p className="text-sm text-muted-foreground">Khách hàng hài lòng</p>
+                <p className="text-sm text-muted-foreground">
+                  Khách hàng hài lòng
+                </p>
               </div>
               <div className="h-12 w-px bg-border" />
               <div>
@@ -64,5 +68,5 @@ export function HeroSection(): JSX.Element {
         </div>
       </div>
     </section>
-  )
+  );
 }
